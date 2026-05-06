@@ -1,4 +1,5 @@
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/8-wwxMvS)
+
 # buyer
 
 Aplicación **Buyer** del [Proyecto IAW 2026](https://iaw-2026.github.io/proyecto/) — comisión `Perfume libre`.
@@ -44,6 +45,7 @@ Se utiliza una arquitectura basada en **Next.js App Router** con una organizaci�
 ```text
 /proyecto-c-buyer-perfume-libre
   /app          --> Rutas y páginas (App Router)
+  	/api 		--> Endpoints de las APIs REST
   /components   --> Componentes de React
     /ui         --> Componentes base de shadcn/ui
   /lib          --> Lógica compartida y utilidades
@@ -91,6 +93,20 @@ Para mantener la claridad y trazabilidad en el historial de versiones, este proy
 * **`test:`** Adición o corrección de pruebas automatizadas.
 * **`style:`** Cambios de formato (identación, comillas, etc.) que no afectan la lógica.
 
+
+
+### Estrategia de Integración
+Para preservar la trazabilidad y el historial visual del desarrollo, todas las integraciones locales de ramas temporales (`feature/*`, `fix/*`) hacia la rama `develop` deben forzar la creación de un commit de fusión explícito.
+
+Se debe utilizar siempre el flag `--no-ff` (No Fast-Forward) para evitar que el historial se aplane:
+```bash
+git merge --no-ff feature/nombre-de-la-rama
+```
+
+
+
 ---
 
 Enunciado completo: <https://iaw-2026.github.io/proyecto/>
+
+Repositorio del proyecto: https://github.com/IAW-2026/proyecto-c-buyer-perfume-libre/
