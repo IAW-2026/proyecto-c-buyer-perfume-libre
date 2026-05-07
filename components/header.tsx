@@ -41,6 +41,7 @@ function AccionesHeader() {
     </div>
   );
 
+  // TODO: Falta boton de fav.
   function AccionesUsuario() {
     return (
       <Show when="signed-in">
