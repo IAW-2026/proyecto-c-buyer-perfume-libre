@@ -1,6 +1,7 @@
 import Header from "@/components/home/header";
 import ProductCard from "@/components/home/productCard";
 import ProductGrid from "@/components/home/productGrid";
+import ProductGridSkeleton from "@/components/home/productSkeleton";
 import SidebarFiltros from "@/components/home/sidebarFiltros";
 import { Suspense } from "react";
 
@@ -13,7 +14,7 @@ export default function Home() {
         <SidebarFiltros />
 
         <main className="flex-1">
-          <Suspense fallback={<p>Cargando fragancias...</p>}>
+          <Suspense fallback={<ProductGridSkeleton />}>
             <ProductGrid />
           </Suspense>
         </main>
