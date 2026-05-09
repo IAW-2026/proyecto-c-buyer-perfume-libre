@@ -8,7 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
-import Header from "@/components/home/header";
+import Header from "@/components/header";
 import { getPerfumeDetalle, PerfumeDetalle } from "@/lib/data";
 import CalificacionEstrellas from "@/components/calificacionEstrellas";
 import { generarUrl } from "@/lib/utils";

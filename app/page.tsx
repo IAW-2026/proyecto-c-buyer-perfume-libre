@@ -1,4 +1,4 @@
-import Header from "@/components/home/header";
+import Header from "@/components/header";
 import ProductCard from "@/components/home/productCard";
 import ProductGrid from "@/components/home/productGrid";
 import ProductGridSkeleton from "@/components/home/productSkeleton";
