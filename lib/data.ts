@@ -8,6 +8,18 @@ export interface Perfume {
   imagenUrl: string;
 }
 
+export interface PerfumeDetalle extends Perfume {
+  descripcion: string;
+  calificacion: number;
+  vendedor: string;
+  genero: "Hombre" | "Mujer" | "Unisex";
+}
+
+type PerfumeDetalleMock = Pick<
+  PerfumeDetalle,
+  "descripcion" | "calificacion" | "vendedor" | "genero"
+>;
+
 // TODO: Reemplazar este mock por una llamada real a la api.
 export const PERFUMES_MOCK: Perfume[] = [
   {
@@ -120,8 +132,120 @@ export const PERFUMES_MOCK: Perfume[] = [
   },
 ];
 
+export const PERFUMES_DETALLE_MOCK: Record<string, PerfumeDetalleMock> = {
+  "1": {
+    descripcion:
+      "Un clásico floral elegante con presencia sofisticada y duración prolongada.",
+    calificacion: 4.9,
+    vendedor: "Perfumería Central",
+    genero: "Mujer",
+  },
+  "2": {
+    descripcion:
+      "Aroma fresco y especiado con salida intensa y fondo amaderado.",
+    calificacion: 4.7,
+    vendedor: "Casa Dior",
+    genero: "Mujer",
+  },
+  "3": {
+    descripcion:
+      "Fragancia floral oriental con notas de jazmín, almendra y cacao.",
+    calificacion: 4.6,
+    vendedor: "Carolina Herrera Store",
+    genero: "Mujer",
+  },
+  "4": {
+    descripcion: "Aroma audaz y moderno con notas de pomelo, canela y cuero.",
+    calificacion: 4.5,
+    vendedor: "Paco Rabanne Official",
+    genero: "Hombre",
+  },
+  "5": {
+    descripcion:
+      "Fragancia fresca y vibrante, ideal para el uso diario. Notas florales intensas con un fondo amaderado elegante. Un clásico moderno para cualquier colección.",
+    calificacion: 4.8,
+    vendedor: "Versace Boutique",
+    genero: "Mujer",
+  },
+  "6": {
+    descripcion:
+      "Aroma amaderado especiado con notas de manzana, canela y madera de sándalo.",
+    calificacion: 4.4,
+    vendedor: "Hugo Boss Store",
+    genero: "Hombre",
+  },
+  "7": {
+    descripcion:
+      "Fragancia dulce y floral con notas de iris, jazmín y praliné.",
+    calificacion: 4.7,
+    vendedor: "Lancôme Official",
+    genero: "Mujer",
+  },
+  "8": {
+    descripcion: "Aroma fresco y limpio con notas de piña, papaya y almizcle.",
+    calificacion: 4.3,
+    vendedor: "Calvin Klein Store",
+    genero: "Mujer",
+  },
+  "9": {
+    descripcion:
+      "Fragancia intensa y misteriosa con notas de trufa negra, bergamota y orquídea.",
+    calificacion: 4.9,
+    vendedor: "Tom Ford Boutique",
+    genero: "Mujer",
+  },
+  "10": {
+    descripcion:
+      "Fragancia fresca y vibrante, ideal para el uso diario. Notas florales intensas con un fondo amaderado elegante. Un clásico moderno para cualquier colección.",
+    calificacion: 4.8,
+    vendedor: "Versace Boutique",
+    genero: "Mujer",
+  },
+  "11": {
+    descripcion:
+      "Aroma floral amaderado con notas de lavanda, flor de azahar y vainilla.",
+    calificacion: 4.6,
+    vendedor: "YSL Official",
+    genero: "Mujer",
+  },
+  "12": {
+    descripcion:
+      "Fragancia oriental especiada con notas de bergamota, limón y madera de guayaco.",
+    calificacion: 4.5,
+    vendedor: "Armani Store",
+    genero: "Hombre",
+  },
+};
+
 // Función que simula una petición a la API con un poquito de demora
 export async function getPerfumes(): Promise<Perfume[]> {
-  await new Promise((resolve) => setTimeout(resolve, 10000));
+  await new Promise((resolve) => setTimeout(resolve, 1000));
   return PERFUMES_MOCK;
+}
+
+export async function getPerfumeDetalle(
+  id: string,
+): Promise<PerfumeDetalle | null> {
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  const perfume = PERFUMES_MOCK.find((item) => item.id === id);
+
+  if (!perfume) {
+    return null;
+  }
+
+  return mergePerfumeDetalle(perfume);
+}
+
+function mergePerfumeDetalle(perfume: Perfume): PerfumeDetalle {
+  const detalle = PERFUMES_DETALLE_MOCK[perfume.id];
+
+  return {
+    ...perfume,
+    descripcion:
+      detalle?.descripcion ?? "Descripción no disponible para este perfume.",
+    calificacion: detalle?.calificacion ?? 4.5,
+    vendedor: detalle?.vendedor ?? "Tienda oficial",
+    genero: detalle?.genero ?? "---",
+  };
 }
