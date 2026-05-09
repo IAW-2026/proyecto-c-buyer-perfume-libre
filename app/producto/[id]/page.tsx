@@ -12,6 +12,7 @@ import Header from "@/components/header";
 import { getPerfumeDetalle, PerfumeDetalle } from "@/lib/data";
 import CalificacionEstrellas from "@/components/calificacionEstrellas";
 import { generarUrl } from "@/lib/utils";
+import { redirect } from "next/dist/client/components/navigation";
 
 export default async function ProductoDetalle({
   params,
@@ -26,7 +27,7 @@ export default async function ProductoDetalle({
   const slug = generarUrl(producto?.nombre || "", producto?.id || "");
 
   if (slug != slugCompleto) {
-    //redirigir a la url correcta
+    redirect(`/producto/${slug}`);
   }
 
   const imagenesGaleria = [
