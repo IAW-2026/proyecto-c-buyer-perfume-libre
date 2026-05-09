@@ -1,8 +1,7 @@
 import Image from "next/image";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "../ui/button";
 
-// Definimos qué datos necesita nuestra tarjeta para existir
 interface ProductCardProps {
   id: string;
   nombre: string;
@@ -20,17 +19,14 @@ export default function ProductCard({
   imagenUrl,
 }: ProductCardProps) {
   return (
-    <Card className="overflow-hidden flex flex-col transition-all hover:shadow-md cursor-pointer group">
+    <Card className="group flex h-full w-full flex-col overflow-hidden border border-border/70 bg-card p-0 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md">
       <ProductCardImage imagenUrl={imagenUrl} nombre={nombre} />
-
       <ProductCardContenido
         marca={marca}
         nombre={nombre}
         tamaño={tamaño}
         precio={precio}
       />
-
-      <ProductCardFooter />
     </Card>
   );
 }
@@ -43,16 +39,14 @@ function ProductCardImage({
   nombre: string;
 }) {
   return (
-    <div className="relative aspect-square bg-white flex items-center justify-center p-4">
-      <div className="relative w-full h-full">
-        <Image
-          src={imagenUrl}
-          alt={`Perfume ${nombre}`}
-          fill
-          className="object-contain group-hover:scale-105 transition-transform duration-300"
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-        />
-      </div>
+    <div className="relative aspect-square overflow-hidden bg-muted/5">
+      <Image
+        src={imagenUrl}
+        alt={`Perfume ${nombre}`}
+        fill
+        className="object-cover transition-transform duration-500 group-hover:scale-105"
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+      />
     </div>
   );
 }
@@ -64,32 +58,34 @@ function ProductCardContenido({
   precio,
 }: Pick<ProductCardProps, "marca" | "nombre" | "tamaño" | "precio">) {
   return (
-    <CardContent className="flex flex-1 flex-col border-t p-4 gap-0.5">
-      <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+    <CardContent className="flex flex-1 flex-col gap-0.5 p-4 pt-3">
+      <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80">
         {marca}
       </span>
-      <h3 className="text-sm font-normal leading-tight line-clamp-2">
+      <h3 className="line-clamp-2 text-sm font-medium leading-snug text-foreground/90 transition-colors group-hover:text-primary">
         {nombre}
       </h3>
-      <span className="-mt-0.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-        {tamaño}
-      </span>
+      <span className="text-xs text-muted-foreground">{tamaño}</span>
 
-      <div className="mt-2 flex flex-col">
-        <span className="text-2xl font-medium tracking-tight">
-          ${precio.toLocaleString()}
-        </span>
+      <div className="mt-auto pt-4">
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col">
+            <span className="text-2xl font-bold tracking-tight text-foreground">
+              ${precio.toLocaleString()}
+            </span>
+          </div>
+
+          <ProductCardActions />
+        </div>
       </div>
     </CardContent>
   );
 }
 
-function ProductCardFooter() {
+function ProductCardActions() {
   return (
-    <CardFooter className="p-3 pt-3">
-      <Button className="w-full font-semibold" variant="default">
-        Agregar al carrito
-      </Button>
-    </CardFooter>
+    <Button className="w-full font-semibold shadow-sm" size="sm">
+      Agregar al carrito
+    </Button>
   );
 }
