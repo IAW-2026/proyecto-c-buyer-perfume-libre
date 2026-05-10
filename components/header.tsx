@@ -1,4 +1,4 @@
-import { Search, ShoppingCart } from "lucide-react";
+import { Heart, Search, ShoppingCart } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -41,11 +41,16 @@ function AccionesHeader() {
     </div>
   );
 
-  // TODO: Falta boton de fav.
   function AccionesUsuario() {
     return (
       <Show when="signed-in">
         <div className="flex items-center gap-4">
+          <Link href="/favoritos">
+            <Button variant="ghost" size="icon" className="relative">
+              <Heart className="h-6 w-6" />
+              <span className="sr-only">Favoritos</span>
+            </Button>
+          </Link>
           <Link href="/carrito">
             <Button variant="ghost" size="icon" className="relative">
               <ShoppingCart className="h-6 w-6" />

@@ -15,3 +15,7 @@ export function generarUrl(nombre: string, id: string): string {
 
   return `${auxnombre}-${id}`;
 }
+
+export function formatearPrecio(precio: number, cantidad: number = 1): string {
+  return `$${(precio * cantidad).toLocaleString()}`;
+}

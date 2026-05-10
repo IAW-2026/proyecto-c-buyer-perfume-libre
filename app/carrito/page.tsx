@@ -2,7 +2,7 @@ import Header from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { generarUrl } from "@/lib/utils";
+import { generarUrl, formatearPrecio } from "@/lib/utils";
 import { Trash2, Plus, Minus } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -277,8 +277,4 @@ function calcularTotal(
   );
   const total = subtotal;
   return total;
-}
-
-function formatearPrecio(precio: number, cantidad: number = 1): string {
-  return `$${(precio * cantidad).toLocaleString()}`;
 }
