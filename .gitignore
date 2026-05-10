@@ -42,3 +42,5 @@ next-env.d.ts
 
 # archivo local para manejar actualizaciones
 todo.txt
+# clerk configuration (can include secrets)
+/.clerk/
