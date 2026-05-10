@@ -1,9 +1,22 @@
-import { Heart, Search, ShoppingCart } from "lucide-react";
+import { Heart, Search, ShoppingBag, ShoppingCart } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { SignInButton, UserButton, Show } from "@clerk/nextjs";
+import { SignInButton, Show, UserButton } from "@clerk/nextjs";
+
+export default function Header() {
+  return (
+    <header className="w-full border-b bg-background py-4 sticky top-0 z-50">
+      <div className="container mx-auto px-4 md:px-8 flex flex-col gap-4 relative">
+        <div className="flex items-center justify-center relative min-h-12">
+          <NombreSitio />
+          <AccionesHeader />
+        </div>
+        <BarraDeBusqueda />
+      </div>
+    </header>
+  );
+}
 
 function NombreSitio() {
   return (
@@ -44,27 +57,10 @@ function AccionesHeader() {
   function AccionesUsuario() {
     return (
       <Show when="signed-in">
-        <div className="flex items-center gap-4">
-          <Link href="/favoritos">
-            <Button variant="ghost" size="icon" className="relative">
-              <Heart className="h-6 w-6" />
-              <span className="sr-only">Favoritos</span>
-            </Button>
-          </Link>
-          <Link href="/carrito">
-            <Button variant="ghost" size="icon" className="relative">
-              <ShoppingCart className="h-6 w-6" />
-              <span className="sr-only">Carrito</span>
-              {/* TODO: implementar lógica para mostrar cantidad */}
-              {false && (
-                <Badge className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full p-0 text-[10px]">
-                  -1
-                </Badge>
-              )}
-            </Button>
-          </Link>
-          <UserButton />
-        </div>
+        <HeaderButton href="/compras" icon={ShoppingBag} label="Compras" />
+        <HeaderButton href="/favoritos" icon={Heart} label="Favoritos" />
+        <HeaderButton href="/carrito" icon={ShoppingCart} label="Carrito" />
+        <UserButton />
       </Show>
     );
   }
@@ -80,16 +76,21 @@ function AccionesHeader() {
   }
 }
 
-export default function Header() {
+function HeaderButton({
+  href,
+  icon: Icon,
+  label,
+}: {
+  href: string;
+  icon: any;
+  label: string;
+}) {
   return (
-    <header className="w-full border-b bg-background py-4 sticky top-0 z-50">
-      <div className="container mx-auto px-4 md:px-8 flex flex-col gap-4 relative">
-        <div className="flex items-center justify-center relative min-h-12">
-          <NombreSitio />
-          <AccionesHeader />
-        </div>
-        <BarraDeBusqueda />
-      </div>
-    </header>
+    <Link href={href}>
+      <Button variant="ghost" size="icon" className="relative">
+        <Icon className="h-6 w-6" />
+        <span className="sr-only">{label}</span>
+      </Button>
+    </Link>
   );
 }
