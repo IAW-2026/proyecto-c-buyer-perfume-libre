@@ -88,6 +88,12 @@ Se debe utilizar siempre el flag `--no-ff` (No Fast-Forward) para evitar que el 
 git merge --no-ff feature/nombre-de-la-rama
 ```
 
+
+
+### Decisiones de Arquitectura: Sincronización de Usuarios
+
+Para sincronizar los usuarios de Clerk con nuestra db, optamos por un observer del lado del cliente en lugar de Webhooks para facilitar el desarollo de la aplicacion y no tener que configurar tuneles para comunicarnos con clerk	
+
 ---
 
 Enunciado completo: <https://iaw-2026.github.io/proyecto/>
