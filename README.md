@@ -35,13 +35,13 @@ Se utiliza una arquitectura basada en **Next.js App Router** con una organizaci�
 ```text
 /proyecto-c-buyer-perfume-libre
   /app          --> Rutas y páginas (App Router)
-  	/api 		--> Endpoints de las APIs REST
+  	/api 		    --> Endpoints de las APIs REST
   /components   --> Componentes de React
     /ui         --> Componentes base de shadcn/ui
   /lib          --> Lógica compartida y utilidades
   /actions      --> Server actions
-  /drizzle  	--> Capa de datos
-  /schema		--> Validaciones con Zod
+  /prisma  	    --> Capa de datos
+  /schema		    --> Validaciones con Zod
   /e2e          --> Pruebas de extremo a extremo (Playwright)
 
 Nota: Se utiliza el patrón de colocation para tests unitarios (los archivos .test.ts residen junto a la lógica que prueban).
@@ -88,11 +88,9 @@ Se debe utilizar siempre el flag `--no-ff` (No Fast-Forward) para evitar que el 
 git merge --no-ff feature/nombre-de-la-rama
 ```
 
-
-
 ### Decisiones de Arquitectura: Sincronización de Usuarios
 
-Para sincronizar los usuarios de Clerk con nuestra db, optamos por un observer del lado del cliente en lugar de Webhooks para facilitar el desarollo de la aplicacion y no tener que configurar tuneles para comunicarnos con clerk	
+Para sincronizar los usuarios de Clerk con nuestra db, optamos por un observer del lado del cliente en lugar de Webhooks para facilitar el desarollo de la aplicacion y no tener que configurar tuneles para comunicarnos con clerk
 
 ---
 
