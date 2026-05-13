@@ -5,15 +5,7 @@ import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { generarUrl } from "@/lib/utils";
-
-interface ProductCardProps {
-  id: string;
-  nombre: string;
-  marca: string;
-  precio: number;
-  tamaño: string;
-  imagenUrl: string;
-}
+import { PerfumeCard } from "@/schema/perfume.schema";
 
 export default function ProductCard({
   id,
@@ -22,7 +14,7 @@ export default function ProductCard({
   precio,
   tamaño,
   imagenUrl,
-}: ProductCardProps) {
+}: PerfumeCard) {
   const slug = generarUrl(nombre, id);
   const urlDetalle = `/producto/${slug}`;
 
@@ -77,7 +69,7 @@ function ProductCardContenido({
   tamaño,
   precio,
   onClick,
-}: Pick<ProductCardProps, "marca" | "nombre" | "tamaño" | "precio"> & {
+}: Pick<PerfumeCard, "marca" | "nombre" | "tamaño" | "precio"> & {
   onClick: (e: React.MouseEvent) => void;
 }) {
   return (
@@ -88,7 +80,7 @@ function ProductCardContenido({
       <h3 className="line-clamp-2 text-sm font-medium leading-snug text-foreground/90 transition-colors group-hover:text-primary">
         {nombre}
       </h3>
-      <span className="text-xs text-muted-foreground">{tamaño}</span>
+      <span className="text-xs text-muted-foreground">{`${tamaño} ml`}</span>
 
       <div className="mt-auto pt-4">
         <div className="flex flex-col gap-3">
