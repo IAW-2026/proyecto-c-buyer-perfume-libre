@@ -1,4 +1,3 @@
-import { vendored } from "next/dist/server/route-modules/app-page/module.compiled";
 import { z } from "zod";
 
 // Esquemas
