@@ -1,40 +1,20 @@
 import Header from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { obtenerProductosFavoritos } from "@/lib/api";
 import { formatearPrecio } from "@/lib/utils";
+import { PerfumeFavorito } from "@/schema/perfume.schema";
 import { ShoppingCart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-// Datos ficticios para simular favoritos
-const FAVORITOS_MOCK = [
-  {
-    id: "1",
-    nombre: "Sauvage Elixir - Dior 60ml",
-    precio: 185000,
-    imagenUrl:
-      "https://images.unsplash.com/photo-1594035910387-fea47794261f?q=80&w=200",
-    marca: "Dior",
-  },
-  {
-    id: "3",
-    nombre: "Carolina Herrera Good Girl",
-    precio: 112.99,
-    imagenUrl:
-      "https://images.unsplash.com/photo-1458538977777-0549b2370168?q=80&w=1174&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    marca: "Carolina Herrera",
-  },
-  {
-    id: "10",
-    nombre: "Dolce & Gabbana Light Blue",
-    precio: 84.99,
-    imagenUrl:
-      "https://images.unsplash.com/photo-1720414913669-87031493d7c9?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    marca: "Dolce & Gabbana",
-  },
-];
+// TODO: Agregar skeleton mientras se cargan los favoritos
+export default async function FavoritosPage() {
+  // TODO: Cambiar por query a db
+  const obtenerIdsFavoritos = ["1", "2", "3"];
+  const perfumesFavoritos =
+    await obtenerProductosFavoritos(obtenerIdsFavoritos);
 
-export default function FavoritosPage() {
   return (
     <div className="min-h-screen bg-slate-50/50">
       <Header />
@@ -43,8 +23,8 @@ export default function FavoritosPage() {
         <h1 className="text-2xl font-bold mb-8 text-foreground">Favoritos</h1>
 
         <div className="flex flex-col gap-4">
-          {FAVORITOS_MOCK.length > 0 ? (
-            FAVORITOS_MOCK.map((producto) => (
+          {perfumesFavoritos.length > 0 ? (
+            perfumesFavoritos.map((producto) => (
               <ProductoCard key={producto.id} producto={producto} />
             ))
           ) : (
@@ -56,7 +36,7 @@ export default function FavoritosPage() {
   );
 }
 
-function ProductoCard({ producto }: { producto: any }) {
+function ProductoCard({ producto }: { producto: PerfumeFavorito }) {
   return (
     <Card
       key={producto.id}
@@ -141,6 +121,7 @@ function ProductInfo({
   );
 }
 
+// TODO: Agregar acciones
 function ProductActions() {
   return (
     <div className="flex items-center justify-center sm:justify-start gap-4 mt-6 sm:mt-0">
@@ -161,6 +142,7 @@ function ProductActions() {
   );
 }
 
+// TODO: Agregar acciones
 function ProductAgregarCarrito() {
   return (
     <div className="p-6 flex items-center justify-center border-t sm:border-t-0 sm:border-l border-slate-100">
