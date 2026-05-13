@@ -1,3 +1,4 @@
+import { obtenerFavoritosDelUsuario } from "@/actions/favoritos";
 import Header from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,7 +12,7 @@ import Link from "next/link";
 // TODO: Agregar skeleton mientras se cargan los favoritos
 export default async function FavoritosPage() {
   // TODO: Cambiar por query a db
-  const obtenerIdsFavoritos = ["1", "2", "3"];
+  const obtenerIdsFavoritos = await obtenerFavoritosDelUsuario();
   const perfumesFavoritos =
     await obtenerProductosFavoritos(obtenerIdsFavoritos);
 
