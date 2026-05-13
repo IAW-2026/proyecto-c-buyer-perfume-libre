@@ -7,6 +7,8 @@ import {
   PerfumeFavorito,
   PerfumeCarrito,
   PerfumeCarritosSchema,
+  PerfumeComprado,
+  PerfumeCompradosSchema,
 } from "@/schema/perfume.schema";
 import { mockPerfumes } from "./mockPerfumes";
 import { z } from "zod";
@@ -57,6 +59,20 @@ export async function obtenerProductosCarrito(
   );
 
   return validarTipo(perfumesFiltrados, PerfumeCarritosSchema);
+}
+
+export async function obtenerProductosComprados(
+  ids: String[],
+): Promise<PerfumeComprado[]> {
+  // En etapa 3 cambiar por fetch a la API real.
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  // En etapa 3 cambiar esta parte y usar el resultado del fetch
+  const perfumesFiltrados = mockPerfumes.filter((perfume) =>
+    ids.includes(perfume.id),
+  );
+
+  return validarTipo(perfumesFiltrados, PerfumeCompradosSchema);
 }
 
 export function validarTipo<TSchema extends z.ZodTypeAny>(

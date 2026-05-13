@@ -14,7 +14,7 @@ export const PerfumeSchema = z.object({
     .array(z.string().url("Debe ser una URL válida"))
     .min(1, "El perfume debe tener al menos una imagen"),
   descripcion: z.string().optional(),
-  calificacion: z
+  calificacion: z // TODO: Esto se deberia eliminar y remplazar por fetch a api de calificaciones
     .number()
     .min(0, "La calificación no puede ser menor a 0")
     .max(5, "La calificación no puede ser mayor a 5"),
@@ -57,6 +57,20 @@ export const PerfumeCarritoSchema = PerfumeSchema.pick({
   nombre: true,
   vendedor: true,
   imagenesUrl: true,
+  precio: true,
+}).transform((datos) => ({
+  id: datos.id,
+  nombre: datos.nombre,
+  vendedor: datos.vendedor,
+  imagenUrl: datos.imagenesUrl[0],
+  precio: datos.precio,
+}));
+
+export const PerfumeCompradoSchema = PerfumeSchema.pick({
+  id: true,
+  nombre: true,
+  vendedor: true,
+  imagenesUrl: true,
 }).transform((datos) => ({
   id: datos.id,
   nombre: datos.nombre,
@@ -69,9 +83,11 @@ export type Perfume = z.infer<typeof PerfumeSchema>;
 export type PerfumeCard = z.infer<typeof PerfumeCardSchema>;
 export type PerfumeFavorito = z.infer<typeof PerfumeFavoritoSchema>;
 export type PerfumeCarrito = z.infer<typeof PerfumeCarritoSchema>;
+export type PerfumeComprado = z.infer<typeof PerfumeCompradoSchema>;
 
 // Esquemas de validación para arrays
 export const PerfumesSchema = z.array(PerfumeSchema);
 export const PerfumeCardsSchema = z.array(PerfumeCardSchema);
 export const PerfumeFavoritosSchema = z.array(PerfumeFavoritoSchema);
 export const PerfumeCarritosSchema = z.array(PerfumeCarritoSchema);
+export const PerfumeCompradosSchema = z.array(PerfumeCompradoSchema);

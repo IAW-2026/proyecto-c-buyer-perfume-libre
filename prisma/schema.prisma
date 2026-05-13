@@ -31,6 +31,7 @@ model Favorito{
   @@unique([usuarioId, productoId])
 }
 
+//TODO: Agregar createdAt 
 model Carrito{
   id String @id @default(cuid())
   usuarioId String
