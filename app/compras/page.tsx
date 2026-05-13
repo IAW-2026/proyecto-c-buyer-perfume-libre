@@ -5,43 +5,14 @@ import { Badge } from "@/components/ui/badge";
 import { Package, ChevronRight, CandlestickChart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { vendored } from "next/dist/server/route-modules/app-page/module.compiled";
+import { obtenerProductosComprados } from "@/lib/api";
+import { PerfumeComprado } from "@/schema/perfume.schema";
 
-// Mock de compras realizadas
-const COMPRAS_MOCK = [
-  {
-    id: "8",
-    fecha: "28 de abril",
-    estado: "Entregado",
-    nombre: "Calvin Klein CK One",
-    vendedor: "PerfumeLibre Oficial",
-    imagenUrl:
-      "https://images.unsplash.com/photo-1620848616916-3efaf499adcb?q=80&w=627&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    cantidad: 1,
-  },
-  {
-    id: "3",
-    fecha: "15 de abril",
-    estado: "Entregado",
-    nombre: "Carolina Herrera Good Girl",
-    vendedor: "Fragancias Premium",
-    imagenUrl:
-      "https://images.unsplash.com/photo-1458538977777-0549b2370168?q=80&w=1174&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    cantidad: 1,
-  },
-  {
-    id: "11",
-    fecha: "10 de abril",
-    estado: "En camino",
-    nombre: "Yves Saint Laurent Libre",
-    vendedor: "PerfumeLibre Oficial",
-    imagenUrl:
-      "https://images.unsplash.com/photo-1723391962166-6d9bb8a3d3e7?q=80&w=764&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    cantidad: 3,
-  },
-];
+export default async function MisComprasPage() {
+  // TODO: Cambiar por query a db
+  const obtenerIdsCompras = ["1", "2", "3"];
+  const perfumesComprados = await obtenerProductosComprados(obtenerIdsCompras);
 
-export default function MisComprasPage() {
   return (
     <div className="min-h-screen bg-slate-50/50">
       <Header />
@@ -50,55 +21,48 @@ export default function MisComprasPage() {
         <h1 className="text-2xl font-bold mb-8 text-foreground">Mis compras</h1>
 
         <div className="flex flex-col gap-6">
-          {COMPRAS_MOCK.map((compra) => (
-            <CompraItem key={compra.id} {...compra} />
+          {perfumesComprados.map((compra) => (
+            <CompraItem key={compra.id} compra={compra} />
           ))}
         </div>
 
-        {COMPRAS_MOCK.length === 0 && <ComprasVacias />}
+        {perfumesComprados.length === 0 && <ComprasVacias />}
       </main>
     </div>
   );
+}
 
-  function CompraItem(compra: {
-    id: string;
-    fecha: string;
-    estado: string;
-    nombre: string;
-    vendedor: string;
-    imagenUrl: string;
-    cantidad: number;
-  }) {
-    return (
-      <div key={compra.id} className="flex flex-col gap-2">
-        <span className="text-sm font-semibold text-muted-foreground ml-1">
-          {compra.fecha}
-        </span>
+function CompraItem({ compra }: { compra: PerfumeComprado }) {
+  return (
+    <div key={compra.id} className="flex flex-col gap-2">
+      <span className="text-sm font-semibold text-muted-foreground ml-1">
+        {"00/00/000"}{" "}
+        {/* TODO: Cambiar por query a db para obtener fecha real de compra */}
+      </span>
 
-        <Card className="overflow-hidden border-none shadow-sm hover:shadow-md transition-all">
-          <CardContent className="p-0">
-            <div className="flex flex-col md:flex-row items-center md:items-stretch">
-              <div className="flex items-center gap-4 p-4 md:p-6 flex-1">
-                <ProductImagen
-                  imagenUrl={compra.imagenUrl}
-                  nombre={compra.nombre}
-                />
+      <Card className="overflow-hidden border-none shadow-sm hover:shadow-md transition-all">
+        <CardContent className="p-0">
+          <div className="flex flex-col md:flex-row items-center md:items-stretch">
+            <div className="flex items-center gap-4 p-4 md:p-6 flex-1">
+              <ProductImagen
+                imagenUrl={compra.imagenUrl}
+                nombre={compra.nombre}
+              />
 
-                <ProductDetalles
-                  estado={compra.estado}
-                  nombre={compra.nombre}
-                  vendedor={compra.vendedor}
-                  cantidad={compra.cantidad}
-                />
-              </div>
-
-              <PurchaseActions />
+              <ProductDetalles
+                estado={"---"} // TODO: Cambiar por query a db para obtener cantidad real de compra
+                nombre={compra.nombre}
+                vendedor={compra.vendedor}
+                cantidad={0} // TODO: Cambiar por query a db para obtener cantidad real de compra
+              />
             </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+
+            <PurchaseActions />
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
 }
 
 function ProductImagen({

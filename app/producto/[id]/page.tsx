@@ -6,14 +6,15 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
 import Header from "@/components/header";
-import { getPerfumeDetalle, PerfumeDetalle } from "@/lib/data";
 import CalificacionEstrellas from "@/components/calificacionEstrellas";
 import { generarUrl } from "@/lib/utils";
 import { redirect } from "next/dist/client/components/navigation";
+import { obtenerDetallePerfume } from "@/lib/api";
+import { Perfume } from "@/schema/perfume.schema";
 
+// TODO: Agregar skeleton mientras se carga el producto
 export default async function ProductoDetalle({
   params,
 }: {
@@ -22,18 +23,14 @@ export default async function ProductoDetalle({
   const { id: slugCompleto } = await params;
   const idReal = slugCompleto.split("-").pop();
 
-  const producto = await getPerfumeDetalle(idReal?.toString() || "1");
+  // TODO: Manejar error cuando el perfume no exista
+  const producto = await obtenerDetallePerfume(idReal || "");
 
-  const slug = generarUrl(producto?.nombre || "", producto?.id || "");
+  const slug = generarUrl(producto.nombre, producto.id);
 
   if (slug != slugCompleto) {
     redirect(`/producto/${slug}`);
   }
-
-  const imagenesGaleria = [
-    producto?.imagenUrl,
-    ...Array(2).fill(producto?.imagenUrl),
-  ];
 
   return (
     <div className="min-h-screen bg-white">
@@ -42,8 +39,8 @@ export default async function ProductoDetalle({
       <main className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
           <ProductImageGallery
-            imagenesGaleria={imagenesGaleria}
-            producto={producto}
+            imagenesGaleria={producto.imagenesUrl}
+            nombre={producto.nombre}
           />
           <ProductInformation producto={producto} />
         </div>
@@ -54,10 +51,10 @@ export default async function ProductoDetalle({
 
 function ProductImageGallery({
   imagenesGaleria,
-  producto,
+  nombre,
 }: {
-  imagenesGaleria: any[];
-  producto: PerfumeDetalle | null;
+  imagenesGaleria: string[];
+  nombre: string;
 }) {
   return (
     <div className="lg:col-span-6 flex flex-col items-center justify-center bg-linear-to-br from-slate-50 to-slate-100/50 rounded-2xl p-8 min-h-125 border border-slate-200/50">
@@ -67,8 +64,8 @@ function ProductImageGallery({
             <CarouselItem key={index}>
               <div className="relative aspect-square">
                 <Image
-                  src={img || ""}
-                  alt={producto?.nombre || "Perfume"}
+                  src={img}
+                  alt={nombre}
                   fill
                   className="object-contain mix-blend-multiply"
                 />
@@ -87,33 +84,25 @@ function ProductImageGallery({
   );
 }
 
-function ProductInformation({ producto }: { producto: PerfumeDetalle | null }) {
+function ProductInformation({ producto }: { producto: Perfume }) {
   return (
     <div className="lg:col-span-6 flex flex-col gap-6 h-fit">
-      {/* 1. Encabezado: Marca */}
       <div className="flex flex-col gap-2 pb-4 border-b border-slate-200">
-        <ProductEncabezado
-          marca={producto?.marca || "Marca Desconocida"}
-          nombre={producto?.nombre || "Producto Desconocido"}
-        />
+        <ProductEncabezado marca={producto.marca} nombre={producto.nombre} />
 
-        {/* 2. CALIFICACIÓN */}
-        <ProductCalificacion calificacion={producto?.calificacion || 0} />
+        {/* TODO: Cambiar por fetch a api */}
+        <ProductCalificacion calificacion={producto.calificacion} />
       </div>
 
-      {/* 3. Precio y Envío */}
-      <ProductPrecio
-        precio={producto?.precio || 0}
-        vendedor={producto?.vendedor || "Tienda oficial"}
-      />
+      <ProductPrecio precio={producto.precio} vendedor={producto.vendedor} />
       <ProductDetalles
-        tamano={producto?.tamaño || "-"}
-        genero={producto?.genero || "-"}
+        tamano={`${producto.tamaño} ml`}
+        genero={producto.genero}
       />
       <ProductActions />
       <ProductDescription
         descripcion={
-          producto?.descripcion ||
+          producto.descripcion ||
           "No hay descripción disponible para este perfume."
         }
       />
@@ -145,9 +134,9 @@ function ProductCalificacion({ calificacion }: { calificacion: number }) {
   return (
     <div className="flex items-center gap-3 mt-3">
       <span className="text-sm font-medium text-foreground">
-        {calificacion?.toFixed(1)}
+        {calificacion.toFixed(1)}
       </span>
-      <CalificacionEstrellas rating={calificacion || 0} />
+      <CalificacionEstrellas rating={calificacion} />
       <span className="text-sm text-muted-foreground">(123 opiniones)</span>
     </div>
   );
@@ -163,7 +152,7 @@ function ProductPrecio({
   return (
     <div className="flex flex-col gap-2 py-4">
       <span className="text-5xl font-bold tracking-tight bg-linear-to-r from-primary to-blue-600 bg-clip-text text-transparent">
-        ${precio?.toLocaleString()}
+        ${precio.toLocaleString()}
       </span>
 
       {/* Vendedor */}
@@ -188,6 +177,7 @@ function ProductDescription({ descripcion }: { descripcion: string }) {
   );
 }
 
+// TODO: Agregar acciones
 function ProductActions() {
   return (
     <div className="flex flex-col gap-3 py-4 border-y border-slate-200">

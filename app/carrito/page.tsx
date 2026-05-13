@@ -2,43 +2,19 @@ import Header from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { obtenerProductosCarrito } from "@/lib/api";
 import { generarUrl, formatearPrecio } from "@/lib/utils";
+import { PerfumeCarrito } from "@/schema/perfume.schema";
 import { Trash2, Plus, Minus } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-export default function CarritoPage() {
-  // Datos ficticios para la simulación cambiar por fetch a la db
-  const PRODUCTOS_CARRITO = [
-    {
-      id: "3",
-      nombre: "Carolina Herrera Good Girl",
-      precio: 112.99,
-      imagenUrl:
-        "https://images.unsplash.com/photo-1458538977777-0549b2370168?q=80&w=1174&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      cantidad: 2,
-      vendedor: "Carolina Herrera",
-    },
-    {
-      id: "9",
-      nombre: "Tom Ford Black Orchid",
-      precio: 189.99,
-      imagenUrl:
-        "https://images.unsplash.com/photo-1642698215110-87817f1fbe0e?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      cantidad: 1,
-      vendedor: "Tom Ford",
-    },
-    {
-      id: "6",
-      nombre: "Hugo Boss Bottled",
-      precio: 69.99,
-      imagenUrl:
-        "https://images.unsplash.com/photo-1638551442447-085a2d42918f?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      marca: "Hugo Boss",
-      cantidad: 1,
-      vendedor: "Hugo Boss",
-    },
-  ];
+// TODO: Agregar skeleton mientras se cargan los productos del carrito
+export default async function CarritoPage() {
+  // TODO: Remplazar por query a la db
+  const productosEnCarritoId = [] as any;
+  const productosEnCarrito =
+    await obtenerProductosCarrito(productosEnCarritoId);
 
   return (
     <div className="min-h-screen bg-slate-50/50">
@@ -46,22 +22,22 @@ export default function CarritoPage() {
 
       <main className="container mx-auto px-4 py-8 md:py-12">
         <h1 className="text-2xl font-bold mb-8">Carrito de compras</h1>
-
+        {/* TODO: Manejar cuando el carrito este vacio */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          <PerfumesEnCarrito Productos={PRODUCTOS_CARRITO} />
+          <PerfumesEnCarrito productos={productosEnCarrito} />
 
-          <ResumenCompra Productos={PRODUCTOS_CARRITO} />
+          <ResumenCompra productos={productosEnCarrito} />
         </div>
       </main>
     </div>
   );
 }
 
-function PerfumesEnCarrito({ Productos }: { Productos?: any }) {
+function PerfumesEnCarrito({ productos }: { productos: PerfumeCarrito[] }) {
   return (
     <div className="lg:col-span-8 flex flex-col gap-4">
-      {Productos.length > 0 ? (
-        Productos.map((producto: any) => (
+      {productos.length > 0 ? (
+        productos.map((producto: PerfumeCarrito) => (
           <ProductInfo key={producto.id} producto={producto} />
         ))
       ) : (
@@ -71,8 +47,8 @@ function PerfumesEnCarrito({ Productos }: { Productos?: any }) {
   );
 }
 
-function ResumenCompra({ Productos }: { Productos?: any }) {
-  const total = calcularTotal(Productos);
+function ResumenCompra({ productos }: { productos: PerfumeCarrito[] }) {
+  const total = calcularTotal(productos);
 
   return (
     <div className="lg:col-span-4">
@@ -81,7 +57,7 @@ function ResumenCompra({ Productos }: { Productos?: any }) {
           <h2 className="text-lg font-bold mb-4">Resumen de compra</h2>
 
           <div className="space-y-3">
-            <ResumenProductos Productos={Productos} />
+            <ResumenProductos productos={productos} />
 
             <Separator className="my-4" />
 
@@ -95,7 +71,7 @@ function ResumenCompra({ Productos }: { Productos?: any }) {
   );
 }
 
-function ProductInfo({ producto }: { producto: any }) {
+function ProductInfo({ producto }: { producto: PerfumeCarrito }) {
   return (
     <Card key={producto.id} className="overflow-hidden border-none shadow-sm">
       <CardContent className="p-4 md:p-6">
@@ -114,12 +90,10 @@ function ProductInfo({ producto }: { producto: any }) {
             />
 
             <div className="flex justify-between items-end mt-4">
-              <SelectorDeCantidad cantidad={producto.cantidad} />
-
-              <ProductPrecio
-                precio={producto.precio}
-                cantidad={producto.cantidad}
-              />
+              {/* TODO: Remplazar por query a db */}
+              <SelectorDeCantidad cantidad={0} />{" "}
+              {/* TODO: Remplazar por query a db */}
+              <ProductPrecio precio={producto.precio} cantidad={0} />
             </div>
           </div>
         </div>
@@ -231,13 +205,14 @@ function ProductPrecio({
   );
 }
 
-function ResumenProductos({ Productos }: { Productos: any[] }) {
+function ResumenProductos({ productos }: { productos: PerfumeCarrito[] }) {
   return (
     <div className="flex flex-col gap-2 text-sm">
-      {Productos.map((prod) => (
+      {productos.map((prod) => (
         <div className="flex justify-between items-start gap-2" key={prod.id}>
           <span>{`${prod.nombre} `}</span>
-          <span>{formatearPrecio(prod.precio, prod.cantidad)}</span>
+          <span>{formatearPrecio(prod.precio, 0)}</span>{" "}
+          {/* TODO: Remplazar por query a db */}
         </div>
       ))}
     </div>
@@ -261,20 +236,11 @@ function BotonContinuarCompra() {
   );
 }
 
-function calcularTotal(
-  Productos: {
-    id: string;
-    nombre: string;
-    precio: number;
-    imagenUrl: string;
-    cantidad: number;
-    vendedor: string;
-  }[],
-) {
-  const subtotal = Productos.reduce(
-    (acc, prod) => acc + prod.precio * prod.cantidad,
-    0,
-  );
+function calcularTotal(productos: PerfumeCarrito[]): number {
+  {
+    /* TODO: Remplazar por query a db */
+  }
+  const subtotal = productos.reduce((acc, prod) => acc + prod.precio * 0, 0);
   const total = subtotal;
   return total;
 }
