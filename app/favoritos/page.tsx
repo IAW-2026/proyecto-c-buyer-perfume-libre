@@ -10,6 +10,9 @@ import Link from "next/link";
 // TODO: Al eliminar el ultimo producto se deberia mostrar instantaneamente
 // FavoritosVacio, lo cual no ocurre ahora mismo. (bug)
 
+// Quitar cuando se agregue el suspense
+export const dynamic = "force-dynamic";
+
 export default async function FavoritosPage() {
   const obtenerIdsFavoritos = await obtenerFavoritosDelUsuario();
   const perfumesFavoritos =
