@@ -13,6 +13,9 @@ import { generarUrl } from "@/lib/utils";
 import { notFound, redirect } from "next/dist/client/components/navigation";
 import { obtenerDetallePerfume } from "@/lib/api";
 import { Perfume } from "@/schema/perfume.schema";
+import { productoEstaEnFavoritos } from "@/actions/favoritos";
+import { BotonFavorito } from "@/components/favoritos/BotonFavorito";
+import { auth } from "@clerk/nextjs/server";
 
 // TODO: Agregar skeleton mientras se carga el producto
 export default async function ProductoDetalle({
@@ -41,6 +44,14 @@ export default async function ProductoDetalle({
     redirect(`/producto/${slug}`);
   }
 
+  const { userId } = await auth();
+
+  let estaEnFavoritos = false;
+
+  if (userId && idReal) {
+    estaEnFavoritos = await productoEstaEnFavoritos(idReal);
+  }
+
   return (
     <div className="min-h-screen bg-white">
       <Header />
@@ -48,8 +59,10 @@ export default async function ProductoDetalle({
       <main className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
           <ProductImageGallery
+            id={producto.id}
             imagenesGaleria={producto.imagenesUrl}
             nombre={producto.nombre}
+            estaEnFavoritos={estaEnFavoritos}
           />
           <ProductInformation producto={producto} />
         </div>
@@ -59,14 +72,19 @@ export default async function ProductoDetalle({
 }
 
 function ProductImageGallery({
+  id,
   imagenesGaleria,
   nombre,
+  estaEnFavoritos,
 }: {
+  id: string;
   imagenesGaleria: string[];
   nombre: string;
+  estaEnFavoritos: boolean;
 }) {
   return (
-    <div className="lg:col-span-6 flex flex-col items-center justify-center bg-linear-to-br from-slate-50 to-slate-100/50 rounded-2xl p-8 min-h-125 border border-slate-200/50">
+    <div className="lg:col-span-6 relative flex flex-col items-center justify-center bg-linear-to-br from-slate-50 to-slate-100/50 rounded-2xl p-8 min-h-125 border border-slate-200/50">
+      <BotonFavorito perfumeId={id} esFavoritoInicial={estaEnFavoritos} />
       <Carousel className="w-full max-w-md">
         <CarouselContent>
           {imagenesGaleria.map((img, index) => (
