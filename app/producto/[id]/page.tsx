@@ -10,7 +10,7 @@ import Image from "next/image";
 import Header from "@/components/header";
 import CalificacionEstrellas from "@/components/calificacionEstrellas";
 import { generarUrl } from "@/lib/utils";
-import { redirect } from "next/dist/client/components/navigation";
+import { notFound, redirect } from "next/dist/client/components/navigation";
 import { obtenerDetallePerfume } from "@/lib/api";
 import { Perfume } from "@/schema/perfume.schema";
 
@@ -21,10 +21,19 @@ export default async function ProductoDetalle({
   params: Promise<{ id: string }>;
 }) {
   const { id: slugCompleto } = await params;
-  const idReal = slugCompleto.split("-").pop();
+  const idReal = extraerIdDeSlug(slugCompleto);
 
   // TODO: Manejar error cuando el perfume no exista
-  const producto = await obtenerDetallePerfume(idReal || "");
+  if (!idReal) {
+    return notFound();
+  }
+
+  let producto: Perfume;
+  try {
+    producto = await obtenerDetallePerfume(idReal);
+  } catch (error) {
+    return notFound();
+  }
 
   const slug = generarUrl(producto.nombre, producto.id);
 
@@ -225,4 +234,8 @@ function ProductDetalles({
       </div>
     </div>
   );
+}
+
+function extraerIdDeSlug(slug: string): string | undefined {
+  return slug.split("-").pop();
 }
