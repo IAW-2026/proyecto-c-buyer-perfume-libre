@@ -6,6 +6,10 @@ import { obtenerProductosFavoritos } from "@/lib/api";
 import Link from "next/link";
 
 // TODO: Agregar skeleton mientras se cargan los favoritos
+
+// TODO: Al eliminar el ultimo producto se deberia mostrar instantaneamente
+// FavoritosVacio, lo cual no ocurre ahora mismo. (bug)
+
 export default async function FavoritosPage() {
   const obtenerIdsFavoritos = await obtenerFavoritosDelUsuario();
   const perfumesFavoritos =
