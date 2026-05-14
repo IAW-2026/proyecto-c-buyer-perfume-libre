@@ -27,8 +27,6 @@ export async function toggleFavorito(productoId: string) {
           id: favoritoExistente.id,
         },
       });
-      revalidatePath(`/producto/${productoId}`, "page");
-      revalidatePath("/");
     } else {
       await prisma.favorito.create({
         data: {
@@ -36,6 +34,7 @@ export async function toggleFavorito(productoId: string) {
           productoId: productoId,
         },
       });
+
       revalidatePath(`/producto/${productoId}`, "page");
       revalidatePath("/");
     }
@@ -95,4 +94,27 @@ export async function productoEstaEnFavoritos(productoId: string) {
     console.error("Error en productoEstaEnFavoritos:", error);
     throw new Error("No se pudo verificar si el producto está en favoritos");
   }
+}
+
+export async function eliminarFavorito(productoId: string) {
+  try {
+    const { userId } = await auth();
+
+    if (!userId) {
+      throw new Error("Usuario no autenticado");
+    }
+
+    await prisma.favorito.delete({
+      where: {
+        usuarioId_productoId: {
+          usuarioId: userId,
+          productoId: productoId,
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Error en eliminarFavorito:", error);
+  }
+
+  revalidatePath(`/favoritos`);
 }
