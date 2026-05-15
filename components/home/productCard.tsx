@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { generarUrl } from "@/lib/utils";
 import { PerfumeCard } from "@/schema/perfume.schema";
-import { BotonAgregarCarrito } from "./botonAgregarCarrito";
+import { BotonAgregarCarrito } from "../carrito/botonAgregarCarrito";
 
 export default function ProductCard({
   id,
@@ -81,7 +81,11 @@ function ProductCardContenido({
             </span>
           </div>
 
-          <BotonAgregarCarrito perfumeId={id} />
+          <BotonAgregarCarrito
+            perfumeId={id}
+            className="w-full font-semibold shadow-sm"
+            size="sm"
+          />
         </div>
       </div>
     </CardContent>

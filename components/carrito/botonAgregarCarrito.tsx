@@ -1,11 +1,21 @@
 "use client";
 
 import { useEffect } from "react";
+import type { ComponentProps } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth, useClerk } from "@clerk/nextjs";
 import { agregarAlCarrito } from "@/actions/carrito";
 
-export function BotonAgregarCarrito({ perfumeId }: { perfumeId: string }) {
+type BotonAgregarCarritoProps = {
+  perfumeId: string;
+} & Pick<ComponentProps<typeof Button>, "className" | "variant" | "size">;
+
+export function BotonAgregarCarrito({
+  perfumeId,
+  className,
+  variant,
+  size,
+}: BotonAgregarCarritoProps) {
   const { userId, isLoaded } = useAuth();
   const clerk = useClerk();
 
@@ -45,8 +55,9 @@ export function BotonAgregarCarrito({ perfumeId }: { perfumeId: string }) {
 
   return (
     <Button
-      className="w-full font-semibold shadow-sm"
-      size="sm"
+      className={className}
+      variant={variant}
+      size={size}
       onClick={handleAgregarAlCarrito}
     >
       Agregar al carrito
