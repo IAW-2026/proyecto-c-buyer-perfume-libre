@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
+import { revalidatePath } from "next/dist/server/web/spec-extension/revalidate";
 
 export async function agregarAlCarrito(productoId: string) {
   try {
@@ -51,6 +52,8 @@ export async function eliminarDelCarrito(productoId: string) {
     console.error("Error en eliminarDelCarrito:", error);
     throw new Error("No se pudo eliminar el producto del carrito");
   }
+
+  revalidatePath("/carrito");
 }
 
 export async function obtenerCarritoDelUsuario() {
@@ -81,7 +84,10 @@ export async function obtenerCarritoDelUsuario() {
   }
 }
 
-export async function aumentarCantidadEnCarrito(productoId: string) {
+export async function actualizarCantidadEnCarrito(
+  productoId: string,
+  nuevaCantidad: number,
+) {
   try {
     const { userId } = await auth();
 
@@ -110,62 +116,15 @@ export async function aumentarCantidadEnCarrito(productoId: string) {
         id: carritoItem.id,
       },
       data: {
-        cantidad: {
-          increment: 1,
-        },
+        cantidad: nuevaCantidad,
       },
     });
   } catch (error) {
-    console.error("Error en aumentarCantidadEnCarrito:", error);
+    console.error("Error en actualizarCantidadEnCarrito:", error);
     throw new Error(
-      "No se pudo aumentar la cantidad del producto en el carrito",
+      "No se pudo actualizar la cantidad del producto en el carrito",
     );
   }
-}
 
-export async function decrementarCantidadEnCarrito(productoId: string) {
-  try {
-    const { userId } = await auth();
-
-    if (!userId) {
-      throw new Error("Usuario no autenticado");
-    }
-
-    const carritoItem = await prisma.carrito.findUnique({
-      where: {
-        usuarioId_productoId: {
-          usuarioId: userId,
-          productoId: productoId,
-        },
-      },
-      select: {
-        cantidad: true,
-        id: true,
-      },
-    });
-
-    if (!carritoItem) {
-      throw new Error("Producto no encontrado en el carrito");
-    }
-
-    if (carritoItem.cantidad <= 1) {
-      throw new Error(
-        "No se puede decrementar. Usa el botón eliminar para remover el producto",
-      );
-    }
-
-    await prisma.carrito.update({
-      where: {
-        id: carritoItem.id,
-      },
-      data: {
-        cantidad: {
-          decrement: 1,
-        },
-      },
-    });
-  } catch (error) {
-    console.error("Error en decrementarCantidadEnCarrito:", error);
-    throw error;
-  }
+  revalidatePath("/carrito");
 }
