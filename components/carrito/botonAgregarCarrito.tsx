@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useTransition } from "react";
 import type { ComponentProps } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth, useClerk } from "@clerk/nextjs";
 import { agregarAlCarrito } from "@/actions/carrito";
+import { Loader2, ShoppingCart } from "lucide-react";
+import { toast } from "sonner";
 
 type BotonAgregarCarritoProps = {
   perfumeId: string;
@@ -19,6 +21,8 @@ export function BotonAgregarCarrito({
   const { userId, isLoaded } = useAuth();
   const clerk = useClerk();
 
+  const [isPending, startTransition] = useTransition();
+
   useEffect(() => {
     if (isLoaded && userId) {
       const agregarPendiente = localStorage.getItem("intencionAgregarCarrito");
@@ -26,17 +30,17 @@ export function BotonAgregarCarrito({
       if (agregarPendiente === perfumeId) {
         localStorage.removeItem("intencionAgregarCarrito");
 
-        agregarAlCarrito(perfumeId).catch((err) => {
-          console.error(
-            "Error al procesar la intención de agregar al carrito",
-            err,
-          );
-        });
+        agregarAlCarrito(perfumeId)
+          .then(() => toast.success("¡Agregado al carrito!"))
+          .catch((err) => {
+            console.error("Error al procesar la intención", err);
+            toast.error("Hubo un problema al guardar tu producto.");
+          });
       }
     }
   }, [isLoaded, userId, perfumeId]);
 
-  const handleAgregarAlCarrito = async (e: React.MouseEvent) => {
+  const handleAgregarAlCarrito = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -46,11 +50,17 @@ export function BotonAgregarCarrito({
       return;
     }
 
-    try {
-      await agregarAlCarrito(perfumeId);
-    } catch (error) {
-      console.error("Error al agregar al carrito", error);
-    }
+    startTransition(async () => {
+      try {
+        await agregarAlCarrito(perfumeId);
+        toast.success("¡Agregado al carrito!");
+      } catch (error) {
+        console.error(error);
+        toast.error("No se pudo agregar al carrito", {
+          description: "Por favor, intentá nuevamente en unos minutos.",
+        });
+      }
+    });
   };
 
   return (
@@ -59,8 +69,14 @@ export function BotonAgregarCarrito({
       variant={variant}
       size={size}
       onClick={handleAgregarAlCarrito}
+      disabled={isPending}
     >
-      Agregar al carrito
+      {isPending ? (
+        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+      ) : (
+        <ShoppingCart className="h-4 w-4 mr-2" />
+      )}
+      {isPending ? "Agregando..." : "Agregar al carrito"}
     </Button>
   );
 }

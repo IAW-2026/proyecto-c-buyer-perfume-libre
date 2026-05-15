@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Geist, Geist_Mono } from "next/font/google";
 import { UsuarioSync } from "@/components/auth/UsuarioSync";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -32,6 +33,7 @@ export default function RootLayout({
         <ClerkProvider>
           <UsuarioSync />
           {children}
+          <Toaster position="bottom-right" />
         </ClerkProvider>
       </body>
     </html>
