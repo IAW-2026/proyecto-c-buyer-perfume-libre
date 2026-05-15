@@ -6,6 +6,9 @@ import { ItemCarrito, PerfumeCarrito } from "@/schema/perfume.schema";
 import Link from "next/link";
 
 // TODO: Agregar skeleton mientras se cargan los productos del carrito
+
+export const dynamic = "force-dynamic";
+
 export default async function CarritoPage() {
   const productosCarritoDb = await obtenerCarritoDelUsuario();
 
