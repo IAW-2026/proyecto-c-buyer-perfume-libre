@@ -16,6 +16,7 @@ import { Perfume } from "@/schema/perfume.schema";
 import { productoEstaEnFavoritos } from "@/actions/favoritos";
 import { BotonFavorito } from "@/components/favoritos/BotonFavorito";
 import { auth } from "@clerk/nextjs/server";
+import { BotonAgregarCarrito } from "@/components/carrito/botonAgregarCarrito";
 
 // TODO: Agregar skeleton mientras se carga el producto
 export default async function ProductoDetalle({
@@ -126,7 +127,7 @@ function ProductInformation({ producto }: { producto: Perfume }) {
         tamano={`${producto.tamaño} ml`}
         genero={producto.genero}
       />
-      <ProductActions />
+      <ProductActions perfumeId={producto.id} />
       <ProductDescription
         descripcion={
           producto.descripcion ||
@@ -205,7 +206,7 @@ function ProductDescription({ descripcion }: { descripcion: string }) {
 }
 
 // TODO: Agregar acciones
-function ProductActions() {
+function ProductActions({ perfumeId }: { perfumeId: string }) {
   return (
     <div className="flex flex-col gap-3 py-4 border-y border-slate-200">
       <Button
@@ -214,13 +215,12 @@ function ProductActions() {
       >
         Comprar ahora
       </Button>
-      <Button
-        size="lg"
+      <BotonAgregarCarrito
+        perfumeId={perfumeId}
         variant="outline"
+        size="lg"
         className="w-full text-base font-bold h-12 border-2 hover:border-primary hover:bg-primary/5 transition-all"
-      >
-        Agregar al carrito
-      </Button>
+      />
     </div>
   );
 }

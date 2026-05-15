@@ -78,12 +78,20 @@ export const PerfumeCompradoSchema = PerfumeSchema.pick({
   imagenUrl: datos.imagenesUrl[0],
 }));
 
+export const ItemCarritoSchema = z.intersection(
+  PerfumeCarritoSchema,
+  z.object({
+    cantidad: z.number().int().min(1).positive(),
+  }),
+);
+
 // Esquemas de validacion para objetos individuales
 export type Perfume = z.infer<typeof PerfumeSchema>;
 export type PerfumeCard = z.infer<typeof PerfumeCardSchema>;
 export type PerfumeFavorito = z.infer<typeof PerfumeFavoritoSchema>;
 export type PerfumeCarrito = z.infer<typeof PerfumeCarritoSchema>;
 export type PerfumeComprado = z.infer<typeof PerfumeCompradoSchema>;
+export type ItemCarrito = z.infer<typeof ItemCarritoSchema>;
 
 // Esquemas de validación para arrays
 export const PerfumesSchema = z.array(PerfumeSchema);
@@ -91,3 +99,4 @@ export const PerfumeCardsSchema = z.array(PerfumeCardSchema);
 export const PerfumeFavoritosSchema = z.array(PerfumeFavoritoSchema);
 export const PerfumeCarritosSchema = z.array(PerfumeCarritoSchema);
 export const PerfumeCompradosSchema = z.array(PerfumeCompradoSchema);
+export const ItemsCarritoSchema = z.array(ItemCarritoSchema);
