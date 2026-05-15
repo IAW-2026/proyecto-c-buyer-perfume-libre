@@ -1,20 +1,26 @@
+import { obtenerCarritoDelUsuario } from "@/actions/carrito";
 import Header from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { obtenerProductosCarrito } from "@/lib/api";
 import { generarUrl, formatearPrecio } from "@/lib/utils";
-import { PerfumeCarrito } from "@/schema/perfume.schema";
+import { ItemCarrito, PerfumeCarrito } from "@/schema/perfume.schema";
 import { Trash2, Plus, Minus } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
 // TODO: Agregar skeleton mientras se cargan los productos del carrito
 export default async function CarritoPage() {
-  // TODO: Remplazar por query a la db
-  const productosEnCarritoId = [] as any;
-  const productosEnCarrito =
-    await obtenerProductosCarrito(productosEnCarritoId);
+  const productosCarritoDb = await obtenerCarritoDelUsuario();
+  const productosCarritoId = productosCarritoDb.map((item) => item.productoId);
+  const productosCarritoDetalle =
+    await obtenerProductosCarrito(productosCarritoId);
+
+  const itemsCarrito = fusionarCarritoConDetalles(
+    productosCarritoDb,
+    productosCarritoDetalle,
+  );
 
   return (
     <div className="min-h-screen bg-slate-50/50">
@@ -24,20 +30,20 @@ export default async function CarritoPage() {
         <h1 className="text-2xl font-bold mb-8">Carrito de compras</h1>
         {/* TODO: Manejar cuando el carrito este vacio */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          <PerfumesEnCarrito productos={productosEnCarrito} />
+          <PerfumesEnCarrito productos={itemsCarrito} />
 
-          <ResumenCompra productos={productosEnCarrito} />
+          <ResumenCompra productos={itemsCarrito} />
         </div>
       </main>
     </div>
   );
 }
 
-function PerfumesEnCarrito({ productos }: { productos: PerfumeCarrito[] }) {
+function PerfumesEnCarrito({ productos }: { productos: ItemCarrito[] }) {
   return (
     <div className="lg:col-span-8 flex flex-col gap-4">
       {productos.length > 0 ? (
-        productos.map((producto: PerfumeCarrito) => (
+        productos.map((producto: ItemCarrito) => (
           <ProductInfo key={producto.id} producto={producto} />
         ))
       ) : (
@@ -47,7 +53,7 @@ function PerfumesEnCarrito({ productos }: { productos: PerfumeCarrito[] }) {
   );
 }
 
-function ResumenCompra({ productos }: { productos: PerfumeCarrito[] }) {
+function ResumenCompra({ productos }: { productos: ItemCarrito[] }) {
   const total = calcularTotal(productos);
 
   return (
@@ -71,7 +77,7 @@ function ResumenCompra({ productos }: { productos: PerfumeCarrito[] }) {
   );
 }
 
-function ProductInfo({ producto }: { producto: PerfumeCarrito }) {
+function ProductInfo({ producto }: { producto: ItemCarrito }) {
   return (
     <Card key={producto.id} className="overflow-hidden border-none shadow-sm">
       <CardContent className="p-4 md:p-6">
@@ -90,10 +96,11 @@ function ProductInfo({ producto }: { producto: PerfumeCarrito }) {
             />
 
             <div className="flex justify-between items-end mt-4">
-              {/* TODO: Remplazar por query a db */}
-              <SelectorDeCantidad cantidad={0} />{" "}
-              {/* TODO: Remplazar por query a db */}
-              <ProductPrecio precio={producto.precio} cantidad={0} />
+              <SelectorDeCantidad cantidad={producto.cantidad} />{" "}
+              <ProductPrecio
+                precio={producto.precio}
+                cantidad={producto.cantidad}
+              />
             </div>
           </div>
         </div>
@@ -205,14 +212,13 @@ function ProductPrecio({
   );
 }
 
-function ResumenProductos({ productos }: { productos: PerfumeCarrito[] }) {
+function ResumenProductos({ productos }: { productos: ItemCarrito[] }) {
   return (
     <div className="flex flex-col gap-2 text-sm">
       {productos.map((prod) => (
         <div className="flex justify-between items-start gap-2" key={prod.id}>
           <span>{`${prod.nombre} `}</span>
-          <span>{formatearPrecio(prod.precio, 0)}</span>{" "}
-          {/* TODO: Remplazar por query a db */}
+          <span>{formatearPrecio(prod.precio, prod.cantidad)}</span>{" "}
         </div>
       ))}
     </div>
@@ -236,11 +242,29 @@ function BotonContinuarCompra() {
   );
 }
 
-function calcularTotal(productos: PerfumeCarrito[]): number {
-  {
-    /* TODO: Remplazar por query a db */
-  }
-  const subtotal = productos.reduce((acc, prod) => acc + prod.precio * 0, 0);
+function calcularTotal(productos: ItemCarrito[]): number {
+  const subtotal = productos.reduce(
+    (acc, prod) => acc + prod.precio * prod.cantidad,
+    0,
+  );
   const total = subtotal;
   return total;
+}
+
+function fusionarCarritoConDetalles(
+  carritoDb: { productoId: string; cantidad: number }[],
+  productoDetalle: PerfumeCarrito[],
+): ItemCarrito[] {
+  const diccionarioCantidades = new Map(
+    carritoDb.map((item) => [item.productoId, item.cantidad]),
+  );
+
+  const carritoFusionado = productoDetalle.map((producto) => {
+    return {
+      ...producto,
+      cantidad: diccionarioCantidades.get(producto.id) || 1,
+    };
+  });
+
+  return carritoFusionado;
 }
