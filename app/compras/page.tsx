@@ -2,42 +2,56 @@ import Header from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Package, ChevronRight, CandlestickChart } from "lucide-react";
+import { Package } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { obtenerProductosComprados } from "@/lib/api";
-import { PerfumeComprado } from "@/schema/perfume.schema";
+import {
+  ItemComprado, //TODO: Quitar cuando se haga la nueva ui.
+  OrdenCompraCard,
+  OrdenCompraCardSchema,
+  OrdenDeCompraDb,
+  OrdenDeCompraDbSchema,
+  PerfumeComprado,
+} from "@/schema/perfume.schema";
+import z from "zod";
+import { obtenerComprasDelUsuario } from "@/actions/compras";
+import { formatearPrecio } from "@/lib/utils";
 
 export default async function MisComprasPage() {
-  // TODO: Cambiar por query a db
-  const obtenerIdsCompras = ["1", "2", "3"];
-  const perfumesComprados = await obtenerProductosComprados(obtenerIdsCompras);
+  const obtenerComprasDb = await obtenerComprasDelUsuario();
+
+  const obtenerComprasDbValidado = z
+    .array(OrdenDeCompraDbSchema)
+    .parse(obtenerComprasDb);
+
+  const perfumesCompradosId = obtenerIdComprados(obtenerComprasDbValidado);
+
+  const detallePerfumesComprados =
+    await obtenerProductosComprados(perfumesCompradosId);
+
+  const itemsComprados = fusionarCompradoConDetalles(
+    obtenerComprasDbValidado,
+    detallePerfumesComprados,
+  );
 
   return (
     <div className="min-h-screen bg-slate-50/50">
       <Header />
+      <main className="container mx-auto px-4 py-8 md:py-12">
+        <h1 className="text-2xl font-bold mb-8">Mis Compras</h1>
 
-      <main className="container mx-auto px-4 py-8 md:py-12 max-w-4xl">
-        <h1 className="text-2xl font-bold mb-8 text-foreground">Mis compras</h1>
-
-        <div className="flex flex-col gap-6">
-          {perfumesComprados.map((compra) => (
-            <CompraItem key={compra.id} compra={compra} />
-          ))}
-        </div>
-
-        {perfumesComprados.length === 0 && <ComprasVacias />}
+        <HistorialCompras ordenes={itemsComprados} />
       </main>
     </div>
   );
 }
 
-function CompraItem({ compra }: { compra: PerfumeComprado }) {
+function CompraItem({ compra }: { compra: ItemComprado }) {
   return (
     <div key={compra.id} className="flex flex-col gap-2">
       <span className="text-sm font-semibold text-muted-foreground ml-1">
-        {"00/00/000"}{" "}
-        {/* TODO: Cambiar por query a db para obtener fecha real de compra */}
+        {compra.fechaCompra.toLocaleDateString()}{" "}
       </span>
 
       <Card className="overflow-hidden border-none shadow-sm hover:shadow-md transition-all">
@@ -50,10 +64,10 @@ function CompraItem({ compra }: { compra: PerfumeComprado }) {
               />
 
               <ProductDetalles
-                estado={"---"} // TODO: Cambiar por query a db para obtener cantidad real de compra
+                estado={compra.estado}
                 nombre={compra.nombre}
                 vendedor={compra.vendedor}
-                cantidad={0} // TODO: Cambiar por query a db para obtener cantidad real de compra
+                cantidad={compra.cantidad}
               />
             </div>
 
@@ -143,6 +157,118 @@ function ComprasVacias() {
       <Button>
         <Link href="/">Empezar a comprar</Link>
       </Button>
+    </div>
+  );
+}
+
+type OrdenesDeCompra = {
+  id: string;
+  estado: string;
+  total: number;
+  createdAt: Date;
+  items: {
+    id: string;
+    productoId: string;
+    precio: number;
+    cantidad: number;
+  }[];
+}[];
+
+function fusionarCompradoConDetalles(
+  compradoDb: OrdenDeCompraDb[],
+  productoDetalle: PerfumeComprado[],
+): OrdenCompraCard[] {
+  const detallesMap = new Map(
+    productoDetalle.map((producto) => [producto.id, producto]),
+  );
+
+  const historialFusionado = compradoDb.map((orden) => {
+    return {
+      id: orden.id,
+      fecha: orden.createdAt,
+      estado: orden.estado,
+      total: orden.total,
+      items: orden.items.map((item) => {
+        const detalleCatálogo = detallesMap.get(item.productoId);
+
+        return {
+          id: item.id,
+          productoId: item.productoId,
+          nombre: detalleCatálogo?.nombre,
+          vendedor: detalleCatálogo?.vendedor,
+          imagenUrl: detalleCatálogo?.imagenUrl,
+          precioHistorico: item.precio,
+          cantidad: item.cantidad,
+        };
+      }),
+    };
+  });
+
+  return z.array(OrdenCompraCardSchema).parse(historialFusionado);
+}
+
+function obtenerIdComprados(comprasDb: OrdenDeCompraDb[]): string[] {
+  return comprasDb.flatMap((orden) =>
+    orden.items.map((item) => item.productoId),
+  );
+}
+
+function HistorialCompras({ ordenes }: { ordenes: OrdenCompraCard[] }) {
+  return (
+    <div className="flex flex-col gap-6">
+      {ordenes.map((orden) => (
+        /* TARJETA DE LA ORDEN DE COMPRA */
+        <div
+          key={orden.id}
+          className="bg-white border rounded-xl shadow-sm overflow-hidden"
+        >
+          {/* Encabezado de la Orden */}
+          <div className="bg-slate-50 p-4 border-b flex flex-wrap justify-between items-center gap-4">
+            <div>
+              <p className="text-xs text-slate-400 font-mono">
+                ORDEN: {orden.id}
+              </p>
+              <p className="text-sm text-slate-600">
+                Comprado el {orden.fecha.toLocaleDateString()}
+              </p>
+            </div>
+            <div className="flex items-center gap-4">
+              <span className="text-sm font-medium px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700">
+                {orden.estado}
+              </span>
+              <p className="text-lg font-bold text-foreground">
+                Total: {formatearPrecio(orden.total)}
+              </p>
+            </div>
+          </div>
+
+          {/* LISTA DE ITEMS ADENTRO DE ESTA ORDEN */}
+          <div className="p-4 divide-y">
+            {orden.items.map((item) => (
+              <div
+                key={item.id}
+                className="py-3 flex justify-between items-center first:pt-0 last:pb-0"
+              >
+                <div className="flex gap-4 items-center">
+                  {/* Aquí va tu componente <Image src={item.imagenUrl} /> */}
+                  <div>
+                    <h4 className="font-medium text-sm">{item.nombre}</h4>
+                    <p className="text-xs text-slate-400">
+                      Vendedor: {item.vendedor}
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      Cantidad: {item.cantidad}
+                    </p>
+                  </div>
+                </div>
+                <span className="text-sm font-semibold">
+                  {formatearPrecio(item.precioHistorico * item.cantidad)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
