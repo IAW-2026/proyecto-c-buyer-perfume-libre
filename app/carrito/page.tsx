@@ -1,5 +1,5 @@
 import { obtenerCarritoDelUsuario } from "@/actions/carrito";
-import { CarritoInteractivo } from "@/components/carrito/carritoWrapper";
+import { CarritoWrapper } from "@/components/carrito/carritoWrapper";
 import Header from "@/components/header";
 import { obtenerProductosCarrito } from "@/lib/api";
 import { ItemCarrito, PerfumeCarrito } from "@/schema/perfume.schema";
@@ -37,7 +37,7 @@ export default async function CarritoPage() {
       <main className="container mx-auto px-4 py-8 md:py-12">
         <h1 className="text-2xl font-bold mb-8">Carrito de compras</h1>
 
-        <CarritoInteractivo productosIniciales={itemsCarrito} />
+        <CarritoWrapper productosIniciales={itemsCarrito} />
       </main>
     </div>
   );
