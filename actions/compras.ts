@@ -136,3 +136,20 @@ export async function comprarProductos(
     throw new Error("No se pudo procesar la compra");
   }
 }
+
+export async function obtenerDetalleCompra(ordenId: string) {
+  const { userId } = await auth();
+
+  if (!userId) return null;
+
+  const orden = await prisma.ordenCompra.findFirst({
+    where: { id: ordenId, usuarioId: userId },
+    include: {
+      items: true,
+    },
+  });
+
+  if (!orden) return null;
+
+  return orden;
+}
