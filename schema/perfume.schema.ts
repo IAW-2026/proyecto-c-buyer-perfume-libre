@@ -8,6 +8,15 @@ export const EstadosOrden = z.enum([
   "Cancelado",
 ]);
 
+export type EstadoOrdenType = z.infer<typeof EstadosOrden>;
+
+export const COLOR_ESTADOS: Record<EstadoOrdenType, string> = {
+  "En proceso": "bg-amber-100 text-amber-800 hover:bg-amber-100",
+  Enviado: "bg-blue-100 text-blue-800 hover:bg-blue-100",
+  Entregado: "bg-green-100 text-green-800 hover:bg-green-100",
+  Cancelado: "bg-red-100 text-red-800 hover:bg-red-100",
+};
+
 // Esquemas
 export const PerfumeSchema = z.object({
   id: z.string().min(1, "El ID no puede estar vacío"),
