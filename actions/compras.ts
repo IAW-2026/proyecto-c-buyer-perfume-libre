@@ -144,12 +144,44 @@ export async function obtenerDetalleCompra(ordenId: string) {
 
   const orden = await prisma.ordenCompra.findFirst({
     where: { id: ordenId, usuarioId: userId },
-    include: {
-      items: true,
+    select: {
+      id: true,
+      estado: true,
+      createdAt: true,
+      envioId: true,
+      pagoId: true,
     },
   });
 
   if (!orden) return null;
 
   return orden;
+}
+
+export async function obtenerItemDeOrden(ordenId: string, itemId: string) {
+  const { userId } = await auth();
+  if (!userId) return null;
+
+  const itemOrden = await prisma.itemOrdenCompra.findFirst({
+    where: {
+      id: itemId,
+      ordenCompraId: ordenId,
+      ordenCompra: {
+        usuarioId: userId,
+      },
+    },
+    include: {
+      ordenCompra: {
+        select: {
+          usuarioId: true,
+          pagoId: true,
+          envioId: true,
+          estado: true,
+          createdAt: true,
+        },
+      },
+    },
+  });
+
+  return itemOrden;
 }
