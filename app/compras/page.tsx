@@ -7,9 +7,9 @@ import { format } from "date-fns";
 import { obtenerProductosComprados } from "@/lib/api";
 import {
   COLOR_ESTADOS,
-  EstadosOrden,
-  OrdenCompraCard,
-  OrdenCompraCardSchema,
+  EstadoOrdenType,
+  ItemOrdenDetalle,
+  ItemOrdenDetalleSchema,
   OrdenDeCompraDb,
   OrdenDeCompraDbSchema,
   PerfumeComprado,
@@ -30,7 +30,7 @@ export default async function MisComprasPage() {
         {/*TODO: Implementar skeleton*/}
         <Suspense fallback={<p>Cargando historial de compras...</p>}>
           {itemsComprados ? (
-            <HistorialCompras ordenes={itemsComprados} />
+            <HistorialCompras items={itemsComprados} />
           ) : (
             <EstadoVacioCompras />
           )}
@@ -62,71 +62,70 @@ function EstadoVacioCompras() {
   );
 }
 
-export function HistorialCompras({ ordenes }: { ordenes: OrdenCompraCard[] }) {
+export function HistorialCompras({ items }: { items: ItemOrdenDetalle[] }) {
   return (
     <div className="flex flex-col gap-6">
       <h1 className="text-2xl font-bold mb-8">Mis Compras</h1>
-      {ordenes.map((orden) => (
+
+      {items.map((item) => (
         <div
-          key={orden.id}
-          className="bg-white border rounded-xl shadow-sm overflow-hidden flex flex-col"
+          key={item.itemId}
+          className="bg-white border rounded-xl shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-shadow"
         >
-          <HeaderOrden orden={orden} />
+          <HeaderCompra fecha={item.fecha} estado={item.estado} />
 
-          <ListaProductos orden={orden} />
+          <ProductoCompra item={item} />
 
-          <FooterAcciones ordenId={orden.id} />
+          <FooterAcciones ordenId={item.ordenId} />
         </div>
       ))}
     </div>
   );
 }
 
-function HeaderOrden({ orden }: { orden: OrdenCompraCard }) {
+function HeaderCompra({
+  fecha,
+  estado,
+}: {
+  fecha: Date;
+  estado: EstadoOrdenType;
+}) {
   return (
-    <div className="bg-slate-50 border-b p-4 md:px-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="bg-slate-50/50 border-b p-4 md:px-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
       <div>
         <p className="text-sm font-semibold text-slate-900">
-          {format(orden.fecha, "d 'de' MMMM 'de' yyyy", { locale: es })}
+          {format(fecha, "d 'de' MMMM 'de' yyyy", { locale: es })}
         </p>
       </div>
 
       <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
-        <Badge className={COLOR_ESTADOS[orden.estado]} variant="secondary">
-          {orden.estado}
+        <Badge className={COLOR_ESTADOS[estado]} variant="secondary">
+          {estado}
         </Badge>
       </div>
     </div>
   );
 }
 
-function ListaProductos({ orden }: { orden: OrdenCompraCard }) {
+function ProductoCompra({ item }: { item: ItemOrdenDetalle }) {
   return (
-    <div className="p-4 md:px-6 divide-y">
-      {orden.items.map((item) => (
-        <div
-          key={item.id}
-          className="py-4 first:pt-2 last:pb-2 flex gap-4 items-center"
-        >
-          <div className="relative h-20 w-20 shrink-0 bg-slate-100 rounded-md border overflow-hidden">
-            <Image
-              src={item.imagenUrl}
-              alt={item.nombre}
-              fill
-              sizes="80px"
-              className="object-cover"
-            />
-          </div>
+    <div className="p-4 md:px-6 flex gap-4 items-center">
+      <div className="relative h-20 w-20 shrink-0 bg-slate-100 rounded-md border overflow-hidden">
+        <Image
+          src={item.imagenUrl}
+          alt={item.nombre}
+          fill
+          sizes="80px"
+          className="object-cover"
+        />
+      </div>
 
-          <DetallesProducto
-            nombre={item.nombre}
-            vendedor={item.vendedor}
-            cantidad={item.cantidad}
-            precioHistorico={item.precioHistorico}
-            imagenUrl={item.imagenUrl}
-          />
-        </div>
-      ))}
+      <DetallesProducto
+        nombre={item.nombre}
+        vendedor={item.vendedor}
+        cantidad={item.cantidad}
+        precioHistorico={item.precioHistorico}
+      />
     </div>
   );
 }
@@ -136,13 +135,11 @@ function DetallesProducto({
   vendedor,
   cantidad,
   precioHistorico,
-  imagenUrl,
 }: {
   nombre: string;
   vendedor: string;
   cantidad: number;
   precioHistorico: number;
-  imagenUrl: string;
 }) {
   return (
     <div className="flex flex-col grow">
@@ -164,11 +161,43 @@ function DetallesProducto({
 function FooterAcciones({ ordenId }: { ordenId: string }) {
   return (
     <div className="border-t p-4 md:px-6 flex justify-end bg-white">
-      <Button variant="outline">
+      <Button variant="outline" size="sm">
         <Link href={`/compras/${ordenId}`}>Ver detalle de la compra</Link>
       </Button>
     </div>
   );
+}
+
+export function fusionarCompradoConDetalles(
+  compradoDb: OrdenDeCompraDb[],
+  productoDetalle: PerfumeComprado[],
+): ItemOrdenDetalle[] {
+  const detallesMap = new Map(
+    productoDetalle.map((producto) => [producto.id, producto]),
+  );
+
+  const historialPlano = compradoDb.flatMap((orden) => {
+    return orden.items.map((item) => {
+      const detalleCatálogo = detallesMap.get(item.productoId);
+
+      return {
+        itemId: item.id,
+        ordenId: orden.id,
+        fecha: orden.createdAt,
+        estado: orden.estado,
+        productoId: item.productoId,
+        nombre: detalleCatálogo?.nombre ?? "Producto no disponible",
+        vendedor: detalleCatálogo?.vendedor ?? "Desconocido",
+        imagenUrl: detalleCatálogo?.imagenUrl ?? "/placeholder-perfume.jpg",
+        precioHistorico: item.precio,
+        cantidad: item.cantidad,
+      };
+    });
+  });
+
+  historialPlano.sort((a, b) => b.fecha.getTime() - a.fecha.getTime());
+
+  return z.array(ItemOrdenDetalleSchema).parse(historialPlano);
 }
 
 async function obtenerHistorialDelUsuario() {
@@ -191,39 +220,6 @@ async function obtenerHistorialDelUsuario() {
     obtenerComprasDbValidado,
     detallePerfumesComprados,
   );
-}
-
-function fusionarCompradoConDetalles(
-  compradoDb: OrdenDeCompraDb[],
-  productoDetalle: PerfumeComprado[],
-): OrdenCompraCard[] {
-  const detallesMap = new Map(
-    productoDetalle.map((producto) => [producto.id, producto]),
-  );
-
-  const historialFusionado = compradoDb.map((orden) => {
-    return {
-      id: orden.id,
-      fecha: orden.createdAt,
-      estado: orden.estado,
-      total: orden.total,
-      items: orden.items.map((item) => {
-        const detalleCatálogo = detallesMap.get(item.productoId);
-
-        return {
-          id: item.id,
-          productoId: item.productoId,
-          nombre: detalleCatálogo?.nombre,
-          vendedor: detalleCatálogo?.vendedor,
-          imagenUrl: detalleCatálogo?.imagenUrl,
-          precioHistorico: item.precio,
-          cantidad: item.cantidad,
-        };
-      }),
-    };
-  });
-
-  return z.array(OrdenCompraCardSchema).parse(historialFusionado);
 }
 
 function obtenerIdComprados(comprasDb: OrdenDeCompraDb[]): string[] {
