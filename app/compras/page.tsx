@@ -125,7 +125,9 @@ function ProductoCompra({ item }: { item: ItemOrdenDetalle }) {
       />
 
       <Button variant="outline" size="sm" className="ml-auto shrink-0">
-        <Link href={`/compras/${item.ordenId}`}>Ver detalle de la compra</Link>
+        <Link href={`/compras/${item.ordenId}?itemId=${item.itemId}`}>
+          Ver detalle de la compra
+        </Link>
       </Button>
     </div>
   );
