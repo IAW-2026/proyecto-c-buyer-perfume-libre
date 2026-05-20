@@ -75,8 +75,6 @@ export function HistorialCompras({ items }: { items: ItemOrdenDetalle[] }) {
           <HeaderCompra fecha={item.fecha} estado={item.estado} />
 
           <ProductoCompra item={item} />
-
-          <FooterAcciones ordenId={item.ordenId} />
         </div>
       ))}
     </div>
@@ -124,22 +122,22 @@ function ProductoCompra({ item }: { item: ItemOrdenDetalle }) {
         nombre={item.nombre}
         vendedor={item.vendedor}
         cantidad={item.cantidad}
-        precioHistorico={item.precioHistorico}
       />
+
+      <Button variant="outline" size="sm" className="ml-auto shrink-0">
+        <Link href={`/compras/${item.ordenId}`}>Ver detalle de la compra</Link>
+      </Button>
     </div>
   );
 }
-
 function DetallesProducto({
   nombre,
   vendedor,
   cantidad,
-  precioHistorico,
 }: {
   nombre: string;
   vendedor: string;
   cantidad: number;
-  precioHistorico: number;
 }) {
   return (
     <div className="flex flex-col grow">
@@ -150,25 +148,13 @@ function DetallesProducto({
         Vendedor: <span className="font-medium">{vendedor}</span>
       </p>
       <p className="text-sm text-slate-500 mt-0.5">
-        Cantidad: {cantidad}
-        <span className="mx-2 text-slate-300">|</span>
-        {formatearPrecio(precioHistorico)} c/u
+        {cantidad > 1 ? `Unidades: ${cantidad}` : `Unidad: ${cantidad}`}
       </p>
     </div>
   );
 }
 
-function FooterAcciones({ ordenId }: { ordenId: string }) {
-  return (
-    <div className="border-t p-4 md:px-6 flex justify-end bg-white">
-      <Button variant="outline" size="sm">
-        <Link href={`/compras/${ordenId}`}>Ver detalle de la compra</Link>
-      </Button>
-    </div>
-  );
-}
-
-export function fusionarCompradoConDetalles(
+function fusionarCompradoConDetalles(
   compradoDb: OrdenDeCompraDb[],
   productoDetalle: PerfumeComprado[],
 ): ItemOrdenDetalle[] {
