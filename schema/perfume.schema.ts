@@ -17,7 +17,7 @@ export const COLOR_ESTADOS: Record<EstadoOrdenType, string> = {
   Cancelado: "bg-red-100 text-red-800 hover:bg-red-100",
 };
 
-// Esquemas
+// Esquema principal del perfume, con toda la información detallada
 export const PerfumeSchema = z.object({
   id: z.string().min(1, "El ID no puede estar vacío"),
   nombre: z.string().min(1, "El nombre no puede estar vacío"),
@@ -39,6 +39,7 @@ export const PerfumeSchema = z.object({
   genero: z.enum(["Hombre", "Mujer", "Unisex"]),
 });
 
+// Esquema usado en la pag principal para mostrar los perfumes
 export const PerfumeCardSchema = PerfumeSchema.pick({
   id: true,
   nombre: true,
@@ -55,6 +56,7 @@ export const PerfumeCardSchema = PerfumeSchema.pick({
   imagenUrl: datos.imagenesUrl[0],
 }));
 
+// Esquema usado en /favoritos para mostrar los perfumes que el usuario marcó como favoritos
 export const PerfumeFavoritoSchema = PerfumeSchema.pick({
   id: true,
   nombre: true,
@@ -69,6 +71,7 @@ export const PerfumeFavoritoSchema = PerfumeSchema.pick({
   imagenUrl: datos.imagenesUrl[0],
 }));
 
+// Esquema usado en /carrito para mostrar los productos que el usuario agregó al carrito
 export const PerfumeCarritoSchema = PerfumeSchema.pick({
   id: true,
   nombre: true,
@@ -83,6 +86,7 @@ export const PerfumeCarritoSchema = PerfumeSchema.pick({
   precio: datos.precio,
 }));
 
+// Esquema usado en /compras para mostrar el historial de compras del usuario
 export const PerfumeCompradoSchema = PerfumeSchema.pick({
   id: true,
   nombre: true,
@@ -95,6 +99,7 @@ export const PerfumeCompradoSchema = PerfumeSchema.pick({
   imagenUrl: datos.imagenesUrl[0],
 }));
 
+// Esquema usado en /carrito para validar los items del carrito
 export const ItemCarritoSchema = z.intersection(
   PerfumeCarritoSchema,
   z.object({
@@ -102,15 +107,7 @@ export const ItemCarritoSchema = z.intersection(
   }),
 );
 
-export const ItemCompradoSchema = z.intersection(
-  PerfumeCompradoSchema,
-  z.object({
-    cantidad: z.number().int().min(1).positive(),
-    fechaCompra: z.date(),
-    estado: EstadosOrden,
-  }),
-);
-
+// Esquema usado en /compras para validar la estructura de las ordenes de compra obtenidas desde la base de datos
 export const OrdenDeCompraDbSchema = z.object({
   id: z.string(),
   estado: EstadosOrden,
@@ -126,6 +123,7 @@ export const OrdenDeCompraDbSchema = z.object({
   ),
 });
 
+// Esquema usado en /compras para mostrar el historial de compras del usuario
 export const ItemOrdenDetalleSchema = z.object({
   itemId: z.string(),
   productoId: z.string(),
@@ -136,12 +134,36 @@ export const ItemOrdenDetalleSchema = z.object({
   cantidad: z.number().int().positive().min(1),
 });
 
+// Esquema usado en /compras para mostrar el historial de compras del usuario, agrupando por orden de compra
 export const OrdenAgrupadaSchema = z.object({
   ordenId: z.string(),
   fecha: z.date(),
   estado: EstadosOrden,
   productosComprados: z.number().int().positive().min(1),
   items: z.array(ItemOrdenDetalleSchema),
+});
+
+export const ItemDeOrdenDetalladoSchema = z.object({
+  idItem: z.string(),
+  ordenCompraId: z.string(),
+  productoId: z.string(),
+  precio: z.number().int().positive(),
+  cantidad: z.number().int().positive().min(1),
+  nombreProducto: z.string(),
+  vendedor: z.string(),
+  imagenUrl: z.string(),
+  marca: z.string(),
+  tamaño: z.number().int().positive(),
+  ordenCompra: z.object({
+    usuarioId: z.string(),
+    pagoId: z.string(),
+    envioId: z.string(),
+    estado: EstadosOrden,
+    costoEnvio: z.number().int().positive(),
+    total: z.number().int().positive(),
+    itemsComprados: z.number().int().positive().min(1),
+    createdAt: z.date(),
+  }),
 });
 
 // Esquemas de validacion para objetos individuales
@@ -151,10 +173,10 @@ export type PerfumeFavorito = z.infer<typeof PerfumeFavoritoSchema>;
 export type PerfumeCarrito = z.infer<typeof PerfumeCarritoSchema>;
 export type PerfumeComprado = z.infer<typeof PerfumeCompradoSchema>;
 export type ItemCarrito = z.infer<typeof ItemCarritoSchema>;
-export type ItemComprado = z.infer<typeof ItemCompradoSchema>;
 export type OrdenDeCompraDb = z.infer<typeof OrdenDeCompraDbSchema>;
 export type ItemOrdenDetalle = z.infer<typeof ItemOrdenDetalleSchema>;
 export type OrdenAgrupada = z.infer<typeof OrdenAgrupadaSchema>;
+export type ItemDeOrdenDetallado = z.infer<typeof ItemDeOrdenDetalladoSchema>;
 
 // Esquemas de validación para arrays
 export const PerfumesSchema = z.array(PerfumeSchema);
@@ -163,5 +185,4 @@ export const PerfumeFavoritosSchema = z.array(PerfumeFavoritoSchema);
 export const PerfumeCarritosSchema = z.array(PerfumeCarritoSchema);
 export const PerfumeCompradosSchema = z.array(PerfumeCompradoSchema);
 export const ItemsCarritoSchema = z.array(ItemCarritoSchema);
-export const ItemsCompradosSchema = z.array(ItemCompradoSchema);
 export const OrdenesDeCompraDbSchema = z.array(OrdenDeCompraDbSchema);

@@ -1,6 +1,8 @@
-import { obtenerItemDeOrden } from "@/actions/compras";
+import {
+  obtenerCantidadDeProductosComprados,
+  obtenerItemDeOrden,
+} from "@/actions/compras";
 import Header from "@/components/header";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -8,9 +10,9 @@ import { formatearPrecio } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import {
-  COLOR_ESTADOS,
   EstadoOrdenType,
   EstadosOrden,
+  ItemDeOrdenDetallado,
 } from "@/schema/perfume.schema";
 import { format } from "date-fns/format";
 import { es } from "date-fns/locale";
@@ -66,7 +68,7 @@ export default async function DetalleCompraPage({
   );
 }
 
-function DetalleCompra({ orden }: { orden: ItemDeOrden }) {
+function DetalleCompra({ orden }: { orden: ItemDeOrdenDetallado }) {
   return (
     <div className="space-y-6">
       <Button
@@ -89,7 +91,7 @@ function DetalleCompra({ orden }: { orden: ItemDeOrden }) {
             Orden #{orden.ordenCompraId.toUpperCase()}
           </p>
           <p className="text-xs text-slate-400 font-mono mt-1">
-            item #{orden.id.toUpperCase()}
+            item #{orden.idItem.toUpperCase()}
           </p>
         </div>
       </div>
@@ -99,7 +101,7 @@ function DetalleCompra({ orden }: { orden: ItemDeOrden }) {
   );
 }
 
-function PanelPrincipal({ orden }: { orden: ItemDeOrden }) {
+function PanelPrincipal({ orden }: { orden: ItemDeOrdenDetallado }) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div className="lg:col-span-2 space-y-6">
@@ -111,7 +113,7 @@ function PanelPrincipal({ orden }: { orden: ItemDeOrden }) {
         {orden.ordenCompra.estado === "En proceso" && (
           <SeccionResenas
             productoId={orden.productoId}
-            nombreProducto={orden.nombre}
+            nombreProducto={orden.nombreProducto}
             vendedor={orden.vendedor}
             usuarioId={orden.ordenCompra.usuarioId}
           />
@@ -123,7 +125,7 @@ function PanelPrincipal({ orden }: { orden: ItemDeOrden }) {
   );
 }
 
-function CardSeguimiento({ orden }: { orden: ItemDeOrden }) {
+function CardSeguimiento({ orden }: { orden: ItemDeOrdenDetallado }) {
   return (
     <Card className="overflow-hidden border-slate-200/80 shadow-sm">
       <CardHeader className="bg-slate-50/50 pb-4 border-b">
@@ -175,7 +177,7 @@ function HistorialEnvio() {
   );
 }
 
-function ProductCard({ orden }: { orden: ItemDeOrden }) {
+function ProductCard({ orden }: { orden: ItemDeOrdenDetallado }) {
   return (
     <Card className="border-slate-200/80 shadow-sm">
       <CardHeader>
@@ -188,7 +190,7 @@ function ProductCard({ orden }: { orden: ItemDeOrden }) {
           <div className="relative h-20 w-20 shrink-0 bg-slate-50 rounded-lg border border-slate-100 overflow-hidden">
             <Image
               src={orden.imagenUrl}
-              alt={orden.nombre}
+              alt={orden.nombreProducto}
               fill
               sizes="80px"
               className="object-cover"
@@ -197,7 +199,7 @@ function ProductCard({ orden }: { orden: ItemDeOrden }) {
 
           <div className="grow min-w-0">
             <h4 className="font-medium text-slate-900 line-clamp-1">
-              {orden.nombre}
+              {orden.nombreProducto}
             </h4>
             <p className="text-xs text-slate-500 mt-1">
               Vendedor:{" "}
@@ -216,7 +218,7 @@ function ProductCard({ orden }: { orden: ItemDeOrden }) {
   );
 }
 
-function ResumenPago({ orden }: { orden: ItemDeOrden }) {
+function ResumenPago({ orden }: { orden: ItemDeOrdenDetallado }) {
   return (
     <div className="space-y-6">
       <Card className="border-slate-200/80 shadow-sm sticky top-6">
@@ -228,15 +230,24 @@ function ResumenPago({ orden }: { orden: ItemDeOrden }) {
         <CardContent className="space-y-4">
           <div className="flex justify-between text-sm text-slate-600">
             <span>
-              Productos ({orden.cantidad}{" "}
-              {orden.cantidad > 1 ? "unidades" : "unidad"})
+              {orden.ordenCompra.itemsComprados > 1
+                ? `productos (${orden.ordenCompra.itemsComprados})`
+                : "producto"}
             </span>
-            <span>{formatearPrecio(orden.precio * orden.cantidad)}</span>
+            <span>
+              {formatearPrecio(
+                orden.ordenCompra.total - orden.ordenCompra.costoEnvio,
+              )}
+            </span>
           </div>
 
           <div className="flex justify-between text-sm text-slate-600">
             <span>Envío</span>
-            <span className="text-green-600 font-medium">Gratis</span>
+            {orden.ordenCompra.costoEnvio > 0 ? (
+              <span>{formatearPrecio(orden.ordenCompra.costoEnvio)}</span>
+            ) : (
+              <span className="text-green-600 font-medium">Gratis</span>
+            )}
           </div>
 
           <Separator className="my-2" />
@@ -244,7 +255,7 @@ function ResumenPago({ orden }: { orden: ItemDeOrden }) {
           <div className="flex justify-between items-baseline">
             <span className="font-bold text-slate-900">Total pagado</span>
             <span className="text-xl font-extrabold text-slate-900">
-              {formatearPrecio(orden.precio * orden.cantidad)}
+              {formatearPrecio(orden.ordenCompra.total)}
             </span>
           </div>
 
@@ -269,7 +280,8 @@ function ResumenPago({ orden }: { orden: ItemDeOrden }) {
             <div className="flex items-center gap-2 text-xs text-slate-500">
               <CreditCard className="h-3.5 w-3.5 text-slate-400" />
               <span className="truncate">
-                ID de Pago: <span className="font-mono">{orden.id}</span>
+                ID de Pago:{" "}
+                <span className="font-mono">{orden.ordenCompra.pagoId}</span>
               </span>
             </div>
           </div>
@@ -282,8 +294,9 @@ function ResumenPago({ orden }: { orden: ItemDeOrden }) {
 async function obtenerItemOrden(
   ordenId: string,
   itemId: string,
-): Promise<ItemDeOrden | null> {
+): Promise<ItemDeOrdenDetallado | null> {
   const ordenDb = await obtenerItemDeOrden(ordenId, itemId);
+  const itemsComprados = await obtenerCantidadDeProductosComprados(ordenId);
 
   if (!ordenDb) {
     return null;
@@ -296,52 +309,20 @@ async function obtenerItemOrden(
   }
 
   const estadoValidado = EstadosOrden.parse(ordenDb.ordenCompra.estado);
+  const { id: idItem, ...restoDeOrdenDb } = ordenDb;
 
   return {
-    ...ordenDb,
+    ...restoDeOrdenDb,
+    idItem,
     ordenCompra: {
       ...ordenDb.ordenCompra,
       estado: estadoValidado,
+      itemsComprados: itemsComprados || 1,
     },
-    nombre: productoDetalle.nombre,
+    nombreProducto: productoDetalle.nombre,
     vendedor: productoDetalle.vendedor,
     imagenUrl: productoDetalle.imagenesUrl[0],
     marca: productoDetalle.marca,
     tamaño: productoDetalle.tamaño,
   };
 }
-
-export type ItemDeOrdenDb = {
-  id: string;
-  ordenCompraId: string;
-  productoId: string;
-  precio: number;
-  cantidad: number;
-  ordenCompra: {
-    pagoId: string;
-    envioId: string;
-    estado: EstadoOrdenType;
-    createdAt: Date;
-    usuarioId: string;
-  };
-};
-
-export type ItemDeOrden = {
-  id: string;
-  ordenCompraId: string;
-  productoId: string;
-  precio: number;
-  cantidad: number;
-  ordenCompra: {
-    usuarioId: string;
-    pagoId: string;
-    envioId: string;
-    estado: EstadoOrdenType;
-    createdAt: Date;
-  };
-  nombre: string;
-  vendedor: string;
-  imagenUrl: string;
-  marca: string;
-  tamaño: number;
-};

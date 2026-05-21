@@ -234,7 +234,7 @@ function fusionarCompradoConDetalles(
     };
   });
 
-  return z.array(OrdenAgrupadaSchema).parse(historialAgrupado);
+  return historialAgrupado;
 }
 
 async function obtenerHistorialDelUsuario() {
