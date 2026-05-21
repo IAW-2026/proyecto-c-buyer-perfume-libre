@@ -26,7 +26,7 @@ export const PerfumeSchema = z.object({
     .number()
     .int("El tamaño debe ser un número entero")
     .positive("El tamaño no puede ser negativo y debe estar en ml"),
-  precio: z.number().positive("El precio debe ser mayor a 0"),
+  precio: z.number().int().positive("El precio debe ser mayor a 0"),
   imagenesUrl: z
     .array(z.string().url("Debe ser una URL válida"))
     .min(1, "El perfume debe tener al menos una imagen"),
@@ -114,39 +114,34 @@ export const ItemCompradoSchema = z.intersection(
 export const OrdenDeCompraDbSchema = z.object({
   id: z.string(),
   estado: EstadosOrden,
-  total: z.number(),
+  total: z.number().int().positive(),
   createdAt: z.date(),
   items: z.array(
     z.object({
       id: z.string(),
       productoId: z.string(),
-      precio: z.number(),
+      precio: z.number().int().positive(),
       cantidad: z.number().int().positive().min(1),
     }),
   ),
 });
 
-export const OrdenItemDetalleSchema = z.object({
-  id: z.string(),
+export const ItemOrdenDetalleSchema = z.object({
+  itemId: z.string(),
   productoId: z.string(),
   nombre: z.string(),
   vendedor: z.string(),
   imagenUrl: z.string(),
-  precioHistorico: z.number(),
+  precioHistorico: z.number().int().positive(),
   cantidad: z.number().int().positive().min(1),
 });
 
-export const ItemOrdenDetalleSchema = z.object({
-  itemId: z.string(),
+export const OrdenAgrupadaSchema = z.object({
   ordenId: z.string(),
   fecha: z.date(),
   estado: EstadosOrden,
-  productoId: z.string(),
-  nombre: z.string(),
-  vendedor: z.string(),
-  imagenUrl: z.string(),
-  precioHistorico: z.number(),
-  cantidad: z.number().int().positive(),
+  productosComprados: z.number().int().positive().min(1),
+  items: z.array(ItemOrdenDetalleSchema),
 });
 
 // Esquemas de validacion para objetos individuales
@@ -157,9 +152,9 @@ export type PerfumeCarrito = z.infer<typeof PerfumeCarritoSchema>;
 export type PerfumeComprado = z.infer<typeof PerfumeCompradoSchema>;
 export type ItemCarrito = z.infer<typeof ItemCarritoSchema>;
 export type ItemComprado = z.infer<typeof ItemCompradoSchema>;
-export type OrdenItemDetalle = z.infer<typeof OrdenItemDetalleSchema>;
 export type OrdenDeCompraDb = z.infer<typeof OrdenDeCompraDbSchema>;
 export type ItemOrdenDetalle = z.infer<typeof ItemOrdenDetalleSchema>;
+export type OrdenAgrupada = z.infer<typeof OrdenAgrupadaSchema>;
 
 // Esquemas de validación para arrays
 export const PerfumesSchema = z.array(PerfumeSchema);

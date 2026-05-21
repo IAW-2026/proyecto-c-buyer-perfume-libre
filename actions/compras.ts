@@ -104,12 +104,14 @@ export async function comprarProductos(
 
     // Logica provisional para simular la compra
     const randomId = () => Math.random().toString(36).substring(7);
-
+    const precioEnvio = () => Math.floor(Math.random() * 25); // TODO: Cambiar por fetch
     const itemOrden = itemsCarrito.map((item) => ({
       productoId: item.id,
       precio: item.precio,
       cantidad: item.cantidad,
     }));
+
+    const costoEnvio = precioEnvio();
 
     const nuevaOrden = await prisma.ordenCompra.create({
       data: {
@@ -117,8 +119,8 @@ export async function comprarProductos(
         pagoId: `pago_id_${randomId()}`,
         envioId: `envio_id_${randomId()}`,
         estado: "En proceso",
-        total: total,
-
+        total: total + costoEnvio,
+        costoEnvio: costoEnvio,
         items: {
           create: itemOrden,
         },
@@ -178,10 +180,31 @@ export async function obtenerItemDeOrden(ordenId: string, itemId: string) {
           envioId: true,
           estado: true,
           createdAt: true,
+          costoEnvio: true,
+          total: true,
         },
       },
     },
   });
 
   return itemOrden;
+}
+
+export async function obtenerCantidadDeProductosComprados(ordenId: string) {
+  const { userId } = await auth();
+  if (!userId) return null;
+
+  const cantidadComprados = await prisma.itemOrdenCompra.aggregate({
+    where: {
+      ordenCompraId: ordenId,
+      ordenCompra: {
+        usuarioId: userId,
+      },
+    },
+    _sum: {
+      cantidad: true,
+    },
+  });
+
+  return cantidadComprados._sum.cantidad;
 }
