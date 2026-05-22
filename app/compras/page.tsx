@@ -10,7 +10,6 @@ import {
   EstadoOrdenType,
   ItemOrdenDetalle,
   OrdenAgrupada,
-  OrdenAgrupadaSchema,
   OrdenDeCompraDb,
   OrdenDeCompraDbSchema,
   PerfumeComprado,
@@ -19,6 +18,9 @@ import z from "zod";
 import { obtenerComprasDelUsuario } from "@/actions/compras";
 import { es } from "date-fns/locale";
 import { Suspense } from "react";
+
+// TODO: Quitar al agregar skeleton
+export const dynamic = "force-dynamic";
 
 export default async function MisComprasPage() {
   const itemsComprados = await obtenerHistorialDelUsuario();
