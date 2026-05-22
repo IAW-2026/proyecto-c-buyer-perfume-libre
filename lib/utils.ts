@@ -16,6 +16,14 @@ export function generarUrl(nombre: string, id: string): string {
   return `${auxnombre}-${id}`;
 }
 
-export function formatearPrecio(precio: number, cantidad: number = 1): string {
-  return `$${(precio * cantidad).toLocaleString()}`;
+export function formatearPrecio(
+  centavos: number,
+  cantidad: number = 1,
+): string {
+  console.log({ centavos, cantidad });
+  const pesos = (centavos * cantidad) / 100;
+  return new Intl.NumberFormat("es-AR", {
+    style: "currency",
+    currency: "ARS",
+  }).format(pesos);
 }

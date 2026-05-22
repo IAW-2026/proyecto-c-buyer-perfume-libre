@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Header from "@/components/header";
 import CalificacionEstrellas from "@/components/calificacionEstrellas";
-import { generarUrl } from "@/lib/utils";
+import { formatearPrecio, generarUrl } from "@/lib/utils";
 import { notFound, redirect } from "next/dist/client/components/navigation";
 import { obtenerDetallePerfume } from "@/lib/api";
 import { Perfume } from "@/schema/perfume.schema";
@@ -180,7 +180,7 @@ function ProductPrecio({
   return (
     <div className="flex flex-col gap-2 py-4">
       <span className="text-5xl font-bold tracking-tight bg-linear-to-r from-primary to-blue-600 bg-clip-text text-transparent">
-        ${precio.toLocaleString()}
+        {formatearPrecio(precio)}
       </span>
 
       {/* Vendedor */}

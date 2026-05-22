@@ -12,6 +12,7 @@ import {
 } from "@/schema/perfume.schema";
 import { mockPerfumes } from "./mockPerfumes";
 import { z } from "zod";
+import { obtenerHistorialSimulado } from "./mockEnvios";
 
 export async function obtenerCatalogo(): Promise<PerfumeCard[]> {
   // En etapa 3 cambiar por fetch a la API real.
@@ -73,6 +74,46 @@ export async function obtenerProductosComprados(
   );
 
   return validarTipo(perfumesFiltrados, PerfumeCompradosSchema);
+}
+
+export async function enviarResenaProducto(
+  productoId: string,
+  usuarioId: string,
+  rating: number,
+  comentario?: string,
+) {
+  console.log("POST a API Feedback (Producto):", {
+    productoId: productoId,
+    usuarioId: usuarioId,
+    rating,
+    comentario,
+  });
+
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+}
+
+export async function enviarResenaVendedor(
+  vendedorId: string,
+  usuarioId: string,
+  rating: number,
+  comentario?: string,
+) {
+  console.log("POST a API Feedback (Vendedor):", {
+    vendedorId: vendedorId,
+    usuarioId: usuarioId,
+    rating,
+    comentario,
+  });
+
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+}
+
+export async function obtenerHistorialEnvio(estado: string) {
+  // En etapa 3 cambiar por fetch a la API real.
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  // En etapa 3 cambiar esta parte y usar el resultado del fetch
+  return obtenerHistorialSimulado(estado);
 }
 
 export function validarTipo<TSchema extends z.ZodTypeAny>(

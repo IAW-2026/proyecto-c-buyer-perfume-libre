@@ -65,7 +65,8 @@ model OrdenCompra{
   pagoId String @unique
   envioId String @unique 
   estado String 
-  total Float
+  total Int
+  costoEnvio Int
   items ItemOrdenCompra[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -77,7 +78,7 @@ model ItemOrdenCompra{
   id String @id @default(cuid())
   ordenCompraId String
   productoId String 
-  precio Float
+  precio Int
   cantidad Int
 
   ordenCompra OrdenCompra @relation(fields: [ordenCompraId], references: [id])
