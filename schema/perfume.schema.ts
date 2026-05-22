@@ -1,7 +1,10 @@
 import { z } from "zod";
 
+// TODO: Separar en varios esquemas según el uso que se le de.
+
 // TODO: Ajustar estados segun lo que se maneje en shipping app
 export const EstadosOrden = z.enum([
+  "Pagado",
   "En proceso",
   "Enviado",
   "Entregado",
@@ -11,6 +14,7 @@ export const EstadosOrden = z.enum([
 export type EstadoOrdenType = z.infer<typeof EstadosOrden>;
 
 export const COLOR_ESTADOS: Record<EstadoOrdenType, string> = {
+  Pagado: "bg-gray-100 text-gray-800 hover:bg-gray-100",
   "En proceso": "bg-amber-100 text-amber-800 hover:bg-amber-100",
   Enviado: "bg-blue-100 text-blue-800 hover:bg-blue-100",
   Entregado: "bg-green-100 text-green-800 hover:bg-green-100",
@@ -154,12 +158,19 @@ export const ItemDeOrdenDetalladoSchema = z.object({
   imagenUrl: z.string(),
   marca: z.string(),
   tamaño: z.number().int().positive(),
+  historialEnvio: z.array(
+    z.object({
+      fecha: z.string(),
+      ubicacion: z.string(),
+    }),
+  ),
+
   ordenCompra: z.object({
     usuarioId: z.string(),
     pagoId: z.string(),
     envioId: z.string(),
     estado: EstadosOrden,
-    costoEnvio: z.number().int().positive(),
+    costoEnvio: z.number().int().min(0),
     total: z.number().int().positive(),
     itemsComprados: z.number().int().positive().min(1),
     createdAt: z.date(),

@@ -1,6 +1,7 @@
 import {
   obtenerCantidadDeProductosComprados,
   obtenerItemDeOrden,
+  simularCambioEstado,
 } from "@/actions/compras";
 import Header from "@/components/header";
 import { Button } from "@/components/ui/button";
@@ -9,32 +10,21 @@ import { Separator } from "@/components/ui/separator";
 import { formatearPrecio } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  EstadoOrdenType,
-  EstadosOrden,
-  ItemDeOrdenDetallado,
-} from "@/schema/perfume.schema";
+import { EstadosOrden, ItemDeOrdenDetallado } from "@/schema/perfume.schema";
 import { format } from "date-fns/format";
 import { es } from "date-fns/locale";
 import { ArrowLeft, Calendar, CreditCard, Truck } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { obtenerDetallePerfume } from "@/lib/api";
+import { obtenerDetallePerfume, obtenerHistorialEnvio } from "@/lib/api";
 import { SeccionResenas } from "@/components/compras/SeccionResenas";
+import { Badge } from "@/components/ui/badge";
+import { SimuladorEnvio } from "@/components/compras/SelectorEnvio";
 
 type Props = {
   params: Promise<{ id: string }>;
   searchParams: Promise<{ itemId?: string }>;
 };
-
-const historialEnvio = [
-  {
-    fecha: "20 de Mayo, 14:30",
-    mensaje: "El paquete está en la sucursal de tu ciudad.",
-  },
-  { fecha: "19 de Mayo, 08:15", mensaje: "El paquete está en viaje." },
-  { fecha: "18 de Mayo, 18:00", mensaje: "El vendedor despachó tu paquete." },
-];
 
 export default async function DetalleCompraPage({
   params,
@@ -42,9 +32,6 @@ export default async function DetalleCompraPage({
 }: Props) {
   const { id: ordenId } = await params;
   const { itemId } = await searchParams;
-
-  console.log("ordenId:", ordenId);
-  console.log("itemId:", itemId);
 
   if (!itemId) notFound();
 
@@ -71,16 +58,16 @@ export default async function DetalleCompraPage({
 function DetalleCompra({ orden }: { orden: ItemDeOrdenDetallado }) {
   return (
     <div className="space-y-6">
-      <Button
-        variant="ghost"
-        size="sm"
-        className="text-slate-600 hover:text-slate-900 -ml-2"
-      >
-        <Link href={"/compras"}>
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Volver al historial
-        </Link>
-      </Button>
+      <div className="flex justify-between items-center">
+        <Button variant="ghost" size="sm" className="text-slate-600 -ml-2">
+          <Link href="/compras">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Volver al historial
+          </Link>
+        </Button>
+
+        <SimuladorEnvio ordenId={orden.ordenCompraId} itemId={orden.idItem} />
+      </div>
 
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
@@ -109,8 +96,7 @@ function PanelPrincipal({ orden }: { orden: ItemDeOrdenDetallado }) {
 
         <ProductCard orden={orden} />
 
-        {/* Luego cambiar para validar si ya reseño*/}
-        {orden.ordenCompra.estado === "En proceso" && (
+        {orden.ordenCompra.estado === "Entregado" && (
           <SeccionResenas
             productoId={orden.productoId}
             nombreProducto={orden.nombreProducto}
@@ -149,13 +135,17 @@ function CardSeguimiento({ orden }: { orden: ItemDeOrdenDetallado }) {
           </p>
         </div>
 
-        <HistorialEnvio />
+        <HistorialEnvio historialEnvio={orden.historialEnvio} />
       </CardContent>
     </Card>
   );
 }
 
-function HistorialEnvio() {
+function HistorialEnvio({
+  historialEnvio,
+}: {
+  historialEnvio: { fecha: string; ubicacion: string }[];
+}) {
   return (
     <div className="border-l-2 border-blue-100 ml-2 pl-6 space-y-6 relative">
       {historialEnvio.map((evento: any, idx: number) => (
@@ -168,7 +158,7 @@ function HistorialEnvio() {
           <p
             className={`text-sm ${idx === 0 ? "font-semibold text-slate-900" : "text-slate-600"}`}
           >
-            {evento.mensaje}
+            {evento.ubicacion}
           </p>
           <p className="text-xs text-slate-400 mt-1">{evento.fecha}</p>
         </div>
@@ -308,7 +298,8 @@ async function obtenerItemOrden(
     return null;
   }
 
-  const estadoValidado = EstadosOrden.parse(ordenDb.ordenCompra.estado);
+  const datosEnvio = await obtenerHistorialEnvio(ordenDb.ordenCompra.estado);
+  const estadoValidado = EstadosOrden.parse(datosEnvio.estadoActual);
   const { id: idItem, ...restoDeOrdenDb } = ordenDb;
 
   return {
@@ -319,6 +310,7 @@ async function obtenerItemOrden(
       estado: estadoValidado,
       itemsComprados: itemsComprados || 1,
     },
+    historialEnvio: datosEnvio.historial,
     nombreProducto: productoDetalle.nombre,
     vendedor: productoDetalle.vendedor,
     imagenUrl: productoDetalle.imagenesUrl[0],

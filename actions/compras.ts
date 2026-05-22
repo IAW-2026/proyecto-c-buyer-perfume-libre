@@ -118,7 +118,7 @@ export async function comprarProductos(
         usuarioId: userId,
         pagoId: `pago_id_${randomId()}`,
         envioId: `envio_id_${randomId()}`,
-        estado: "En proceso",
+        estado: "Pagado",
         total: total + costoEnvio,
         costoEnvio: costoEnvio,
         items: {
@@ -207,4 +207,25 @@ export async function obtenerCantidadDeProductosComprados(ordenId: string) {
   });
 
   return cantidadComprados._sum.cantidad;
+}
+
+export async function simularCambioEstado(
+  ordenId: string,
+  itemId: string,
+  nuevoEstado: string,
+) {
+  console.log(
+    "Se entro a simular cambio con: " +
+      ordenId +
+      " - " +
+      itemId +
+      " - " +
+      nuevoEstado,
+  );
+  await prisma.ordenCompra.update({
+    where: { id: ordenId },
+    data: { estado: nuevoEstado },
+  });
+
+  revalidatePath(`/compras/${ordenId}?itemId=${itemId}`);
 }
