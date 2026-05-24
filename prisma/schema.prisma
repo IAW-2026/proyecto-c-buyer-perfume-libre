@@ -7,85 +7,75 @@ datasource db {
   provider = "postgresql"
 }
 
-// Modelo de datos
-
-/*
-* Tanto el id de los productos, direcciones, pagos y envíos se obtienen de las APIs 
-* correspondientes por lo que no es necesario crear modelos adicionales para ellos.
-*/
-model Usuario{
-  id String @id // Usamos el id de clerk
+/// * Tanto el id de los productos, direcciones, pagos y envíos se obtienen de las APIs 
+/// * correspondientes por lo que no es necesario crear modelos adicionales para ellos.
+model Usuario {
+  id          String        @id
+  createdAt   DateTime      @default(now())
+  carrito     Carrito[]
   direcciones Direccion[]
-  carrito Carrito[]
-  favoritos Favorito[]
-  compras OrdenCompra[]
-  createdAt DateTime @default(now())
+  favoritos   Favorito[]
+  compras     OrdenCompra[]
 }
 
-model Favorito{
-  id String @id @default(cuid())
-  usuarioId String
-  productoId String 
-
-  usuario Usuario @relation(fields: [usuarioId], references: [id])
-  @@unique([usuarioId, productoId])
-}
-
-//TODO: Agregar createdAt 
-model Carrito{
-  id String @id @default(cuid())
-  usuarioId String
+model Favorito {
+  id         String  @id @default(cuid())
+  usuarioId  String
   productoId String
-  cantidad Int
+  usuario    Usuario @relation(fields: [usuarioId], references: [id])
 
-  usuario Usuario @relation(fields: [usuarioId], references: [id])
   @@unique([usuarioId, productoId])
 }
 
-/*
-* Dejamos libre la direccion y telefono para que
-* varios usuarios puedan compartir la misma dirección o teléfono si lo desean.
-*/
-model Direccion{
-  id String @id @default(cuid())
+model Carrito {
+  id         String  @id @default(cuid())
+  usuarioId  String
+  productoId String
+  cantidad   Int
+  usuario    Usuario @relation(fields: [usuarioId], references: [id])
+
+  @@unique([usuarioId, productoId])
+}
+
+/// * Dejamos libre la direccion y telefono para que
+/// * varios usuarios puedan compartir la misma dirección o teléfono si lo desean.
+model Direccion {
+  id String   @id @default(cuid())
   usuarioId String
-  calle String
-  numero String
-  pisoDepto String? 
-  localidad String
   provincia String
   codigoPostal String
+  localidad String
+  calle String
+  altura String
+  pisoDepto String?
   telefono String
   nombreDestinatario String
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   usuario Usuario @relation(fields: [usuarioId], references: [id])
 }
 
-model OrdenCompra{
-  id String @id @default(cuid())
-  usuarioId String
-  pagoId String @unique
-  envioId String @unique 
-  estado String 
-  total Int
+model OrdenCompra {
+  id         String            @id @default(cuid())
+  usuarioId  String
+  pagoId     String            @unique
+  envioId    String            @unique
+  estado     String
+  total      Int
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
   costoEnvio Int
-  items ItemOrdenCompra[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  usuario Usuario @relation(fields: [usuarioId], references: [id])
+  items      ItemOrdenCompra[]
+  usuario    Usuario           @relation(fields: [usuarioId], references: [id])
 }
 
-model ItemOrdenCompra{
-  id String @id @default(cuid())
+model ItemOrdenCompra {
+  id            String      @id @default(cuid())
   ordenCompraId String
-  productoId String 
-  precio Int
-  cantidad Int
-
-  ordenCompra OrdenCompra @relation(fields: [ordenCompraId], references: [id])
+  productoId    String
+  precio        Int
+  cantidad      Int
+  ordenCompra   OrdenCompra @relation(fields: [ordenCompraId], references: [id])
 }
-
