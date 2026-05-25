@@ -1,0 +1,17 @@
+import Header from "@/components/header";
+import { obtenerDireccionesUsuario } from "@/actions/direcciones";
+import DireccionesEnvioPanel from "@/components/checkout/FormularioDireccion";
+
+export default async function CheckoutEnvioPage() {
+  const direcciones = await obtenerDireccionesUsuario();
+
+  return (
+    <div className="min-h-screen bg-linear-to-b from-background via-background to-muted/20">
+      <Header />
+
+      <main className="container mx-auto px-4 py-8 md:px-8">
+        <DireccionesEnvioPanel direcciones={direcciones} />
+      </main>
+    </div>
+  );
+}
