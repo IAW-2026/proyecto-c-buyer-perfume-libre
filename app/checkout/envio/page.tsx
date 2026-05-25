@@ -1,6 +1,7 @@
 import Header from "@/components/header";
 import { obtenerDireccionesUsuario } from "@/actions/direcciones";
-import DireccionesEnvioPanel from "@/components/checkout/FormularioDireccion";
+import PrimeraDireccionPantalla from "@/components/checkout/PrimeraDireccionPantalla";
+import DireccionesEnvioPanel from "@/components/checkout/DireccionesEnvioPanel";
 
 export default async function CheckoutEnvioPage() {
   const direcciones = await obtenerDireccionesUsuario();
@@ -10,7 +11,11 @@ export default async function CheckoutEnvioPage() {
       <Header />
 
       <main className="container mx-auto px-4 py-8 md:px-8">
-        <DireccionesEnvioPanel direcciones={direcciones} />
+        {direcciones.length === 0 ? (
+          <PrimeraDireccionPantalla />
+        ) : (
+          <DireccionesEnvioPanel direcciones={direcciones} />
+        )}
       </main>
     </div>
   );
