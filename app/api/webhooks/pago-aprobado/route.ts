@@ -1,0 +1,34 @@
+import { actualizarOrden } from "@/actions/checkout";
+import { EstadosOrden } from "@/schema/perfume.schema";
+import { NextResponse } from "next/server";
+
+// TODO: Charlar para cambiar el nombre del webhook a algo más genérico,
+// tipo "actualizacion-orden" o algo así, porque en realidad no solo se va a usar para pagos aprobados,
+// sino también para rechazos.
+
+export async function POST(req: Request) {
+  try {
+    const body = await req.json();
+    const { id_orden, id_pago, estado } = body;
+
+    // validarToken(headers); (en la def no estaba header asiq lo respetamos por ahora)
+
+    const nuevoEstadoOrden =
+      estado === "aprobado"
+        ? EstadosOrden.enum.Pagado
+        : EstadosOrden.enum.Rechazado;
+
+    await actualizarOrden(id_orden, id_pago, nuevoEstadoOrden);
+
+    // fetch a shipping para q cree el envio
+
+    return NextResponse.json({ message: "200 ok" });
+  } catch (error) {
+    return NextResponse.json({ error: "Error en el webhook" }, { status: 500 });
+  }
+}
+
+function validarToken(headers: Headers) {
+  //TODO: Implementar la lógica para validar el token secreto que esperamos
+  // recibir en los headers de la request. (Aun no lo discutimos)
+}

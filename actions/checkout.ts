@@ -1,8 +1,8 @@
-// actions/checkout.ts
 "use server";
 
 import { obtenerPreciosDeProductos } from "@/lib/api";
 import { prisma } from "@/lib/prisma";
+import { EstadosOrden } from "@/schema/perfume.schema";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
@@ -41,7 +41,7 @@ export async function iniciarProcesamientoCompra(direccionId: string) {
   const nuevaOrden = await prisma.ordenCompra.create({
     data: {
       usuarioId: userId,
-      estado: "Pendiente",
+      estado: EstadosOrden.enum.Pendiente,
       costoEnvio: costoEnvioSimulado,
       total: total,
       items: {
@@ -56,4 +56,28 @@ export async function iniciarProcesamientoCompra(direccionId: string) {
   });
 
   redirect(`/checkout/confirmacion?ordenId=${nuevaOrden.id}`);
+}
+
+export async function actualizarOrden(
+  idOrden: string,
+  idPago: string,
+  estado: string,
+) {
+  const { userId } = await auth();
+  if (!userId) throw new Error("No autorizado");
+
+  try {
+    await prisma.ordenCompra.update({
+      where: { id: idOrden, usuarioId: userId },
+      data: {
+        estado: estado,
+        idPago: idPago,
+      },
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.log("Error al actualizar la orden:", error);
+    throw new Error("Error al actualizar la orden");
+  }
 }

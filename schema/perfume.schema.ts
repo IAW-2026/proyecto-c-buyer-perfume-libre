@@ -10,6 +10,7 @@ export const EstadosOrden = z.enum([
   "Enviado",
   "Entregado",
   "Cancelado",
+  "Rechazado",
 ]);
 
 export type EstadoOrdenType = z.infer<typeof EstadosOrden>;
@@ -21,6 +22,7 @@ export const COLOR_ESTADOS: Record<EstadoOrdenType, string> = {
   Enviado: "bg-blue-100 text-blue-800 hover:bg-blue-100",
   Entregado: "bg-green-100 text-green-800 hover:bg-green-100",
   Cancelado: "bg-red-100 text-red-800 hover:bg-red-100",
+  Rechazado: "bg-red-100 text-red-800 hover:bg-red-100",
 };
 
 // Esquema principal del perfume, con toda la información detallada
