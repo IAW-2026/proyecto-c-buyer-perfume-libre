@@ -10,6 +10,7 @@ import { Card, CardContent } from "../ui/card";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { useTransition } from "react";
 import FormularioDireccion from "./FormularioDireccion";
+import { iniciarProcesamientoCompra } from "@/actions/checkout";
 
 export default function DireccionesEnvioPanel({
   direcciones,
@@ -49,6 +50,18 @@ export default function DireccionesEnvioPanel({
     }
   };
 
+  const handleContinuarCompra = () => {
+    if (!seleccionada) return;
+
+    startTransition(async () => {
+      try {
+        await iniciarProcesamientoCompra(seleccionada);
+      } catch (error) {
+        console.error("Error al iniciar checkout:", error);
+      }
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -72,8 +85,8 @@ export default function DireccionesEnvioPanel({
       <div className="pt-4 border-t">
         <Button
           className="w-full text-lg h-12"
-          disabled={!seleccionada}
-          //onClick={() => redirigirAlResumen(seleccionada)}
+          disabled={!seleccionada || isPending}
+          onClick={handleContinuarCompra}
         >
           Continuar compra
         </Button>

@@ -116,6 +116,20 @@ export async function obtenerHistorialEnvio(estado: string) {
   return obtenerHistorialSimulado(estado);
 }
 
+export async function obtenerPreciosDeProductos(ids: string[]) {
+  // En etapa 3 cambiar por fetch a la API real.
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  const preciosFiltrados = mockPerfumes
+    .filter((perfume) => ids.includes(perfume.id))
+    .map((perfume) => ({
+      id: perfume.id,
+      precio: perfume.precio,
+    }));
+
+  return preciosFiltrados;
+}
+
 export function validarTipo<TSchema extends z.ZodTypeAny>(
   data: unknown,
   schema: TSchema,
