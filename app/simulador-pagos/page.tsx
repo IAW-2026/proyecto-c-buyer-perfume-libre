@@ -22,9 +22,9 @@ export default function SimuladorPagosApp() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        ordenId: ordenId,
-        status: resultado,
-        pagoId: `pago_mock_${Math.floor(Math.random() * 10000)}`,
+        id_orden: ordenId,
+        id_pago: `pago_mock_${Math.floor(Math.random() * 10000)}`,
+        estado: resultado,
       }),
     });
 

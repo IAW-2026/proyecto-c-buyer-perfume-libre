@@ -24,7 +24,10 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ message: "200 ok" });
   } catch (error) {
-    return NextResponse.json({ error: "Error en el webhook" }, { status: 500 });
+    return NextResponse.json(
+      { error: `Error en el webhook ${error}` },
+      { status: 500 },
+    );
   }
 }
 

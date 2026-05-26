@@ -63,21 +63,17 @@ export async function actualizarOrden(
   idPago: string,
   estado: string,
 ) {
-  const { userId } = await auth();
-  if (!userId) throw new Error("No autorizado");
-
   try {
     await prisma.ordenCompra.update({
-      where: { id: idOrden, usuarioId: userId },
+      where: { id: idOrden },
       data: {
         estado: estado,
-        idPago: idPago,
+        pagoId: idPago,
       },
     });
 
     return { success: true };
   } catch (error) {
-    console.log("Error al actualizar la orden:", error);
-    throw new Error("Error al actualizar la orden");
+    throw new Error(`Error al actualizar la orden ${error}`);
   }
 }

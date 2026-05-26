@@ -5,17 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { prisma } from "@/lib/prisma";
-
-// Pequeña función utilitaria para formatear la plata (en centavos)
-function formatearPrecio(centavos: number) {
-  return new Intl.NumberFormat("es-AR", {
-    style: "currency",
-    currency: "ARS",
-  }).format(centavos / 100);
-}
+import { formatearPrecio } from "@/lib/utils";
+import Link from "next/dist/client/link";
 
 type Props = {
-  // Next.js nos da searchParams automáticamente en las Pages
   searchParams: Promise<{ ordenId?: string }>;
 };
 
@@ -25,30 +18,25 @@ export default async function ConfirmacionCheckoutPage({
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
 
-  // Esperamos los query params (en Next.js 15+ se manejan como Promise)
   const { ordenId } = await searchParams;
 
   if (!ordenId) {
-    redirect("/carrito"); // Si entraron a mano sin ID, los mandamos al carrito
+    redirect("/carrito");
   }
 
-  // 1. Buscamos la orden pendiente en nuestra DB
+  // TODO: Mover a actions
   const orden = await prisma.ordenCompra.findUnique({
     where: { id: ordenId, usuarioId: userId },
     include: {
-      items: true, // Traemos los renglones de los perfumes comprados
+      items: true,
     },
   });
 
-  // Seguridad: Si la orden no existe o ya no está pendiente, rebote
   if (!orden || orden.estado !== "Pendiente") {
     redirect("/carrito");
   }
 
-  // 2. Buscamos los datos de la dirección para mostrárselos al usuario
-  // (Aunque te abstraigas para Shipping, acá nos sirve para mostrar el texto en pantalla)
-
-  // 3. Calculamos el subtotal de productos sumando los items de la orden
+  // TODO: Mover a lib
   const subtotalProductos = orden.items.reduce(
     (acc, item) => acc + item.precio * item.cantidad,
     0,
@@ -159,9 +147,11 @@ export default async function ConfirmacionCheckoutPage({
 
                 {/* BOTÓN CRÍTICO: DETONADOR DE LA PASARELA */}
                 <div className="pt-4">
-                  <Button className="w-full h-12 text-base font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-md">
-                    <CreditCard className="w-4 h-4 mr-2" /> Continuar al pago
-                  </Button>
+                  <Link href={`/simulador-pagos?ordenId=${orden.id}`}>
+                    <Button className="w-full h-12 text-base font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-md">
+                      <CreditCard className="w-4 h-4 mr-2" /> Continuar al pago
+                    </Button>
+                  </Link>
                 </div>
 
                 <p className="text-[11px] text-center text-slate-400 mt-2">
