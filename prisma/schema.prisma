@@ -60,8 +60,8 @@ model Direccion {
 model OrdenCompra {
   id         String            @id @default(cuid())
   usuarioId  String
-  pagoId     String            @unique
-  envioId    String            @unique
+  pagoId     String?            @unique
+  envioId    String?           @unique
   estado     String
   total      Int
   createdAt  DateTime          @default(now())

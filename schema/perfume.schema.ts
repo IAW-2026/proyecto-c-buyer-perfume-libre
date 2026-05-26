@@ -4,6 +4,7 @@ import { z } from "zod";
 
 // TODO: Ajustar estados segun lo que se maneje en shipping app
 export const EstadosOrden = z.enum([
+  "Pendiente",
   "Pagado",
   "En proceso",
   "Enviado",
@@ -14,6 +15,7 @@ export const EstadosOrden = z.enum([
 export type EstadoOrdenType = z.infer<typeof EstadosOrden>;
 
 export const COLOR_ESTADOS: Record<EstadoOrdenType, string> = {
+  Pendiente: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100",
   Pagado: "bg-gray-100 text-gray-800 hover:bg-gray-100",
   "En proceso": "bg-amber-100 text-amber-800 hover:bg-amber-100",
   Enviado: "bg-blue-100 text-blue-800 hover:bg-blue-100",
