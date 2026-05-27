@@ -1,4 +1,4 @@
-import Header from "@/components/header";
+import Header from "@/components/layout/header";
 import { obtenerDireccionesUsuario } from "@/actions/direcciones";
 import PrimeraDireccionPantalla from "@/components/checkout/PrimeraDireccionPantalla";
 import DireccionesEnvioPanel from "@/components/checkout/DireccionesEnvioPanel";
@@ -8,8 +8,6 @@ export default async function CheckoutEnvioPage() {
 
   return (
     <div className="min-h-screen bg-linear-to-b from-background via-background to-muted/20">
-      <Header />
-
       <main className="container mx-auto px-4 py-8 md:px-8">
         {direcciones.length === 0 ? (
           <PrimeraDireccionPantalla />
