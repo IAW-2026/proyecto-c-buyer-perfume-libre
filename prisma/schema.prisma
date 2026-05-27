@@ -66,8 +66,13 @@ model OrdenCompra {
   total      Int
   createdAt  DateTime          @default(now())
   updatedAt  DateTime          @updatedAt
-  costoEnvio Int
   items      ItemOrdenCompra[]
+  direccionId   String            
+  // Datos del envio que usa shipping app. 
+  costoEnvio Int              
+  operadorEnvio String           
+  servicioEnvio String
+  demoraDias Int
   usuario    Usuario           @relation(fields: [usuarioId], references: [id])
 }
 
