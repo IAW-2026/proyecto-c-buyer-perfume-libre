@@ -25,6 +25,28 @@ export async function obtenerDireccionesUsuario() {
   }
 }
 
+export async function obtenerDireccionPorId(direccionId: string) {
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      throw new Error("Usuario no autenticado");
+    }
+
+    const direccion = await prisma.direccion.findUnique({
+      where: { id: direccionId, usuarioId: userId },
+    });
+
+    if (!direccion) {
+      throw new Error("Dirección no encontrada");
+    }
+
+    return direccion;
+  } catch (error) {
+    console.error("Error en obtenerDireccionPorId:", error);
+    throw new Error("No se pudo cargar la dirección");
+  }
+}
+
 export async function agregarDireccion(datosDireccion: Direccion) {
   try {
     const { userId } = await auth();

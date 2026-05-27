@@ -1,4 +1,9 @@
-import { actualizarOrden } from "@/actions/checkout";
+import {
+  actualizarOrden,
+  obtenerOrden,
+  vaciarCarrito,
+} from "@/actions/checkout";
+import { generarOrden } from "@/lib/api";
 import { EstadosOrden } from "@/schema/perfume.schema";
 import { NextResponse } from "next/server";
 
@@ -18,9 +23,25 @@ export async function POST(req: Request) {
         ? EstadosOrden.enum.Pagado
         : EstadosOrden.enum.Rechazado;
 
-    await actualizarOrden(id_orden, id_pago, nuevoEstadoOrden);
+    const orden = await obtenerOrden(id_orden);
 
-    // fetch a shipping para q cree el envio
+    const id_envio = await generarOrden(
+      id_orden,
+      orden.usuarioId,
+      orden.direccionId,
+      orden.items,
+      "id_vendedor_mock",
+      {
+        operador: orden.operadorEnvio,
+        tipo_servicio: orden.servicioEnvio,
+        precio: orden.costoEnvio,
+        demora_en_dias: orden.demoraDias,
+      },
+    );
+
+    await actualizarOrden(id_orden, id_pago, id_envio, nuevoEstadoOrden);
+
+    await vaciarCarrito(orden.usuarioId);
 
     return NextResponse.json({ message: "200 ok" });
   } catch (error) {
