@@ -12,7 +12,7 @@ import {
 } from "@/schema/perfume.schema";
 import { mockPerfumes } from "./mockPerfumes";
 import { z } from "zod";
-import { obtenerHistorialSimulado } from "./mockEnvios";
+import { obtenerHistorialSimulado, OpcionEnvio } from "./mockEnvios";
 
 export async function obtenerCatalogo(): Promise<PerfumeCard[]> {
   // En etapa 3 cambiar por fetch a la API real.
@@ -141,4 +141,20 @@ export function validarTipo<TSchema extends z.ZodTypeAny>(
   }
 
   return resultado.data;
+}
+
+// TODO: Charlar con el equipo acerca de los parametros. El id_vendedor no lo tengo deberia pedirlo y
+// puede ser distinto por cada producto.
+export async function generarOrden(
+  id_orden: string,
+  id_comprador: string,
+  direccion_entrega: string,
+  items: any[],
+  id_vendedor: string,
+  servicio_elegido: OpcionEnvio,
+) {
+  // Simulación de generación de orden de shipping app, devuelve el id track.
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  return `envio_mock_${Math.floor(Math.random() * 10000)}`;
 }

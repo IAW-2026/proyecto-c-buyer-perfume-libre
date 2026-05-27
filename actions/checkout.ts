@@ -1,12 +1,16 @@
 "use server";
 
 import { obtenerPreciosDeProductos } from "@/lib/api";
+import { OpcionEnvio } from "@/lib/mockEnvios";
 import { prisma } from "@/lib/prisma";
 import { EstadosOrden } from "@/schema/perfume.schema";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
-export async function iniciarProcesamientoCompra(direccionId: string) {
+export async function iniciarProcesamientoCompra(
+  direccionId: string,
+  datosEnvio: OpcionEnvio,
+) {
   const { userId } = await auth();
   if (!userId) throw new Error("No autorizado");
 
@@ -16,33 +20,25 @@ export async function iniciarProcesamientoCompra(direccionId: string) {
 
   if (itemsCarrito.length === 0) throw new Error("El carrito está vacío");
 
-  const direccion = await prisma.direccion.findUnique({
-    where: { id: direccionId, usuarioId: userId },
-    select: {
-      codigoPostal: true,
-      calle: true,
-    },
-  });
-
-  if (!direccion) throw new Error("Dirección no encontrada");
-
-  // En etapa 3 cambiar por fetch a la API real.
-  await new Promise((resolve) => setTimeout(resolve, 1500));
-  const costoEnvioSimulado = Math.floor(Math.random() * 2500); // Entre $0 y $25.00 en centavos
-
   const idsProductos = itemsCarrito.map((item) => item.productoId);
+
   const preciosProductos = await obtenerPreciosDeProductos(idsProductos);
-  const total = itemsCarrito.reduce((acc, item) => {
-    const precioUnitario =
-      preciosProductos.find((p) => p.id === item.productoId)?.precio || 0;
-    return acc + precioUnitario * item.cantidad;
-  }, 0);
+  const total =
+    itemsCarrito.reduce((acc, item) => {
+      const precioUnitario =
+        preciosProductos.find((p) => p.id === item.productoId)?.precio || 0;
+      return acc + precioUnitario * item.cantidad;
+    }, 0) + datosEnvio.precio;
 
   const nuevaOrden = await prisma.ordenCompra.create({
     data: {
       usuarioId: userId,
       estado: EstadosOrden.enum.Pendiente,
-      costoEnvio: costoEnvioSimulado,
+      costoEnvio: datosEnvio.precio,
+      operadorEnvio: datosEnvio.operador,
+      servicioEnvio: datosEnvio.tipo_servicio,
+      demoraDias: datosEnvio.demora_en_dias,
+      direccionId: direccionId,
       total: total,
       items: {
         create: itemsCarrito.map((item) => ({
@@ -61,6 +57,7 @@ export async function iniciarProcesamientoCompra(direccionId: string) {
 export async function actualizarOrden(
   idOrden: string,
   idPago: string,
+  idEnvio: string,
   estado: string,
 ) {
   try {
@@ -69,11 +66,39 @@ export async function actualizarOrden(
       data: {
         estado: estado,
         pagoId: idPago,
+        envioId: idEnvio,
       },
     });
 
     return { success: true };
   } catch (error) {
     throw new Error(`Error al actualizar la orden ${error}`);
+  }
+}
+
+export async function obtenerOrden(idOrden: string) {
+  try {
+    const orden = await prisma.ordenCompra.findUnique({
+      where: { id: idOrden },
+      include: {
+        items: true,
+      },
+    });
+
+    if (!orden) throw new Error("Orden no encontrada");
+
+    return orden;
+  } catch (error) {
+    throw new Error(`Error al obtener la orden ${error}`);
+  }
+}
+
+export async function vaciarCarrito(usuarioId: string) {
+  try {
+    await prisma.carrito.deleteMany({
+      where: { usuarioId },
+    });
+  } catch (error) {
+    throw new Error(`Error al vaciar el carrito ${error}`);
   }
 }

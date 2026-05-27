@@ -10,7 +10,7 @@ import { Card, CardContent } from "../ui/card";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { useTransition } from "react";
 import FormularioDireccion from "./FormularioDireccion";
-import { iniciarProcesamientoCompra } from "@/actions/checkout";
+import { useRouter } from "next/navigation";
 
 export default function DireccionesEnvioPanel({
   direcciones,
@@ -21,6 +21,8 @@ export default function DireccionesEnvioPanel({
   const [seleccionada, setSeleccionada] = React.useState<string | undefined>(
     direcciones[0]?.id,
   );
+
+  const router = useRouter();
 
   const [direccionEditando, setDireccionEditando] =
     React.useState<DireccionDb | null>(null);
@@ -53,13 +55,7 @@ export default function DireccionesEnvioPanel({
   const handleContinuarCompra = () => {
     if (!seleccionada) return;
 
-    startTransition(async () => {
-      try {
-        await iniciarProcesamientoCompra(seleccionada);
-      } catch (error) {
-        console.error("Error al iniciar checkout:", error);
-      }
-    });
+    router.push(`/checkout/metodo-envio?direccionId=${seleccionada}`);
   };
 
   return (
