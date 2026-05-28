@@ -1,3 +1,4 @@
+import { itemsDeOrdenDb } from "@/schema/perfume.schema";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -28,4 +29,8 @@ export function formatearPrecio(
     minimumFractionDigits: pesos % 1 === 0 ? 0 : 2,
     maximumFractionDigits: 2,
   }).format(pesos);
+}
+
+export function calcularTotalProductos(items: itemsDeOrdenDb): number {
+  return items.reduce((acc, item) => acc + item.precio * item.cantidad, 0);
 }

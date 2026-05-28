@@ -189,6 +189,7 @@ export type PerfumeCarrito = z.infer<typeof PerfumeCarritoSchema>;
 export type PerfumeComprado = z.infer<typeof PerfumeCompradoSchema>;
 export type ItemCarrito = z.infer<typeof ItemCarritoSchema>;
 export type OrdenDeCompraDb = z.infer<typeof OrdenDeCompraDbSchema>;
+export type itemsDeOrdenDb = z.infer<typeof OrdenDeCompraDbSchema.shape.items>;
 export type ItemOrdenDetalle = z.infer<typeof ItemOrdenDetalleSchema>;
 export type OrdenAgrupada = z.infer<typeof OrdenAgrupadaSchema>;
 export type ItemDeOrdenDetallado = z.infer<typeof ItemDeOrdenDetalladoSchema>;
