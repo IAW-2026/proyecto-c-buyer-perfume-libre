@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { obtenerDetallePerfume } from "@/lib/api";
-import { ItemCarrito } from "@/schema/perfume.schema";
+import { EstadosOrden, ItemCarrito } from "@/schema/perfume.schema";
 
 export async function obtenerComprasDelUsuario() {
   try {
@@ -15,7 +15,10 @@ export async function obtenerComprasDelUsuario() {
     }
 
     const ordenes = await prisma.ordenCompra.findMany({
-      where: { usuarioId: userId },
+      where: {
+        usuarioId: userId,
+        estado: { not: EstadosOrden.enum.Pendiente },
+      },
       select: {
         id: true,
         estado: true,
@@ -88,54 +91,6 @@ export async function verDetallesCompra(ordenId: string) {
   } catch (error) {
     console.error("Error en verDetallesCompra:", error);
     throw new Error("No se pudo cargar los detalles de la compra");
-  }
-}
-
-export async function comprarProductos(
-  itemsCarrito: ItemCarrito[],
-  total: number,
-) {
-  try {
-    const { userId } = await auth();
-
-    if (!userId) {
-      throw new Error("Usuario no autenticado");
-    }
-
-    // Logica provisional para simular la compra
-    const randomId = () => Math.random().toString(36).substring(7);
-    const precioEnvio = () => Math.floor(Math.random() * 25); // TODO: Cambiar por fetch
-    const itemOrden = itemsCarrito.map((item) => ({
-      productoId: item.id,
-      precio: item.precio,
-      cantidad: item.cantidad,
-    }));
-
-    const costoEnvio = precioEnvio();
-
-    const nuevaOrden = await prisma.ordenCompra.create({
-      data: {
-        usuarioId: userId,
-        pagoId: `pago_id_${randomId()}`,
-        envioId: `envio_id_${randomId()}`,
-        estado: "Pagado",
-        total: total + costoEnvio,
-        costoEnvio: costoEnvio,
-        items: {
-          create: itemOrden,
-        },
-      },
-    });
-
-    await prisma.carrito.deleteMany({
-      where: { usuarioId: userId },
-    });
-
-    revalidatePath("/carrito");
-    revalidatePath("/compras");
-  } catch (error) {
-    console.error("Error en comprarProductos:", error);
-    throw new Error("No se pudo procesar la compra");
   }
 }
 

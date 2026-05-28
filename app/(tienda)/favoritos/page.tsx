@@ -1,6 +1,6 @@
 import { obtenerFavoritosDelUsuario } from "@/actions/favoritos";
 import ProductoCardFavoritos from "@/components/favoritos/ProductCardFavoritos";
-import Header from "@/components/header";
+import Header from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
 import { obtenerProductosFavoritos } from "@/lib/api";
 import Link from "next/link";

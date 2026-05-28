@@ -1,3 +1,4 @@
+import { itemsDeOrdenDb } from "@/schema/perfume.schema";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -20,10 +21,16 @@ export function formatearPrecio(
   centavos: number,
   cantidad: number = 1,
 ): string {
-  console.log({ centavos, cantidad });
   const pesos = (centavos * cantidad) / 100;
+
   return new Intl.NumberFormat("es-AR", {
     style: "currency",
     currency: "ARS",
+    minimumFractionDigits: pesos % 1 === 0 ? 0 : 2,
+    maximumFractionDigits: 2,
   }).format(pesos);
+}
+
+export function calcularTotalProductos(items: itemsDeOrdenDb): number {
+  return items.reduce((acc, item) => acc + item.precio * item.cantidad, 0);
 }

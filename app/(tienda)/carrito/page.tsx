@@ -1,6 +1,6 @@
 import { obtenerCarritoDelUsuario } from "@/actions/carrito";
 import { CarritoWrapper } from "@/components/carrito/carritoWrapper";
-import Header from "@/components/header";
+import Header from "@/components/layout/header";
 import { obtenerProductosCarrito } from "@/lib/api";
 import { ItemCarrito, PerfumeCarrito } from "@/schema/perfume.schema";
 import Link from "next/link";

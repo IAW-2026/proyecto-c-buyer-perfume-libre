@@ -4,21 +4,25 @@ import { z } from "zod";
 
 // TODO: Ajustar estados segun lo que se maneje en shipping app
 export const EstadosOrden = z.enum([
+  "Pendiente",
   "Pagado",
   "En proceso",
   "Enviado",
   "Entregado",
   "Cancelado",
+  "Rechazado",
 ]);
 
 export type EstadoOrdenType = z.infer<typeof EstadosOrden>;
 
 export const COLOR_ESTADOS: Record<EstadoOrdenType, string> = {
+  Pendiente: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100",
   Pagado: "bg-gray-100 text-gray-800 hover:bg-gray-100",
   "En proceso": "bg-amber-100 text-amber-800 hover:bg-amber-100",
   Enviado: "bg-blue-100 text-blue-800 hover:bg-blue-100",
   Entregado: "bg-green-100 text-green-800 hover:bg-green-100",
   Cancelado: "bg-red-100 text-red-800 hover:bg-red-100",
+  Rechazado: "bg-red-100 text-red-800 hover:bg-red-100",
 };
 
 // Esquema principal del perfume, con toda la información detallada
@@ -185,6 +189,7 @@ export type PerfumeCarrito = z.infer<typeof PerfumeCarritoSchema>;
 export type PerfumeComprado = z.infer<typeof PerfumeCompradoSchema>;
 export type ItemCarrito = z.infer<typeof ItemCarritoSchema>;
 export type OrdenDeCompraDb = z.infer<typeof OrdenDeCompraDbSchema>;
+export type itemsDeOrdenDb = z.infer<typeof OrdenDeCompraDbSchema.shape.items>;
 export type ItemOrdenDetalle = z.infer<typeof ItemOrdenDetalleSchema>;
 export type OrdenAgrupada = z.infer<typeof OrdenAgrupadaSchema>;
 export type ItemDeOrdenDetallado = z.infer<typeof ItemDeOrdenDetalladoSchema>;

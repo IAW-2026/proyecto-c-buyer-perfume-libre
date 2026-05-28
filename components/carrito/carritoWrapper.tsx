@@ -1,6 +1,6 @@
 "use client";
 
-import { startTransition, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { ItemCarrito } from "@/schema/perfume.schema";
 import {
   actualizarCantidadEnCarrito,
@@ -11,9 +11,7 @@ import ProductCardCarrito from "./productCardCarrito";
 import { Card } from "../ui/card";
 import { Separator } from "../ui/separator";
 import { Button } from "../ui/button";
-import { error } from "console";
-import { comprarProductos } from "@/actions/compras";
-import { toast } from "sonner";
+import Link from "next/dist/client/link";
 
 export function CarritoWrapper({
   productosIniciales,
@@ -117,27 +115,6 @@ function ResumenTotal({ total }: { total: number }) {
   );
 }
 
-const handleComprar = (
-  e: React.MouseEvent,
-  productos: ItemCarrito[],
-  total: number,
-) => {
-  e.preventDefault();
-  e.stopPropagation();
-
-  startTransition(async () => {
-    try {
-      await comprarProductos(productos, total);
-      toast.success("¡Compra realizada!");
-    } catch (error) {
-      console.error(error);
-      toast.error("No se pudo completar la compra", {
-        description: "Por favor, intentá nuevamente en unos minutos.",
-      });
-    }
-  });
-};
-
 function BotonContinuarCompra({
   productos,
   total,
@@ -146,12 +123,11 @@ function BotonContinuarCompra({
   total: number;
 }) {
   return (
-    <Button
-      className="w-full mt-6 h-12 text-base font-bold bg-blue-600 hover:bg-blue-700 shadow-md"
-      onClick={(e) => handleComprar(e, productos, total)}
-    >
-      Continuar compra
-    </Button>
+    <Link href={`/checkout/envio`}>
+      <Button className="w-full mt-6 h-12 text-base font-bold bg-blue-600 hover:bg-blue-700 shadow-md">
+        Continuar compra
+      </Button>
+    </Link>
   );
 }
 

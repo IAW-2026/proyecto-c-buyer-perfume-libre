@@ -1,4 +1,4 @@
-import Header from "@/components/header";
+import Header from "@/components/layout/header";
 import ProductGrid from "@/components/home/productGrid";
 import ProductGridSkeleton from "@/components/home/productSkeleton";
 import SidebarFiltros from "@/components/home/sidebarFiltros";

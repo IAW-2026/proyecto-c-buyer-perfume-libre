@@ -9,10 +9,11 @@ import {
   PerfumeCarritosSchema,
   PerfumeComprado,
   PerfumeCompradosSchema,
+  PerfumesSchema,
 } from "@/schema/perfume.schema";
 import { mockPerfumes } from "./mockPerfumes";
 import { z } from "zod";
-import { obtenerHistorialSimulado } from "./mockEnvios";
+import { obtenerHistorialSimulado, OpcionEnvio } from "./mockEnvios";
 
 export async function obtenerCatalogo(): Promise<PerfumeCard[]> {
   // En etapa 3 cambiar por fetch a la API real.
@@ -76,6 +77,20 @@ export async function obtenerProductosComprados(
   return validarTipo(perfumesFiltrados, PerfumeCompradosSchema);
 }
 
+export async function obtenerDetallesProducto(
+  ids: string[],
+): Promise<Perfume[]> {
+  // En etapa 3 cambiar por fetch a la API real.
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  // En etapa 3 cambiar esta parte y usar el resultado del fetch
+  const perfumesFiltrados = mockPerfumes.filter((perfume) =>
+    ids.includes(perfume.id),
+  );
+
+  return validarTipo(perfumesFiltrados, PerfumesSchema);
+}
+
 export async function enviarResenaProducto(
   productoId: string,
   usuarioId: string,
@@ -116,6 +131,20 @@ export async function obtenerHistorialEnvio(estado: string) {
   return obtenerHistorialSimulado(estado);
 }
 
+export async function obtenerPreciosDeProductos(ids: string[]) {
+  // En etapa 3 cambiar por fetch a la API real.
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  const preciosFiltrados = mockPerfumes
+    .filter((perfume) => ids.includes(perfume.id))
+    .map((perfume) => ({
+      id: perfume.id,
+      precio: perfume.precio,
+    }));
+
+  return preciosFiltrados;
+}
+
 export function validarTipo<TSchema extends z.ZodTypeAny>(
   data: unknown,
   schema: TSchema,
@@ -127,4 +156,20 @@ export function validarTipo<TSchema extends z.ZodTypeAny>(
   }
 
   return resultado.data;
+}
+
+// TODO: Charlar con el equipo acerca de los parametros. El id_vendedor no lo tengo deberia pedirlo y
+// puede ser distinto por cada producto.
+export async function generarOrden(
+  id_orden: string,
+  id_comprador: string,
+  direccion_entrega: string,
+  items: any[],
+  id_vendedor: string,
+  servicio_elegido: OpcionEnvio,
+) {
+  // Simulación de generación de orden de shipping app, devuelve el id track.
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  return `envio_mock_${Math.floor(Math.random() * 10000)}`;
 }

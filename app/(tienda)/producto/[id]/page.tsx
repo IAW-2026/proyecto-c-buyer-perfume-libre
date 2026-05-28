@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/carousel";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import Header from "@/components/header";
+import Header from "@/components/layout/header";
 import CalificacionEstrellas from "@/components/calificacionEstrellas";
 import { formatearPrecio, generarUrl } from "@/lib/utils";
 import { notFound, redirect } from "next/dist/client/components/navigation";
