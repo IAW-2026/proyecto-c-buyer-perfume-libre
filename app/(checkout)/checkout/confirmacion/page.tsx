@@ -11,6 +11,7 @@ import { obtenerDireccionPorId } from "@/actions/direcciones";
 import { obtenerDetallesProducto } from "@/lib/api";
 import { DireccionDb } from "@/schema/direccion.schema";
 import {
+  EstadosOrden,
   itemsDeOrdenDb,
   OrdenDeCompraDb,
   Perfume,
@@ -31,7 +32,7 @@ export default async function ConfirmacionCheckoutPage({
 
   let orden;
   try {
-    orden = await obtenerOrdenDeUsuario(ordenId);
+    orden = await obtenerOrdenDeUsuario(ordenId, EstadosOrden.enum.Pendiente);
   } catch {
     redirect("/carrito");
   }
