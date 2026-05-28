@@ -2,8 +2,8 @@
 
 import React from "react";
 import { Controller, Control, FieldPath, FieldValues } from "react-hook-form";
-import { Field, FieldError, FieldLabel } from "../ui/field";
-import { Input } from "../ui/input";
+import { Field, FieldError, FieldLabel } from "../../ui/field";
+import { Input } from "../../ui/input";
 
 type Props<T extends FieldValues> = {
   nombre: FieldPath<T>;

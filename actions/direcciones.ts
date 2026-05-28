@@ -55,7 +55,7 @@ export async function agregarDireccion(datosDireccion: Direccion) {
       throw new Error("Usuario no autenticado");
     }
 
-    await prisma.direccion.create({
+    const nuevaDireccion = await prisma.direccion.create({
       data: {
         usuarioId: userId,
         ...datosDireccion,
@@ -63,6 +63,8 @@ export async function agregarDireccion(datosDireccion: Direccion) {
     });
 
     revalidatePath("/checkout/envio");
+
+    return nuevaDireccion.id;
   } catch (error) {
     console.error("Error en agregarDireccion:", error);
     throw new Error("No se pudo agregar la dirección");

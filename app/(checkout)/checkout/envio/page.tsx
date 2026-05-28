@@ -1,7 +1,7 @@
 import Header from "@/components/layout/header";
 import { obtenerDireccionesUsuario } from "@/actions/direcciones";
-import PrimeraDireccionPantalla from "@/components/checkout/PrimeraDireccionPantalla";
-import DireccionesEnvioPanel from "@/components/checkout/DireccionesEnvioPanel";
+import PrimeraDireccionPantalla from "@/components/checkout/envio/PrimeraDireccionPantalla";
+import DireccionesEnvioPanel from "@/components/checkout/envio/DireccionesEnvioPanel";
 
 export default async function CheckoutEnvioPage() {
   const direcciones = await obtenerDireccionesUsuario();
