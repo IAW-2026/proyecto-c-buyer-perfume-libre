@@ -9,6 +9,7 @@ import {
   PerfumeCarritosSchema,
   PerfumeComprado,
   PerfumeCompradosSchema,
+  PerfumesSchema,
 } from "@/schema/perfume.schema";
 import { mockPerfumes } from "./mockPerfumes";
 import { z } from "zod";
@@ -74,6 +75,20 @@ export async function obtenerProductosComprados(
   );
 
   return validarTipo(perfumesFiltrados, PerfumeCompradosSchema);
+}
+
+export async function obtenerDetallesProducto(
+  ids: string[],
+): Promise<Perfume[]> {
+  // En etapa 3 cambiar por fetch a la API real.
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  // En etapa 3 cambiar esta parte y usar el resultado del fetch
+  const perfumesFiltrados = mockPerfumes.filter((perfume) =>
+    ids.includes(perfume.id),
+  );
+
+  return validarTipo(perfumesFiltrados, PerfumesSchema);
 }
 
 export async function enviarResenaProducto(

@@ -54,6 +54,30 @@ export async function iniciarProcesamientoCompra(
   redirect(`/checkout/confirmacion?ordenId=${nuevaOrden.id}`);
 }
 
+export async function obtenerOrdenDeUsuario(idOrden: string) {
+  try {
+    const { userId } = await auth();
+    if (!userId) throw new Error("No autorizado");
+
+    const orden = await prisma.ordenCompra.findFirst({
+      where: {
+        id: idOrden,
+        usuarioId: userId,
+        estado: EstadosOrden.enum.Pendiente,
+      },
+      include: {
+        items: true,
+      },
+    });
+
+    if (!orden) throw new Error("Orden no encontrada");
+
+    return orden;
+  } catch (error) {
+    throw new Error(`Error al obtener la orden ${error}`);
+  }
+}
+
 export async function actualizarOrden(
   idOrden: string,
   idPago: string,
