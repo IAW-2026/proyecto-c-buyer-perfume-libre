@@ -15,11 +15,30 @@ import { mockPerfumes } from "./mockPerfumes";
 import { z } from "zod";
 import { obtenerHistorialSimulado, OpcionEnvio } from "./mockEnvios";
 
-export async function obtenerCatalogo(): Promise<PerfumeCard[]> {
+export interface FiltrosCatalogo {
+  q?: string | string[];
+  marca?: string | string[];
+  genero?: string | string[];
+  tamano?: string | string[];
+  precioMin?: string | string[];
+  precioMax?: string | string[];
+  page: number;
+  limit: number;
+}
+
+export async function obtenerCatalogo(
+  filtros: FiltrosCatalogo,
+): Promise<{ items: PerfumeCard[]; total: number }> {
   // En etapa 3 cambiar por fetch a la API real.
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
-  return validarTipo(mockPerfumes, PerfumeCardsSchema);
+  const { q, marca, genero, tamano, precioMin, precioMax, page, limit } =
+    filtros;
+
+  const items = validarTipo(mockPerfumes, PerfumeCardsSchema);
+  const total = items.length;
+
+  return { items, total };
 }
 
 export async function obtenerDetallePerfume(id: string): Promise<Perfume> {
