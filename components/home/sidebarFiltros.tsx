@@ -182,10 +182,7 @@ export default function SidebarFiltros() {
     <aside className="w-64 shrink-0 hidden md:block border-r pr-2 h-[calc(100vh-160px)] overflow-y-auto sticky top-24 pb-16 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-slate-200 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-300">
       <h2 className="font-bold text-xl mb-4 tracking-tight pl-2">Filtros</h2>
 
-      <Accordion
-        multiple
-        defaultValue={["Marca", "Género", "Precio", "Tamaño"]}
-      >
+      <Accordion multiple defaultValue={[]}>
         <AcordionCheckList
           title="Marca"
           paramName="marca"
