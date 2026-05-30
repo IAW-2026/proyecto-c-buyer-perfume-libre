@@ -39,3 +39,26 @@ export async function actualizarRol(usuarioId: string, nuevoRol: RolUsuario) {
     throw new Error("Error al actualizar el rol del usuario");
   }
 }
+
+export async function obtenerRolUsuario() {
+  try {
+    const user = await currentUser();
+
+    if (!user) {
+      throw new Error("Usuario no autenticado");
+    }
+
+    const rolUsuario = await prisma.usuario.findUnique({
+      where: { id: user.id },
+      select: { rol: true },
+    });
+
+    if (!rolUsuario) {
+      throw new Error("Usuario no encontrado en la base de datos");
+    }
+
+    return rolUsuario;
+  } catch (error) {
+    throw new Error("Error al obtener el rol del usuario");
+  }
+}
