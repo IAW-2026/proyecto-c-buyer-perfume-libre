@@ -126,3 +126,22 @@ export async function vaciarCarrito(usuarioId: string) {
     throw new Error(`Error al vaciar el carrito ${error}`);
   }
 }
+
+export async function actualizarEstadoEnvio(
+  trackingId: string,
+  nuevoEstado: string,
+  fecha: string,
+) {
+  try {
+    const orden = await prisma.ordenCompra.update({
+      where: { envioId: trackingId },
+      data: { estado: nuevoEstado },
+    });
+  } catch (error: any) {
+    if (error.code === "P2025") {
+      throw new Error(`NOT_FOUND`);
+    }
+
+    throw new Error(`Error al actualizar el estado del envío ${error.message}`);
+  }
+}
