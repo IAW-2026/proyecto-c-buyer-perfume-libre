@@ -126,3 +126,45 @@ export async function vaciarCarrito(usuarioId: string) {
     throw new Error(`Error al vaciar el carrito ${error}`);
   }
 }
+
+export async function actualizarEstadoEnvio(
+  trackingId: string,
+  nuevoEstado: string,
+  fecha: string,
+) {
+  try {
+    const orden = await prisma.ordenCompra.update({
+      where: { envioId: trackingId },
+      data: { estado: nuevoEstado },
+    });
+  } catch (error: any) {
+    if (error.code === "P2025") {
+      throw new Error(`NOT_FOUND`);
+    }
+
+    throw new Error(`Error al actualizar el estado del envío ${error.message}`);
+  }
+}
+
+export async function obtenerItemsOrdenParaSeller(ordenId: string) {
+  try {
+    const orden = await prisma.ordenCompra.findUnique({
+      where: { id: ordenId },
+      select: {
+        usuarioId: true,
+        items: {
+          select: {
+            productoId: true,
+            cantidad: true,
+          },
+        },
+      },
+    });
+
+    if (!orden) throw new Error("NOT_FOUND");
+
+    return orden;
+  } catch (error) {
+    throw new Error(`Error al obtener los items de la orden ${error}`);
+  }
+}
