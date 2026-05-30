@@ -6,9 +6,9 @@ export const mockPerfumes: Perfume[] = [
     nombre: "Chanel No. 5 Eau de Parfum",
     marca: "Chanel",
     tamaño: 100,
-    precio: 14599,
+    precio: 21000000,
     imagenesUrl: [
-      "https://images.unsplash.com/photo-1769671327147-bb49bc45e9f6?q=80&w=777&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1769671327147-bb49bc45e9f6?q=80&w=777&auto=format&fit=crop",
     ],
     descripcion:
       "Un clásico floral elegante con presencia sofisticada y duración prolongada.",
@@ -19,27 +19,27 @@ export const mockPerfumes: Perfume[] = [
   {
     id: "2",
     nombre: "Dior Sauvage Eau de Toilette",
-    precio: 9899,
-    imagenesUrl: [
-      "https://images.unsplash.com/photo-1700522604220-471669e4364c?q=80&w=764&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    ],
     marca: "Dior",
     tamaño: 100,
+    precio: 18500000,
+    imagenesUrl: [
+      "https://images.unsplash.com/photo-1700522604220-471669e4364c?q=80&w=764&auto=format&fit=crop",
+    ],
     descripcion:
       "Aroma fresco y especiado con salida intensa y fondo amaderado.",
     calificacion: 4.7,
     vendedor: "Casa Dior",
-    genero: "Mujer",
+    genero: "Hombre",
   },
   {
     id: "3",
     nombre: "Carolina Herrera Good Girl",
-    precio: 11299,
-    imagenesUrl: [
-      "https://images.unsplash.com/photo-1458538977777-0549b2370168?q=80&w=1174&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    ],
     marca: "Carolina Herrera",
-    tamaño: 80,
+    tamaño: 75,
+    precio: 14500000,
+    imagenesUrl: [
+      "https://images.unsplash.com/photo-1458538977777-0549b2370168?q=80&w=1174&auto=format&fit=crop",
+    ],
     descripcion:
       "Fragancia floral oriental con notas de jazmín, almendra y cacao.",
     calificacion: 4.6,
@@ -49,12 +49,12 @@ export const mockPerfumes: Perfume[] = [
   {
     id: "4",
     nombre: "Paco Rabanne 1 Million",
-    precio: 8999,
-    imagenesUrl: [
-      "https://images.unsplash.com/photo-1675255425189-ac9da0ae7d96?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    ],
     marca: "Paco Rabanne",
     tamaño: 100,
+    precio: 13500000,
+    imagenesUrl: [
+      "https://images.unsplash.com/photo-1675255425189-ac9da0ae7d96?q=80&w=687&auto=format&fit=crop",
+    ],
     descripcion: "Aroma audaz y moderno con notas de pomelo, canela y cuero.",
     calificacion: 4.5,
     vendedor: "Paco Rabanne Official",
@@ -63,14 +63,14 @@ export const mockPerfumes: Perfume[] = [
   {
     id: "5",
     nombre: "Versace Bright Crystal",
-    precio: 7999,
-    imagenesUrl: [
-      "https://images.unsplash.com/photo-1587017539504-67cfbddac569?q=80&w=735&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    ],
     marca: "Versace",
-    tamaño: 90,
+    tamaño: 50,
+    precio: 9500000,
+    imagenesUrl: [
+      "https://images.unsplash.com/photo-1587017539504-67cfbddac569?q=80&w=735&auto=format&fit=crop",
+    ],
     descripcion:
-      "Fragancia fresca y vibrante, ideal para el uso diario. Notas florales intensas con un fondo amaderado elegante. Un clásico moderno para cualquier colección.",
+      "Fragancia fresca y vibrante, ideal para el uso diario. Notas florales intensas.",
     calificacion: 4.8,
     vendedor: "Versace Boutique",
     genero: "Mujer",
@@ -78,12 +78,12 @@ export const mockPerfumes: Perfume[] = [
   {
     id: "6",
     nombre: "Hugo Boss Bottled",
-    precio: 6999,
-    imagenesUrl: [
-      "https://images.unsplash.com/photo-1638551442447-085a2d42918f?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    ],
     marca: "Hugo Boss",
     tamaño: 100,
+    precio: 11000000,
+    imagenesUrl: [
+      "https://images.unsplash.com/photo-1638551442447-085a2d42918f?q=80&w=1170&auto=format&fit=crop",
+    ],
     descripcion:
       "Aroma amaderado especiado con notas de manzana, canela y madera de sándalo.",
     calificacion: 4.4,
@@ -93,12 +93,12 @@ export const mockPerfumes: Perfume[] = [
   {
     id: "7",
     nombre: "Lancôme La Vie Est Belle",
-    precio: 10599,
-    imagenesUrl: [
-      "https://images.unsplash.com/photo-1613521140785-e85e427f8002?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    ],
     marca: "Lancôme",
     tamaño: 75,
+    precio: 16000000,
+    imagenesUrl: [
+      "https://images.unsplash.com/photo-1613521140785-e85e427f8002?q=80&w=687&auto=format&fit=crop",
+    ],
     descripcion:
       "Fragancia dulce y floral con notas de iris, jazmín y praliné.",
     calificacion: 4.7,
@@ -108,58 +108,58 @@ export const mockPerfumes: Perfume[] = [
   {
     id: "8",
     nombre: "Calvin Klein CK One",
-    precio: 4599,
-    imagenesUrl: [
-      "https://images.unsplash.com/photo-1620848616916-3efaf499adcb?q=80&w=627&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    ],
     marca: "Calvin Klein",
-    tamaño: 100,
+    tamaño: 200,
+    precio: 8500000,
+    imagenesUrl: [
+      "https://images.unsplash.com/photo-1620848616916-3efaf499adcb?q=80&w=627&auto=format&fit=crop",
+    ],
     descripcion: "Aroma fresco y limpio con notas de piña, papaya y almizcle.",
     calificacion: 4.3,
     vendedor: "Calvin Klein Store",
-    genero: "Mujer",
+    genero: "Unisex",
   },
   {
     id: "9",
     nombre: "Tom Ford Black Orchid",
-    precio: 18999,
-    imagenesUrl: [
-      "https://images.unsplash.com/photo-1642698215110-87817f1fbe0e?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    ],
     marca: "Tom Ford",
     tamaño: 50,
+    precio: 24000000,
+    imagenesUrl: [
+      "https://images.unsplash.com/photo-1642698215110-87817f1fbe0e?q=80&w=1170&auto=format&fit=crop",
+    ],
     descripcion:
       "Fragancia intensa y misteriosa con notas de trufa negra, bergamota y orquídea.",
     calificacion: 4.9,
     vendedor: "Tom Ford Boutique",
-    genero: "Mujer",
+    genero: "Unisex",
   },
   {
     id: "10",
     nombre: "Dolce & Gabbana Light Blue",
-    precio: 8499,
-    imagenesUrl: [
-      "https://images.unsplash.com/photo-1720414913669-87031493d7c9?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    ],
     marca: "Dolce & Gabbana",
     tamaño: 100,
+    precio: 11500000,
+    imagenesUrl: [
+      "https://images.unsplash.com/photo-1720414913669-87031493d7c9?q=80&w=687&auto=format&fit=crop",
+    ],
     descripcion:
-      "Fragancia fresca y vibrante, ideal para el uso diario. Notas florales intensas con un fondo amaderado elegante. Un clásico moderno para cualquier colección.",
+      "Fragancia fresca y vibrante, ideal para el uso diario. Notas florales intensas.",
     calificacion: 4.8,
-    vendedor: "Versace Boutique",
+    vendedor: "D&G Official",
     genero: "Mujer",
   },
   {
     id: "11",
     nombre: "Yves Saint Laurent Libre",
-    precio: 11899,
-    imagenesUrl: [
-      "https://images.unsplash.com/photo-1723391962166-6d9bb8a3d3e7?q=80&w=764&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    ],
     marca: "YSL",
-    tamaño: 90,
+    tamaño: 50,
+    precio: 14000000,
+    imagenesUrl: [
+      "https://images.unsplash.com/photo-1723391962166-6d9bb8a3d3e7?q=80&w=764&auto=format&fit=crop",
+    ],
     descripcion:
-      "Fragancia floral oriental con notas de jazmín, almendra y cacao.",
+      "Fragancia floral oriental con notas de jazmín, almendra y lavanda.",
     calificacion: 4.6,
     vendedor: "YSL Official",
     genero: "Mujer",
@@ -167,16 +167,311 @@ export const mockPerfumes: Perfume[] = [
   {
     id: "12",
     nombre: "Armani Code",
-    precio: 9299,
-    imagenesUrl: [
-      "https://images.unsplash.com/photo-1706924179763-7f2744656823?q=80&w=715&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    ],
     marca: "Armani",
     tamaño: 75,
+    precio: 13500000,
+    imagenesUrl: [
+      "https://images.unsplash.com/photo-1706924179763-7f2744656823?q=80&w=715&auto=format&fit=crop",
+    ],
     descripcion:
       "Fragancia oriental especiada con notas de bergamota, limón y madera de guayaco.",
     calificacion: 4.5,
     vendedor: "Armani Store",
+    genero: "Hombre",
+  },
+  {
+    id: "13",
+    nombre: "Carolina Herrera 212 VIP Men",
+    marca: "Carolina Herrera",
+    tamaño: 100,
+    precio: 12500000,
+    imagenesUrl: [
+      "https://www.perfumerianormy.com.ar/wp-content/uploads/2016/08/212-vip_8_11zon.webp",
+    ],
+    descripcion: "Explosiva y vibrante, con notas de vodka, maracuyá y menta.",
+    calificacion: 4.6,
+    vendedor: "Perfumería Central",
+    genero: "Hombre",
+  },
+  {
+    id: "14",
+    nombre: "Dior J'adore",
+    marca: "Dior",
+    tamaño: 50,
+    precio: 17500000,
+    imagenesUrl: [
+      "https://images.unsplash.com/photo-1594035910387-fea47794261f?q=80&w=800&auto=format&fit=crop",
+    ],
+    descripcion:
+      "Un bouquet floral magnífico con rosa de damasco y ylang-ylang.",
+    calificacion: 4.9,
+    vendedor: "Casa Dior",
+    genero: "Mujer",
+  },
+  {
+    id: "15",
+    nombre: "Calvin Klein CK Everyone",
+    marca: "Calvin Klein",
+    tamaño: 100,
+    precio: 7500000,
+    imagenesUrl: [
+      "https://images.unsplash.com/photo-1523293182086-7651a899d37f?q=80&w=800&auto=format&fit=crop",
+    ],
+    descripcion:
+      "Fragancia limpia, verde y cítrica. Perfecta para cualquier género.",
+    calificacion: 4.2,
+    vendedor: "Calvin Klein Store",
+    genero: "Unisex",
+  },
+  {
+    id: "16",
+    nombre: "Paco Rabanne Invictus",
+    marca: "Paco Rabanne",
+    tamaño: 100,
+    precio: 14500000,
+    imagenesUrl: [
+      "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?q=80&w=800&auto=format&fit=crop",
+    ],
+    descripcion: "El aroma de la victoria. Madera de guayaco y pomelo fresco.",
+    calificacion: 4.7,
+    vendedor: "Paco Rabanne Official",
+    genero: "Hombre",
+  },
+  {
+    id: "17",
+    nombre: "Chanel Bleu de Chanel",
+    marca: "Chanel",
+    tamaño: 100,
+    precio: 23000000,
+    imagenesUrl: [
+      "https://images.unsplash.com/photo-1732828912093-a776288edfed?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    ],
+    descripcion:
+      "Intensa, amaderada y elegante. Para el hombre que desafía las convenciones.",
+    calificacion: 5.0,
+    vendedor: "Chanel Boutique",
+    genero: "Hombre",
+  },
+  {
+    id: "18",
+    nombre: "Versace Eros",
+    marca: "Versace",
+    tamaño: 100,
+    precio: 15500000,
+    imagenesUrl: [
+      "https://www.perfumerianormy.com.ar/wp-content/uploads/2016/10/VersaceEros.jpg",
+    ],
+    descripcion:
+      "Pasión y deseo en una botella. Notas de menta, manzana verde y vainilla.",
+    calificacion: 4.8,
+    vendedor: "Versace Boutique",
+    genero: "Hombre",
+  },
+  {
+    id: "19",
+    nombre: "Dior Fahrenheit",
+    marca: "Dior",
+    tamaño: 75,
+    precio: 19500000,
+    imagenesUrl: [
+      "https://www.perfumerianormy.com.ar/wp-content/uploads/2016/10/EDT_11zon-1.webp",
+    ],
+    descripcion: "Una firma única y contrastante. Cuero, mandarina y violeta.",
+    calificacion: 4.6,
+    vendedor: "Perfumería Rouge",
+    genero: "Hombre",
+  },
+  {
+    id: "20",
+    nombre: "Carolina Herrera 212 NYC",
+    marca: "Carolina Herrera",
+    tamaño: 100,
+    precio: 13000000,
+    imagenesUrl: [
+      "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?q=80&w=800&auto=format&fit=crop",
+    ],
+    descripcion:
+      "Fresca e innovadora, capta el espíritu joven y dinámico de Nueva York.",
+    calificacion: 4.5,
+    vendedor: "Perfumería Central",
+    genero: "Mujer",
+  },
+  {
+    id: "21",
+    nombre: "Paco Rabanne Olympéa",
+    marca: "Paco Rabanne",
+    tamaño: 50,
+    precio: 14000000,
+    imagenesUrl: [
+      "https://images.unsplash.com/photo-1596462502278-27bfdc403348?q=80&w=800&auto=format&fit=crop",
+    ],
+    descripcion:
+      "Vainilla salada y mandarina verde. Una fragancia divina e irresistible.",
+    calificacion: 4.7,
+    vendedor: "Paco Rabanne Official",
+    genero: "Mujer",
+  },
+  {
+    id: "22",
+    nombre: "Calvin Klein Euphoria",
+    marca: "Calvin Klein",
+    tamaño: 100,
+    precio: 9500000,
+    imagenesUrl: [
+      "https://images.unsplash.com/photo-1588405748880-12d1d2a59f75?q=80&w=800&auto=format&fit=crop",
+    ],
+    descripcion:
+      "Misteriosa y provocativa. Notas de granada, orquídea negra y caoba.",
+    calificacion: 4.4,
+    vendedor: "Calvin Klein Store",
+    genero: "Mujer",
+  },
+  {
+    id: "23",
+    nombre: "Yves Saint Laurent Black Opium",
+    marca: "YSL",
+    tamaño: 75,
+    precio: 18000000,
+    imagenesUrl: [
+      "https://www.perfumerianormy.com.ar/wp-content/uploads/2016/09/black-opium.png",
+    ],
+    descripcion:
+      "Adictiva y audaz. La energía del café negro combinada con flores blancas.",
+    calificacion: 4.9,
+    vendedor: "YSL Official",
+    genero: "Mujer",
+  },
+  {
+    id: "24",
+    nombre: "Tom Ford Oud Wood",
+    marca: "Tom Ford",
+    tamaño: 50,
+    precio: 25000000,
+    imagenesUrl: [
+      "https://images.unsplash.com/photo-1582211594533-268f4f1edcb9?q=80&w=800&auto=format&fit=crop",
+    ],
+    descripcion:
+      "Madera de oud, sándalo y vetiver. Exótica, ahumada y sumamente lujosa.",
+    calificacion: 5.0,
+    vendedor: "Tom Ford Boutique",
+    genero: "Unisex",
+  },
+  {
+    id: "25",
+    nombre: "Lancôme Idôle",
+    marca: "Lancôme",
+    tamaño: 50,
+    precio: 13500000,
+    imagenesUrl: [
+      "https://www.perfumerianormy.com.ar/wp-content/uploads/2019/08/IdoleLancome.jpg",
+    ],
+    descripcion: "Un perfume limpio y luminoso con esencia de pétalos de rosa.",
+    calificacion: 4.6,
+    vendedor: "Lancôme Official",
+    genero: "Mujer",
+  },
+  {
+    id: "26",
+    nombre: "Armani My Way",
+    marca: "Armani",
+    tamaño: 30,
+    precio: 9000000,
+    imagenesUrl: [
+      "https://images.unsplash.com/photo-1541643600914-78b084683601?q=80&w=800&auto=format&fit=crop",
+    ],
+    descripcion: "Un ramo de flores blancas radiante, cítrico y amaderado.",
+    calificacion: 4.5,
+    vendedor: "Armani Store",
+    genero: "Mujer",
+  },
+  {
+    id: "27",
+    nombre: "Chanel Coco Mademoiselle",
+    marca: "Chanel",
+    tamaño: 100,
+    precio: 22000000,
+    imagenesUrl: [
+      "https://images.unsplash.com/photo-1590736701530-f9e57920dd6f?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    ],
+    descripcion:
+      "Fresca y sensual. El espíritu de una mujer libre e independiente.",
+    calificacion: 4.9,
+    vendedor: "Chanel Boutique",
+    genero: "Mujer",
+  },
+  {
+    id: "28",
+    nombre: "Dior Miss Dior",
+    marca: "Dior",
+    tamaño: 50,
+    precio: 16500000,
+    imagenesUrl: [
+      "https://www.perfumerianormy.com.ar/wp-content/uploads/2024/07/MISS-DIOR-PARFUM.webp",
+    ],
+    descripcion:
+      "El perfume del amor y la alegría, con rosas de Grasse y peonías.",
+    calificacion: 4.8,
+    vendedor: "Casa Dior",
+    genero: "Mujer",
+  },
+  {
+    id: "29",
+    nombre: "Versace Crystal Noir",
+    marca: "Versace",
+    tamaño: 50,
+    precio: 11000000,
+    imagenesUrl: [
+      "https://www.perfumerianormy.com.ar/wp-content/uploads/2016/09/EDT-CRYSTAL_11zon.webp",
+    ],
+    descripcion:
+      "Mágica, etérea y sensual. Con notas de cardamomo, coco y gardenia.",
+    calificacion: 4.5,
+    vendedor: "Versace Boutique",
+    genero: "Mujer",
+  },
+  {
+    id: "30",
+    nombre: "Calvin Klein Be",
+    marca: "Calvin Klein",
+    tamaño: 200,
+    precio: 8500000,
+    imagenesUrl: [
+      "https://images.unsplash.com/photo-1594035910387-fea47794261f?q=80&w=800&auto=format&fit=crop",
+    ],
+    descripcion:
+      "Aroma íntimo y muy personal con notas de lavanda y almizcle blanco.",
+    calificacion: 4.4,
+    vendedor: "Perfumería Central",
+    genero: "Unisex",
+  },
+  {
+    id: "31",
+    nombre: "Yves Saint Laurent Y",
+    marca: "YSL",
+    tamaño: 100,
+    precio: 17000000,
+    imagenesUrl: [
+      "https://www.perfumerianormy.com.ar/wp-content/uploads/2024/05/MY-SELF.png",
+    ],
+    descripcion:
+      "Atrevida y fresca. Para el hombre que se atreve a seguir sus pasiones.",
+    calificacion: 4.7,
+    vendedor: "YSL Official",
+    genero: "Hombre",
+  },
+  {
+    id: "32",
+    nombre: "Carolina Herrera Bad Boy",
+    marca: "Carolina Herrera",
+    tamaño: 100,
+    precio: 15500000,
+    imagenesUrl: [
+      "https://www.perfumerianormy.com.ar/wp-content/uploads/2019/11/BadBoy.jpg",
+    ],
+    descripcion:
+      "Compleja y cautivadora, con pimienta blanca, negra y madera de cedro.",
+    calificacion: 4.6,
+    vendedor: "Carolina Herrera Store",
     genero: "Hombre",
   },
 ];

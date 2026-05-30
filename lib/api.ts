@@ -15,11 +15,74 @@ import { mockPerfumes } from "./mockPerfumes";
 import { z } from "zod";
 import { obtenerHistorialSimulado, OpcionEnvio } from "./mockEnvios";
 
-export async function obtenerCatalogo(): Promise<PerfumeCard[]> {
+export interface FiltrosCatalogo {
+  q?: string | string[];
+  marca?: string | string[];
+  genero?: string | string[];
+  tamano?: string | string[];
+  precioMin?: string | string[];
+  precioMax?: string | string[];
+  page: number;
+  limit: number;
+}
+
+export async function obtenerCatalogo(
+  filtros: FiltrosCatalogo,
+): Promise<{ items: PerfumeCard[]; total: number }> {
   // En etapa 3 cambiar por fetch a la API real.
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
-  return validarTipo(mockPerfumes, PerfumeCardsSchema);
+  const { q, marca, genero, tamano, precioMin, precioMax, page, limit } =
+    filtros;
+
+  // Filtrado simulado, en etapa 3 esto lo hará la API.
+  let resultado = [...mockPerfumes];
+
+  if (q && typeof q === "string") {
+    const query = q.toLowerCase();
+    resultado = resultado.filter(
+      (p) =>
+        p.nombre.toLowerCase().includes(query) ||
+        p.marca.toLowerCase().includes(query),
+    );
+  }
+
+  if (marca) {
+    const marcasSeleccionadas = Array.isArray(marca) ? marca : [marca];
+    resultado = resultado.filter((p) => marcasSeleccionadas.includes(p.marca));
+  }
+
+  if (genero) {
+    const generosSeleccionados = Array.isArray(genero) ? genero : [genero];
+    resultado = resultado.filter((p) =>
+      generosSeleccionados.includes(p.genero),
+    );
+  }
+
+  if (tamano) {
+    const tamanosSeleccionados = (
+      Array.isArray(tamano) ? tamano : [tamano]
+    ).map(Number);
+    resultado = resultado.filter((p) =>
+      tamanosSeleccionados.includes(p.tamaño),
+    );
+  }
+
+  if (precioMin && typeof precioMin === "string") {
+    resultado = resultado.filter((p) => p.precio >= parseInt(precioMin));
+  }
+  if (precioMax && typeof precioMax === "string") {
+    resultado = resultado.filter((p) => p.precio <= parseInt(precioMax));
+  }
+
+  const total = resultado.length;
+  const inicio = (page - 1) * limit;
+  const fin = inicio + limit;
+
+  const items = validarTipo(resultado, PerfumeCardsSchema);
+  const itemsPagina = items.slice(inicio, fin);
+
+  return { items: itemsPagina, total };
 }
 
 export async function obtenerDetallePerfume(id: string): Promise<Perfume> {

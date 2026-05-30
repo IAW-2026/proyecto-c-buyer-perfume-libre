@@ -1,9 +1,6 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { formatearPrecio, generarUrl } from "@/lib/utils";
 import { PerfumeCard } from "@/schema/perfume.schema";
 import { BotonAgregarCarrito } from "../carrito/botonAgregarCarrito";

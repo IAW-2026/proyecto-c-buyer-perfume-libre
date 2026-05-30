@@ -1,9 +1,9 @@
-import { Heart, Search, ShoppingBag, ShoppingCart } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { Heart, ShoppingBag, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { SignInButton, Show, UserButton } from "@clerk/nextjs";
 import SiteBrand from "./SiteBrand";
+import { BarraDeBusqueda } from "./BarraDeBusqueda";
 
 export default function Header() {
   return (
@@ -16,21 +16,6 @@ export default function Header() {
         <BarraDeBusqueda />
       </div>
     </header>
-  );
-}
-
-function BarraDeBusqueda() {
-  return (
-    <div className="flex justify-center w-full">
-      <div className="relative w-full max-w-2xl">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-        <Input
-          type="search"
-          placeholder="Buscar fragancias, marcas, notas..."
-          className="w-full pl-10 h-12 text-lg shadow-sm border-2"
-        />
-      </div>
-    </div>
   );
 }
 
