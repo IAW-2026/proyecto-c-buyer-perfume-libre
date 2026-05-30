@@ -92,6 +92,17 @@ git merge --no-ff feature/nombre-de-la-rama
 
 Para sincronizar los usuarios de Clerk con nuestra db, optamos por un observer del lado del cliente en lugar de Webhooks para facilitar el desarollo de la aplicacion y no tener que configurar tuneles para comunicarnos con clerk
 
+### Modificar Rol de Usuario (Backdoor)
+
+Asegúrese de haber **iniciado sesión previamente** en la aplicación. Luego, simplemente navegue a las siguientes rutas:
+
+- **Hacerse Administrador (Acceso al Panel de Control):**
+  `/api/roles/actualizar?secret=IAW&rol=ADMIN`
+- **Volver a ser un Usuario Normal:**
+  `/api/roles/actualizar?secret=IAW&rol=USER`
+
+Al visitar estos enlaces, el sistema actualizará los permisos de su cuenta en la base de datos y lo redirigirá automáticamente al Dashboard de Administración (en caso de ser `ADMIN`) o a la página principal (en caso de ser `USER`).
+
 ---
 
 Enunciado completo: <https://iaw-2026.github.io/proyecto/>
