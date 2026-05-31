@@ -5,6 +5,7 @@ import { obtenerRolUsuario } from "./usuario";
 import { RolUsuario } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { EstadoOrdenType, EstadosOrden } from "@/schema/perfume.schema";
+import { revalidatePath } from "next/cache";
 
 const EstadosOrdenInactivas: EstadoOrdenType[] = [
   EstadosOrden.enum.Pendiente,
@@ -145,5 +146,96 @@ async function obtenerGraficoVentas(x: number = 6) {
     return resultados;
   } catch (error) {
     throw new Error("No se pudo obtener los datos para el gráfico de ventas");
+  }
+}
+
+export async function generarDatosPrueba(x: number = 6) {
+  try {
+    const CANTIDAD_USUARIOS = 15;
+    const CANTIDAD_ORDENES = 30;
+
+    const mockUsers = await crearUsuariosFalsos(CANTIDAD_USUARIOS);
+
+    const ordenesData = crearOrdenesFalsas(CANTIDAD_ORDENES, x, mockUsers);
+
+    await prisma.ordenCompra.createMany({
+      data: ordenesData,
+    });
+
+    revalidatePath("/admin");
+    return { success: true };
+  } catch (error) {
+    throw new Error("Hubo un problema generando los datos de prueba." + error);
+  }
+}
+
+function crearOrdenesFalsas(
+  cantOrdenes: number,
+  x: number,
+  mockUsers: { id: string; rol: RolUsuario; createdAt: Date }[],
+) {
+  return Array.from({ length: cantOrdenes }).map(() => {
+    const fechaRandom = new Date();
+    fechaRandom.setDate(1);
+    const mesesAtras = Math.floor(Math.random() * x);
+    fechaRandom.setMonth(fechaRandom.getMonth() - mesesAtras);
+    fechaRandom.setDate(Math.floor(Math.random() * 28) + 1);
+
+    const usuarioRandom =
+      mockUsers[Math.floor(Math.random() * mockUsers.length)];
+
+    const minCentavos = 7500000;
+    const maxCentavos = 25000000;
+    const totalRandom = Math.floor(
+      Math.random() * (maxCentavos - minCentavos + 1) + minCentavos,
+    );
+
+    return {
+      id: `mock_ord_${Math.random().toString(36).substring(7)}`,
+      usuarioId: usuarioRandom.id,
+      total: totalRandom,
+      estado: EstadosOrden.enum.Entregado,
+      createdAt: fechaRandom,
+      direccionId: `mock_dir_${Math.random().toString(36).substring(7)}`,
+      costoEnvio: Math.floor(Math.random() * (1500 - 500 + 1) + 500),
+      operadorEnvio: "MockExpress",
+      servicioEnvio: "MockStandard",
+      demoraDias: Math.floor(Math.random() * (7 - 2 + 1) + 2),
+    };
+  });
+}
+
+async function crearUsuariosFalsos(CANTIDAD_USUARIOS: number) {
+  return await Promise.all(
+    Array.from({ length: CANTIDAD_USUARIOS }).map((_, i) =>
+      prisma.usuario.create({
+        data: {
+          id: `mock_user_${Date.now()}_${i}`,
+          rol: RolUsuario.USER,
+        },
+      }),
+    ),
+  );
+}
+
+export async function limpiarDatosPrueba() {
+  try {
+    await prisma.$transaction([
+      prisma.ordenCompra.deleteMany({
+        where: {
+          usuarioId: { startsWith: "mock_user_" },
+        },
+      }),
+
+      prisma.usuario.deleteMany({
+        where: {
+          id: { startsWith: "mock_user_" },
+        },
+      }),
+    ]);
+
+    revalidatePath("/admin");
+  } catch (error) {
+    throw new Error("Hubo un problema limpiando los datos de prueba.");
   }
 }

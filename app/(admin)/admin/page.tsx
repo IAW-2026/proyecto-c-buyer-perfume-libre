@@ -1,4 +1,5 @@
 import { obtenerAdminPageData } from "@/actions/admin";
+import { HerramientasDesarrollo } from "@/components/admin/HerramientasDesarollo";
 import { VentasChart } from "@/components/admin/VentasChart";
 import {
   Card,
@@ -10,21 +11,22 @@ import {
 import { formatearPrecio } from "@/lib/utils";
 import { Package, TrendingUp, Users } from "lucide-react";
 
-// TODO: Quitar al agregar skeleton
-export const dynamic = "force-dynamic";
-
 export default async function AdminDashboardPage() {
   const { ganancia, ordenes, usuarios, grafico } = await obtenerAdminPageData();
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">
-          Panel de Control
-        </h1>
-        <p className="text-muted-foreground mt-1">
-          Monitoreo global de transacciones, estados de envío e integraciones.
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            Panel de Control
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Monitoreo global de transacciones, estados de envío e integraciones.
+          </p>
+        </div>
+
+        <HerramientasDesarrollo />
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
