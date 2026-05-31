@@ -7,10 +7,16 @@ datasource db {
   provider = "postgresql"
 }
 
+enum RolUsuario {
+  USER
+  ADMIN
+}
+
 /// * Tanto el id de los productos, direcciones, pagos y envíos se obtienen de las APIs 
 /// * correspondientes por lo que no es necesario crear modelos adicionales para ellos.
 model Usuario {
   id          String        @id
+  rol         RolUsuario @default(USER)
   createdAt   DateTime      @default(now())
   carrito     Carrito[]
   direcciones Direccion[]

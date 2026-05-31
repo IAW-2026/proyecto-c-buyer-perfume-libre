@@ -171,8 +171,8 @@ export const ItemDeOrdenDetalladoSchema = z.object({
 
   ordenCompra: z.object({
     usuarioId: z.string(),
-    pagoId: z.string(),
-    envioId: z.string(),
+    pagoId: z.string().nullable(),
+    envioId: z.string().nullable(),
     estado: EstadosOrden,
     costoEnvio: z.number().int().min(0),
     total: z.number().int().positive(),
