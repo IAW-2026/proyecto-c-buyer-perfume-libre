@@ -2,10 +2,23 @@
 
 import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-
-export const dynamic = "force-dynamic";
+import { Suspense } from "react";
 
 export default function SimuladorPagosApp() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-slate-900 text-white">
+          <p className="text-xl">Cargando simulador...</p>
+        </div>
+      }
+    >
+      <SimuladorPagosContenido />
+    </Suspense>
+  );
+}
+
+function SimuladorPagosContenido() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const ordenId = searchParams.get("ordenId");
