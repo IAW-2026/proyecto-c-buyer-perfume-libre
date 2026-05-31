@@ -1,9 +1,18 @@
-import { Heart, ShoppingBag, ShoppingCart } from "lucide-react";
+import {
+  Heart,
+  LayoutDashboard,
+  ShieldAlert,
+  ShoppingBag,
+  ShoppingCart,
+  TrendingUp,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { SignInButton, Show, UserButton } from "@clerk/nextjs";
 import SiteBrand from "./SiteBrand";
 import { BarraDeBusqueda } from "./BarraDeBusqueda";
+import { obtenerRolUsuario } from "@/actions/usuario";
+import { RolUsuario } from "@/lib/generated/prisma/browser";
 
 export default function Header() {
   return (
@@ -28,9 +37,14 @@ function AccionesHeader() {
     </div>
   );
 
-  function AccionesUsuario() {
+  async function AccionesUsuario() {
+    const rolUsuario = await obtenerRolUsuario();
+
     return (
       <Show when="signed-in">
+        {rolUsuario.rol === RolUsuario.ADMIN && (
+          <HeaderButton href="/admin" icon={LayoutDashboard} label="Admin" />
+        )}
         <HeaderButton href="/compras" icon={ShoppingBag} label="Compras" />
         <HeaderButton href="/favoritos" icon={Heart} label="Favoritos" />
         <HeaderButton href="/carrito" icon={ShoppingCart} label="Carrito" />
