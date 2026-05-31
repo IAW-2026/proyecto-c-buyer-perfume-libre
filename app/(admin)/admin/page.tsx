@@ -10,6 +10,9 @@ import {
 import { formatearPrecio } from "@/lib/utils";
 import { Package, TrendingUp, Users } from "lucide-react";
 
+// TODO: Quitar al agregar skeleton
+export const dynamic = "force-dynamic";
+
 export default async function AdminDashboardPage() {
   const { ganancia, ordenes, usuarios, grafico } = await obtenerAdminPageData();
 

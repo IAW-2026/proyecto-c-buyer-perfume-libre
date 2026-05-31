@@ -1,7 +1,9 @@
-import Header from "@/components/layout/header";
 import { obtenerDireccionesUsuario } from "@/actions/direcciones";
 import PrimeraDireccionPantalla from "@/components/checkout/envio/PrimeraDireccionPantalla";
 import DireccionesEnvioPanel from "@/components/checkout/envio/DireccionesEnvioPanel";
+
+// TODO: Quitar al poner skeleton de direcciones
+export const dynamic = "force-dynamic";
 
 export default async function CheckoutEnvioPage() {
   const direcciones = await obtenerDireccionesUsuario();
