@@ -3,6 +3,8 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
+export const dynamic = "force-dynamic";
+
 export default function SimuladorPagosApp() {
   const searchParams = useSearchParams();
   const router = useRouter();
