@@ -23,7 +23,6 @@ import { BotonAgregarCarrito } from "@/components/carrito/botonAgregarCarrito";
 import { Star } from "lucide-react";
 import { Suspense } from "react";
 
-// TODO: Agregar skeleton mientras se carga el producto
 export default async function ProductoDetalle({
   params,
 }: {
