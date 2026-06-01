@@ -7,6 +7,7 @@ import { PerfumeFavorito } from "@/schema/perfume.schema";
 import { ShoppingCart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { BotonAgregarCarrito } from "../carrito/botonAgregarCarrito";
 
 export default function ProductoCardFavoritos({
   producto,
@@ -38,7 +39,7 @@ export default function ProductoCardFavoritos({
             onEliminar={onClickEliminar}
           />
 
-          <ProductAgregarCarrito />
+          <ProductAgregarCarrito productoId={producto.id} />
         </div>
       </CardContent>
     </Card>
@@ -116,19 +117,20 @@ function ProductActions({
         variant="link"
         className="text-blue-500 p-0 h-auto font-medium hover:text-blue-700"
       >
-        Comprar ahora
+        <Link href={`/checkout/envio`}>Comprar ahora</Link>
       </Button>
     </div>
   );
 }
 
-function ProductAgregarCarrito() {
+function ProductAgregarCarrito({ productoId }: { productoId: string }) {
   return (
     <div className="p-6 flex items-center justify-center border-t sm:border-t-0 sm:border-l border-slate-100">
-      <Button className="w-full sm:w-auto gap-2 bg-blue-600 hover:bg-blue-700">
-        <ShoppingCart className="h-4 w-4" />
-        Agregar al carrito
-      </Button>
+      <BotonAgregarCarrito
+        perfumeId={productoId}
+        className="w-full sm:w-auto gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+        size="default"
+      />
     </div>
   );
 }
