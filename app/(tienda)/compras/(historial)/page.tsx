@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
 import Link from "next/link";
@@ -19,12 +19,6 @@ import { es } from "date-fns/locale";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = {
-  title: "Mis Compras",
-  description:
-    "Revisa el historial de tus compras realizadas en Buyer Perfume Libre",
-};
-
 export default async function MisComprasPage() {
   const itemsComprados = await obtenerHistorialDelUsuario();
 
@@ -44,9 +38,6 @@ export default async function MisComprasPage() {
 function EstadoVacioCompras() {
   return (
     <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-6 py-12 text-center shadow-sm">
-      <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-slate-500">
-        <span className="text-lg font-semibold">0</span>
-      </div>
       <h2 className="text-xl font-semibold text-slate-900">
         Todavía no tienes compras
       </h2>
@@ -55,9 +46,9 @@ function EstadoVacioCompras() {
         detalle de cada pedido.
       </p>
       <div className="mt-6 flex justify-center">
-        <Button variant="outline">
-          <Link href="/">Explorar perfumes</Link>
-        </Button>
+        <Link href="/" className={buttonVariants({ variant: "outline" })}>
+          Explorar perfumes
+        </Link>
       </div>
     </div>
   );

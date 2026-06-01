@@ -90,11 +90,15 @@ function HeaderButton({
   label: string;
 }) {
   return (
-    <Link href={href}>
-      <Button variant="ghost" size="icon" className="relative">
-        <Icon className="h-6 w-6" />
-        <span className="sr-only">{label}</span>
-      </Button>
+    <Link
+      href={href}
+      className={cn(
+        buttonVariants({ variant: "ghost", size: "icon" }),
+        "relative",
+      )}
+    >
+      <Icon className="h-6 w-6" />
+      <span className="sr-only">{label}</span>
     </Link>
   );
 }

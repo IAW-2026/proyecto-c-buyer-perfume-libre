@@ -2,10 +2,10 @@ import {
   obtenerCantidadDeProductosComprados,
   obtenerItemDeOrden,
 } from "@/actions/compras";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { formatearPrecio } from "@/lib/utils";
+import { cn, formatearPrecio } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import { EstadosOrden, ItemDeOrdenDetallado } from "@/schema/perfume.schema";
@@ -61,12 +61,16 @@ function DetalleCompra({ orden }: { orden: ItemDeOrdenDetallado }) {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <Button variant="ghost" size="sm" className="text-slate-600 -ml-2">
-          <Link href="/compras">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Volver al historial
-          </Link>
-        </Button>
+        <Link
+          href="/compras"
+          className={cn(
+            buttonVariants({ variant: "ghost", size: "sm" }),
+            "text-slate-600 -ml-2 font-medium",
+          )}
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Volver al historial
+        </Link>
 
         <SimuladorEnvio ordenId={orden.ordenCompraId} itemId={orden.idItem} />
       </div>

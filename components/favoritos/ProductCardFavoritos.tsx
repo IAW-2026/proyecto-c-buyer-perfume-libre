@@ -1,8 +1,8 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { formatearPrecio, generarUrl } from "@/lib/utils";
+import { cn, formatearPrecio, generarUrl } from "@/lib/utils";
 import { PerfumeFavorito } from "@/schema/perfume.schema";
 import Image from "next/image";
 import Link from "next/link";
@@ -112,14 +112,15 @@ function ProductActions({
         {"Eliminar"}
       </Button>
       <div className="w-px h-4 bg-slate-200 hidden sm:block" />
-      <Button
-        variant="link"
-        className="text-blue-500 p-0 h-auto font-medium hover:text-blue-700"
+      <Link
+        href={`/checkout/envio?productoId=${perfumeId}`}
+        className={cn(
+          buttonVariants({ variant: "link" }),
+          "text-blue-500 p-0 h-auto font-medium hover:text-blue-700",
+        )}
       >
-        <Link href={`/checkout/envio?productoId=${perfumeId}`}>
-          Comprar ahora
-        </Link>
-      </Button>
+        Comprar ahora
+      </Link>
     </div>
   );
 }

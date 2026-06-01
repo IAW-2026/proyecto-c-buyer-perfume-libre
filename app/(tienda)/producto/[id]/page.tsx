@@ -5,11 +5,11 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import type { Metadata } from "next";
 import Image from "next/image";
 import CalificacionEstrellas from "@/components/calificacionEstrellas";
-import { formatearPrecio, generarUrl } from "@/lib/utils";
+import { cn, formatearPrecio, generarUrl } from "@/lib/utils";
 import { notFound, redirect } from "next/dist/client/components/navigation";
 import {
   obtenerDetallePerfume,
@@ -296,17 +296,15 @@ function ProductDescription({ descripcion }: { descripcion: string }) {
 function ProductActions({ perfumeId }: { perfumeId: string }) {
   return (
     <div className="flex flex-col gap-3 py-3 border-y border-slate-200">
-      <Button
-        size="lg"
-        className="w-full text-base font-bold h-12 shadow-md hover:shadow-lg transition-all"
+      <Link
+        href={`/checkout/envio?productoId=${perfumeId}`}
+        className={cn(
+          buttonVariants({ size: "lg" }),
+          "w-full text-base font-bold h-12 shadow-md hover:shadow-lg transition-all flex items-center justify-center",
+        )}
       >
-        <Link
-          href={`/checkout/envio?productoId=${perfumeId}`}
-          className="w-full h-full flex items-center justify-center"
-        >
-          Comprar ahora
-        </Link>
-      </Button>
+        Comprar ahora
+      </Link>
       <BotonAgregarCarrito
         perfumeId={perfumeId}
         variant="outline"

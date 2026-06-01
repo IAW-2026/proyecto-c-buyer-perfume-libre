@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Button } from "../ui/button";
+import { Button, buttonVariants } from "../ui/button";
 
 export default function FavoritosVacio() {
   return (
@@ -7,9 +7,9 @@ export default function FavoritosVacio() {
       <p className="text-muted-foreground mb-4">
         No tenés productos guardados como favoritos.
       </p>
-      <Button>
-        <Link href="/">Explorar perfumes</Link>
-      </Button>
+      <Link href="/" className={buttonVariants()}>
+        Explorar perfumes
+      </Link>
     </div>
   );
 }

@@ -8,11 +8,11 @@ import {
 import { ItemCarrito } from "@/schema/perfume.schema";
 import CarritoVacio from "./CarritoVacio";
 import ProductCardCarrito from "./productCardCarrito";
-import { formatearPrecio } from "@/lib/utils";
+import { cn, formatearPrecio } from "@/lib/utils";
 import { Separator } from "../ui/separator";
 import { Card } from "../ui/card";
 import Link from "next/link";
-import { Button } from "../ui/button";
+import { Button, buttonVariants } from "../ui/button";
 
 type AccionOptimista =
   | { tipo: "ELIMINAR"; id: string }
@@ -145,11 +145,14 @@ function BotonContinuarCompra({
   total: number;
 }) {
   return (
-    // TODO: Revisar esto
-    <Link href={`/checkout/envio`}>
-      <Button className="w-full mt-6 h-12 text-base font-bold bg-blue-600 hover:bg-blue-700 shadow-md">
-        Continuar compra
-      </Button>
+    <Link
+      href="/checkout/envio"
+      className={cn(
+        buttonVariants(),
+        "w-full mt-6 h-12 text-base font-bold bg-blue-600 hover:bg-blue-700 shadow-md flex items-center justify-center",
+      )}
+    >
+      Continuar compra
     </Link>
   );
 }
