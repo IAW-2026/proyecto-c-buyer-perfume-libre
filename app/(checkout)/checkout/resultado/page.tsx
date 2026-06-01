@@ -124,6 +124,7 @@ function PagoRechazado({ ordenId }: { ordenId: string }) {
         </p>
       </CardContent>
 
+      {/* Esto se deberia encargar payments app */}
       <CardFooter className="flex flex-col gap-3 px-6 pb-8 md:px-8">
         <Link
           href={`/checkout/confirmacion?ordenId=${ordenId}`}
