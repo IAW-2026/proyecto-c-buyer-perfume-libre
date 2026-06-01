@@ -59,7 +59,7 @@ export default async function ProductoDetalle({
 
   return (
     <div className="min-h-screen bg-white">
-      <main className="container mx-auto px-4 py-12">
+      <main className="container mx-auto px-4 py-6 lg:py-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
           <ProductImageGallery
             id={producto.id}
@@ -86,7 +86,7 @@ function ProductImageGallery({
   estaEnFavoritos: boolean;
 }) {
   return (
-    <div className="lg:col-span-6 relative bg-slate-50 rounded-2xl border border-slate-200/50 overflow-hidden">
+    <div className="lg:col-span-6 relative bg-slate-50 rounded-2xl border border-slate-200/50 overflow-hidden h-fit lg:sticky lg:top-24">
       <div className="absolute top-4 right-4 z-20">
         <BotonFavorito perfumeId={id} esFavoritoInicial={estaEnFavoritos} />
       </div>
@@ -95,12 +95,12 @@ function ProductImageGallery({
         <CarouselContent>
           {imagenesGaleria.map((img, index) => (
             <CarouselItem key={index}>
-              <div className="relative aspect-square w-full">
+              <div className="relative aspect-square lg:aspect-4/5 lg:max-h-[75vh] w-full">
                 <Image
                   src={img}
                   alt={nombre}
                   fill
-                  // Si las fotos de productos vienen sin fondo cambiar a "object-contain"
+                  // Si las fotos vienen sin fondo cambiar a "object-contain"
                   className="object-cover"
                   priority={index === 0}
                 />
@@ -122,7 +122,7 @@ function ProductImageGallery({
 
 function ProductInformation({ producto }: { producto: Perfume }) {
   return (
-    <div className="lg:col-span-6 flex flex-col gap-6 h-fit">
+    <div className="lg:col-span-6 flex flex-col gap-4 lg:gap-5 h-fit">
       <div className="flex flex-col gap-2 pb-4 border-b border-slate-200">
         <ProductEncabezado marca={producto.marca} nombre={producto.nombre} />
 
@@ -204,7 +204,7 @@ async function ProductCalificacion({ idProducto }: { idProducto: string }) {
 
 function ProductPrecio({ precio }: { precio: number }) {
   return (
-    <div className="flex flex-col gap-2 py-4">
+    <div className="flex flex-col gap-2 py-3">
       <span className="text-5xl font-bold tracking-tight bg-linear-to-r from-primary to-blue-600 bg-clip-text text-transparent">
         {formatearPrecio(precio)}
       </span>
@@ -267,7 +267,7 @@ function ProductDescription({ descripcion }: { descripcion: string }) {
 // TODO: Agregar acciones
 function ProductActions({ perfumeId }: { perfumeId: string }) {
   return (
-    <div className="flex flex-col gap-3 py-4 border-y border-slate-200">
+    <div className="flex flex-col gap-3 py-3 border-y border-slate-200">
       <Button
         size="lg"
         className="w-full text-base font-bold h-12 shadow-md hover:shadow-lg transition-all"
