@@ -32,7 +32,10 @@ export default async function ConfirmacionCheckoutPage({
 
   let orden;
   try {
-    orden = await obtenerOrdenDeUsuario(ordenId, EstadosOrden.enum.Pendiente);
+    orden = await obtenerOrdenDeUsuario(ordenId, [
+      EstadosOrden.enum.Pendiente,
+      EstadosOrden.enum.Rechazado,
+    ]);
   } catch {
     redirect("/carrito");
   }
