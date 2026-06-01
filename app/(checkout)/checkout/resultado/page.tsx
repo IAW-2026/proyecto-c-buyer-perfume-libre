@@ -1,4 +1,3 @@
-// app/checkout/resultado/page.tsx
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -6,7 +5,7 @@ import {
   CheckCircle2,
   XCircle,
   ShoppingBag,
-  ArrowRight, // 👈 Import corregido
+  ArrowRight,
   RefreshCw,
 } from "lucide-react";
 
@@ -18,7 +17,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { buttonVariants } from "@/components/ui/button"; // 👈 Importamos la magia de shadcn
+import { buttonVariants } from "@/components/ui/button";
 import { cn, formatearPrecio } from "@/lib/utils";
 import { obtenerOrdenDeUsuario } from "@/actions/checkout";
 import { EstadosOrden } from "@/schema/perfume.schema";
@@ -37,7 +36,10 @@ export default async function CheckoutResultadoPage({ searchParams }: Props) {
 
   let orden;
   try {
-    orden = await obtenerOrdenDeUsuario(ordenId, EstadosOrden.enum.Pagado);
+    orden = await obtenerOrdenDeUsuario(ordenId, [
+      EstadosOrden.enum.Pagado,
+      EstadosOrden.enum.Rechazado,
+    ]);
   } catch {
     redirect("/carrito");
   }

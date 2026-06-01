@@ -70,7 +70,10 @@ export async function iniciarProcesamientoCompra(
   redirect(`/checkout/confirmacion?ordenId=${nuevaOrden.id}`);
 }
 
-export async function obtenerOrdenDeUsuario(idOrden: string, estado: string) {
+export async function obtenerOrdenDeUsuario(
+  idOrden: string,
+  estado: string | string[],
+) {
   try {
     const { userId } = await auth();
     if (!userId) throw new Error("No autorizado");
@@ -79,7 +82,7 @@ export async function obtenerOrdenDeUsuario(idOrden: string, estado: string) {
       where: {
         id: idOrden,
         usuarioId: userId,
-        estado: estado,
+        estado: Array.isArray(estado) ? { in: estado } : estado,
       },
       include: {
         items: true,
