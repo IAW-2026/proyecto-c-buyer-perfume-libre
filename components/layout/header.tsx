@@ -20,9 +20,11 @@ export default function Header() {
       <div className="container mx-auto px-4 md:px-8 flex flex-col gap-4 relative">
         <div className="flex items-center justify-center relative min-h-12">
           <SiteBrand />
+        </div>
+        <div className="flex items-center justify-center relative min-h-12">
+          <BarraDeBusqueda />
           <AccionesHeader />
         </div>
-        <BarraDeBusqueda />
       </div>
     </header>
   );

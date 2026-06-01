@@ -43,7 +43,6 @@ export default async function DetalleCompraPage({
 
   return (
     <div className="min-h-screen bg-slate-50/50">
-      <Header />
       <main className="container mx-auto px-4 py-8 md:py-12">
         <Suspense fallback={<p>Cargando detalles de la compra...</p>}>
           <div className="min-h-screen bg-slate-50/50">

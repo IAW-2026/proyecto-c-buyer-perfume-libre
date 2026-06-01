@@ -4,8 +4,6 @@ import Link from "next/link";
 export default function NotFoundProducto() {
   return (
     <div className="min-h-screen bg-white">
-      <Header />
-
       <main className="container mx-auto px-4 py-16 text-center">
         <h1 className="text-2xl font-bold mb-2">Perfume no encontrado</h1>
         <p className="text-muted-foreground mb-6">
