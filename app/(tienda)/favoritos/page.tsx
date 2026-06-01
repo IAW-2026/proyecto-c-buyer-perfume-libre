@@ -2,6 +2,8 @@ import { obtenerFavoritosDelUsuario } from "@/actions/favoritos";
 import ListaFavoritos from "@/components/favoritos/ListaFavoritos";
 import { obtenerProductosFavoritos } from "@/lib/api";
 
+const dynamic = "force-dynamic";
+
 export default async function FavoritosPage() {
   const obtenerIdsFavoritos = await obtenerFavoritosDelUsuario();
   const perfumesFavoritos =
