@@ -1,60 +1,82 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { ItemCarrito } from "@/schema/perfume.schema";
+import { startTransition, useOptimistic } from "react";
 import {
   actualizarCantidadEnCarrito,
   eliminarDelCarrito,
 } from "@/actions/carrito";
-import { formatearPrecio } from "@/lib/utils";
+import { ItemCarrito } from "@/schema/perfume.schema";
+import CarritoVacio from "./CarritoVacio";
 import ProductCardCarrito from "./productCardCarrito";
-import { Card } from "../ui/card";
+import { formatearPrecio } from "@/lib/utils";
 import { Separator } from "../ui/separator";
+import { Card } from "../ui/card";
+import Link from "next/link";
 import { Button } from "../ui/button";
-import Link from "next/dist/client/link";
+
+type AccionOptimista =
+  | { tipo: "ELIMINAR"; id: string }
+  | { tipo: "CAMBIAR_CANTIDAD"; id: string; cantidad: number };
 
 export function CarritoWrapper({
   productosIniciales,
 }: {
   productosIniciales: ItemCarrito[];
 }) {
-  const [productos, setProductos] = useState<ItemCarrito[]>(productosIniciales);
+  const [optimisticProductos, dispatchOptimistic] = useOptimistic(
+    productosIniciales,
+    (estadoActual, accion: AccionOptimista) => {
+      switch (accion.tipo) {
+        case "ELIMINAR":
+          return estadoActual.filter((p) => p.id !== accion.id);
+        case "CAMBIAR_CANTIDAD":
+          return estadoActual.map((p) =>
+            p.id === accion.id ? { ...p, cantidad: accion.cantidad } : p,
+          );
+        default:
+          return estadoActual;
+      }
+    },
+  );
+
+  if (optimisticProductos.length === 0) {
+    return <CarritoVacio />;
+  }
 
   const handleCambiarCantidad = async (id: string, nuevaCantidad: number) => {
     if (nuevaCantidad < 1) return;
 
-    const estadoAnterior = [...productos];
+    startTransition(async () => {
+      dispatchOptimistic({
+        tipo: "CAMBIAR_CANTIDAD",
+        id,
+        cantidad: nuevaCantidad,
+      });
 
-    setProductos((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, cantidad: nuevaCantidad } : p)),
-    );
-    try {
-      await actualizarCantidadEnCarrito(id, nuevaCantidad);
-    } catch (error) {
-      console.error("Fallo al actualizar", error);
-      setProductos(estadoAnterior);
-    }
+      try {
+        await actualizarCantidadEnCarrito(id, nuevaCantidad);
+      } catch (error) {
+        console.error("Fallo al actualizar", error);
+      }
+    });
   };
 
   const handleEliminar = async (id: string) => {
-    setProductos((prev) => prev.filter((p) => p.id !== id));
+    startTransition(async () => {
+      dispatchOptimistic({ tipo: "ELIMINAR", id });
 
-    try {
-      await eliminarDelCarrito(id);
-    } catch (error) {
-      console.error("Fallo al eliminar", error);
-      setProductos(productosIniciales);
-    }
+      try {
+        await eliminarDelCarrito(id);
+      } catch (error) {
+        console.error("Fallo al eliminar", error);
+      }
+    });
   };
-
-  useEffect(() => {
-    setProductos(productosIniciales);
-  }, [productosIniciales]);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
       <div className="lg:col-span-8 flex flex-col gap-4">
-        {productos.map((producto) => (
+        {optimisticProductos.map((producto) => (
           <ProductCardCarrito
             key={producto.id}
             producto={producto}
@@ -64,7 +86,7 @@ export function CarritoWrapper({
         ))}
       </div>
 
-      <ResumenCompra productos={productos} />
+      <ResumenCompra productos={optimisticProductos} />
     </div>
   );
 }
@@ -123,6 +145,7 @@ function BotonContinuarCompra({
   total: number;
 }) {
   return (
+    // TODO: Revisar esto
     <Link href={`/checkout/envio`}>
       <Button className="w-full mt-6 h-12 text-base font-bold bg-blue-600 hover:bg-blue-700 shadow-md">
         Continuar compra

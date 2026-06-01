@@ -1,11 +1,8 @@
 import { obtenerCarritoDelUsuario } from "@/actions/carrito";
+import CarritoVacio from "@/components/carrito/CarritoVacio";
 import { CarritoWrapper } from "@/components/carrito/carritoWrapper";
-import Header from "@/components/layout/header";
 import { obtenerProductosCarrito } from "@/lib/api";
 import { ItemCarrito, PerfumeCarrito } from "@/schema/perfume.schema";
-import Link from "next/link";
-
-// TODO: Agregar skeleton mientras se cargan los productos del carrito
 
 export const dynamic = "force-dynamic";
 
@@ -35,20 +32,6 @@ export default async function CarritoPage() {
         <h1 className="text-2xl font-bold mb-8">Carrito de compras</h1>
         <CarritoWrapper productosIniciales={itemsCarrito} />
       </main>
-    </div>
-  );
-}
-
-function CarritoVacio() {
-  return (
-    <div className="bg-white p-12 rounded-xl text-center shadow-sm">
-      <p className="text-muted-foreground mb-4">Tu carrito está vacío</p>
-      <Link
-        href="/"
-        className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-      >
-        Ir a buscar perfumes
-      </Link>
     </div>
   );
 }
