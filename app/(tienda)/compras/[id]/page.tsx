@@ -13,10 +13,13 @@ import { format } from "date-fns/format";
 import { es } from "date-fns/locale";
 import { ArrowLeft, Calendar, CreditCard, Truck } from "lucide-react";
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
 import { obtenerDetallePerfume, obtenerHistorialEnvio } from "@/lib/api";
 import { SeccionResenas } from "@/components/compras/SeccionResenas";
 import { SimuladorEnvio } from "@/components/compras/SelectorEnvio";
+
+// Se podria utilizar suspense aqui dentro para mostrar
+// Detalles del producto independientemente de si el fetch a Shipping app funciona
+// pero por temas de tiempo se omitio en esta entrega.
 
 type Props = {
   params: Promise<{ id: string }>;
