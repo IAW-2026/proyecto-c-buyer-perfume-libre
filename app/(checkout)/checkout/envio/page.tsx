@@ -2,10 +2,15 @@ import { obtenerDireccionesUsuario } from "@/actions/direcciones";
 import PrimeraDireccionPantalla from "@/components/checkout/envio/PrimeraDireccionPantalla";
 import DireccionesEnvioPanel from "@/components/checkout/envio/DireccionesEnvioPanel";
 
-// TODO: Quitar al poner skeleton de direcciones
 export const dynamic = "force-dynamic";
 
-export default async function CheckoutEnvioPage() {
+export default async function CheckoutEnvioPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ productoId?: string }>;
+}) {
+  const { productoId } = await searchParams;
+
   const direcciones = await obtenerDireccionesUsuario();
 
   return (
@@ -14,7 +19,10 @@ export default async function CheckoutEnvioPage() {
         {direcciones.length === 0 ? (
           <PrimeraDireccionPantalla />
         ) : (
-          <DireccionesEnvioPanel direcciones={direcciones} />
+          <DireccionesEnvioPanel
+            direcciones={direcciones}
+            productoId={productoId}
+          />
         )}
       </main>
     </div>

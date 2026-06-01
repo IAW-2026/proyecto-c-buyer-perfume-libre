@@ -264,7 +264,6 @@ function ProductDescription({ descripcion }: { descripcion: string }) {
   );
 }
 
-// TODO: Hay un error, esto funciona con los items en carrito y no con lo enviado.
 function ProductActions({ perfumeId }: { perfumeId: string }) {
   return (
     <div className="flex flex-col gap-3 py-3 border-y border-slate-200">
@@ -273,7 +272,7 @@ function ProductActions({ perfumeId }: { perfumeId: string }) {
         className="w-full text-base font-bold h-12 shadow-md hover:shadow-lg transition-all"
       >
         <Link
-          href={`/checkout/envio`}
+          href={`/checkout/envio?productoId=${perfumeId}`}
           className="w-full h-full flex items-center justify-center"
         >
           Comprar ahora

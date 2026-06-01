@@ -10,24 +10,37 @@ import { redirect } from "next/navigation";
 export async function iniciarProcesamientoCompra(
   direccionId: string,
   datosEnvio: OpcionEnvio,
+  productoId?: string,
 ) {
   const { userId } = await auth();
   if (!userId) throw new Error("No autorizado");
 
-  const itemsCarrito = await prisma.carrito.findMany({
-    where: { usuarioId: userId },
-  });
+  let itemsAProcesar: { productoId: string; cantidad: number }[] = [];
 
-  if (itemsCarrito.length === 0) throw new Error("El carrito está vacío");
+  if (productoId) {
+    itemsAProcesar = [{ productoId, cantidad: 1 }];
+  } else {
+    const itemsCarrito = await prisma.carrito.findMany({
+      where: { usuarioId: userId },
+    });
 
-  const idsProductos = itemsCarrito.map((item) => item.productoId);
+    if (itemsCarrito.length === 0) throw new Error("El carrito está vacío");
 
+    itemsAProcesar = itemsCarrito.map((item) => ({
+      productoId: item.productoId,
+      cantidad: item.cantidad,
+    }));
+  }
+
+  const idsProductos = itemsAProcesar.map((item) => item.productoId);
   const preciosProductos = await obtenerPreciosDeProductos(idsProductos);
+
+  const obtenerPrecio = (id: string) =>
+    preciosProductos.find((p) => p.id === id)?.precio || 0;
+
   const total =
-    itemsCarrito.reduce((acc, item) => {
-      const precioUnitario =
-        preciosProductos.find((p) => p.id === item.productoId)?.precio || 0;
-      return acc + precioUnitario * item.cantidad;
+    itemsAProcesar.reduce((acc, item) => {
+      return acc + obtenerPrecio(item.productoId) * item.cantidad;
     }, 0) + datosEnvio.precio;
 
   const nuevaOrden = await prisma.ordenCompra.create({
@@ -41,15 +54,18 @@ export async function iniciarProcesamientoCompra(
       direccionId: direccionId,
       total: total,
       items: {
-        create: itemsCarrito.map((item) => ({
+        create: itemsAProcesar.map((item) => ({
           productoId: item.productoId,
           cantidad: item.cantidad,
-          precio:
-            preciosProductos.find((p) => p.id === item.productoId)?.precio || 0,
+          precio: obtenerPrecio(item.productoId),
         })),
       },
     },
   });
+
+  if (!productoId) {
+    await prisma.carrito.deleteMany({ where: { usuarioId: userId } });
+  }
 
   redirect(`/checkout/confirmacion?ordenId=${nuevaOrden.id}`);
 }

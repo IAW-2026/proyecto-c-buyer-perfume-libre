@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatearPrecio, generarUrl } from "@/lib/utils";
 import { PerfumeFavorito } from "@/schema/perfume.schema";
-import { ShoppingCart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { BotonAgregarCarrito } from "../carrito/botonAgregarCarrito";
@@ -117,7 +116,9 @@ function ProductActions({
         variant="link"
         className="text-blue-500 p-0 h-auto font-medium hover:text-blue-700"
       >
-        <Link href={`/checkout/envio`}>Comprar ahora</Link>
+        <Link href={`/checkout/envio?productoId=${perfumeId}`}>
+          Comprar ahora
+        </Link>
       </Button>
     </div>
   );
