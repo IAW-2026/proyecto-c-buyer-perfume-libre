@@ -59,6 +59,6 @@ export async function obtenerRolUsuario() {
 
     return rolUsuario;
   } catch (error) {
-    throw new Error("Error al obtener el rol del usuario");
+    null;
   }
 }

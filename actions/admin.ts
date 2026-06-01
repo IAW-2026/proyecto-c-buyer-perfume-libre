@@ -25,7 +25,7 @@ export async function obtenerAdminPageData() {
 
     const rolUsuario = await obtenerRolUsuario();
 
-    if (rolUsuario.rol !== RolUsuario.ADMIN) {
+    if (rolUsuario?.rol !== RolUsuario.ADMIN) {
       throw new Error(
         "Acceso denegado. Solo los administradores pueden acceder a esta página.",
       );
