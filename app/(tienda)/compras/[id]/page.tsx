@@ -1,9 +1,7 @@
 import {
   obtenerCantidadDeProductosComprados,
   obtenerItemDeOrden,
-  simularCambioEstado,
 } from "@/actions/compras";
-import Header from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -18,7 +16,6 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { obtenerDetallePerfume, obtenerHistorialEnvio } from "@/lib/api";
 import { SeccionResenas } from "@/components/compras/SeccionResenas";
-import { Badge } from "@/components/ui/badge";
 import { SimuladorEnvio } from "@/components/compras/SelectorEnvio";
 
 type Props = {
@@ -44,11 +41,9 @@ export default async function DetalleCompraPage({
   return (
     <div className="min-h-screen bg-slate-50/50">
       <main className="container mx-auto px-4 py-8 md:py-12">
-        <Suspense fallback={<p>Cargando detalles de la compra...</p>}>
-          <div className="min-h-screen bg-slate-50/50">
-            <DetalleCompra orden={orden} />
-          </div>
-        </Suspense>
+        <div className="min-h-screen bg-slate-50/50">
+          <DetalleCompra orden={orden} />
+        </div>
       </main>
     </div>
   );
@@ -93,7 +88,7 @@ function PanelPrincipal({ orden }: { orden: ItemDeOrdenDetallado }) {
       <div className="lg:col-span-2 space-y-6">
         <CardSeguimiento orden={orden} />
 
-        <ProductCard orden={orden} />
+        <ResumenProductoComprado orden={orden} />
 
         {orden.ordenCompra.estado === "Entregado" && (
           <SeccionResenas
@@ -147,7 +142,7 @@ function HistorialEnvio({
 }) {
   return (
     <div className="border-l-2 border-blue-100 ml-2 pl-6 space-y-6 relative">
-      {historialEnvio.map((evento: any, idx: number) => (
+      {historialEnvio.map((evento, idx) => (
         <div key={idx} className="relative">
           <span
             className={`absolute -left-7.25 top-1 h-3 w-3 rounded-full ring-4 ring-white ${
@@ -166,7 +161,7 @@ function HistorialEnvio({
   );
 }
 
-function ProductCard({ orden }: { orden: ItemDeOrdenDetallado }) {
+function ResumenProductoComprado({ orden }: { orden: ItemDeOrdenDetallado }) {
   return (
     <Card className="border-slate-200/80 shadow-sm">
       <CardHeader>
@@ -284,20 +279,24 @@ async function obtenerItemOrden(
   ordenId: string,
   itemId: string,
 ): Promise<ItemDeOrdenDetallado | null> {
-  const ordenDb = await obtenerItemDeOrden(ordenId, itemId);
-  const itemsComprados = await obtenerCantidadDeProductosComprados(ordenId);
+  const [ordenDb, itemsComprados] = await Promise.all([
+    obtenerItemDeOrden(ordenId, itemId),
+    obtenerCantidadDeProductosComprados(ordenId),
+  ]);
 
   if (!ordenDb) {
     return null;
   }
 
-  const productoDetalle = await obtenerDetallePerfume(ordenDb.productoId);
+  const [productoDetalle, datosEnvio] = await Promise.all([
+    obtenerDetallePerfume(ordenDb.productoId),
+    obtenerHistorialEnvio(ordenDb.ordenCompra.estado),
+  ]);
 
   if (!productoDetalle) {
     return null;
   }
 
-  const datosEnvio = await obtenerHistorialEnvio(ordenDb.ordenCompra.estado);
   const estadoValidado = EstadosOrden.parse(datosEnvio.estadoActual);
   const { id: idItem, ...restoDeOrdenDb } = ordenDb;
 
