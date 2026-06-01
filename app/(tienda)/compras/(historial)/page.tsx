@@ -16,7 +16,6 @@ import {
 import z from "zod";
 import { obtenerComprasDelUsuario } from "@/actions/compras";
 import { es } from "date-fns/locale";
-import { Suspense } from "react";
 
 export const dynamic = "force-dynamic";
 
