@@ -7,16 +7,21 @@ import {
 } from "@/components/ui/carousel";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import Header from "@/components/layout/header";
 import CalificacionEstrellas from "@/components/calificacionEstrellas";
 import { formatearPrecio, generarUrl } from "@/lib/utils";
 import { notFound, redirect } from "next/dist/client/components/navigation";
-import { obtenerDetallePerfume } from "@/lib/api";
+import {
+  obtenerDetallePerfume,
+  obtenerResenaProducto,
+  obtenerResenaVendedor,
+} from "@/lib/api";
 import { Perfume } from "@/schema/perfume.schema";
 import { productoEstaEnFavoritos } from "@/actions/favoritos";
 import { BotonFavorito } from "@/components/favoritos/BotonFavorito";
 import { auth } from "@clerk/nextjs/server";
 import { BotonAgregarCarrito } from "@/components/carrito/botonAgregarCarrito";
+import { Star } from "lucide-react";
+import { Suspense } from "react";
 
 // TODO: Agregar skeleton mientras se carga el producto
 export default async function ProductoDetalle({
@@ -27,7 +32,6 @@ export default async function ProductoDetalle({
   const { id: slugCompleto } = await params;
   const idReal = extraerIdDeSlug(slugCompleto);
 
-  // TODO: Manejar error cuando el perfume no exista
   if (!idReal) {
     return notFound();
   }
@@ -82,27 +86,33 @@ function ProductImageGallery({
   estaEnFavoritos: boolean;
 }) {
   return (
-    <div className="lg:col-span-6 relative flex flex-col items-center justify-center bg-linear-to-br from-slate-50 to-slate-100/50 rounded-2xl p-8 min-h-125 border border-slate-200/50">
-      <BotonFavorito perfumeId={id} esFavoritoInicial={estaEnFavoritos} />
-      <Carousel className="w-full max-w-md">
+    <div className="lg:col-span-6 relative bg-slate-50 rounded-2xl border border-slate-200/50 overflow-hidden">
+      <div className="absolute top-4 right-4 z-20">
+        <BotonFavorito perfumeId={id} esFavoritoInicial={estaEnFavoritos} />
+      </div>
+
+      <Carousel className="w-full">
         <CarouselContent>
           {imagenesGaleria.map((img, index) => (
             <CarouselItem key={index}>
-              <div className="relative aspect-square">
+              <div className="relative aspect-square w-full">
                 <Image
                   src={img}
                   alt={nombre}
                   fill
-                  className="object-contain mix-blend-multiply"
+                  // Si las fotos de productos vienen sin fondo cambiar a "object-contain"
+                  className="object-cover"
+                  priority={index === 0}
                 />
               </div>
             </CarouselItem>
           ))}
         </CarouselContent>
+
         {imagenesGaleria.length > 1 && (
           <>
-            <CarouselPrevious className="-left-6 lg:-left-16 bg-white hover:bg-primary hover:text-white shadow-lg" />
-            <CarouselNext className="-right-6 lg:-right-16 bg-white hover:bg-primary hover:text-white shadow-lg" />
+            <CarouselPrevious className="left-4 bg-white/80 backdrop-blur-sm hover:bg-primary hover:text-white border-none shadow-md" />
+            <CarouselNext className="right-4 bg-white/80 backdrop-blur-sm hover:bg-primary hover:text-white border-none shadow-md" />
           </>
         )}
       </Carousel>
@@ -116,11 +126,24 @@ function ProductInformation({ producto }: { producto: Perfume }) {
       <div className="flex flex-col gap-2 pb-4 border-b border-slate-200">
         <ProductEncabezado marca={producto.marca} nombre={producto.nombre} />
 
-        {/* TODO: Cambiar por fetch a api */}
-        <ProductCalificacion calificacion={producto.calificacion} />
+        <Suspense
+          fallback={
+            <div className="h-5 w-24 bg-gray-200 rounded animate-pulse" />
+          }
+        >
+          <ProductCalificacion idProducto={producto.id} />
+        </Suspense>
       </div>
 
-      <ProductPrecio precio={producto.precio} vendedor={producto.vendedor} />
+      <ProductPrecio precio={producto.precio} />
+      <Suspense
+        fallback={
+          <div className="h-5 w-24 bg-gray-200 rounded animate-pulse" />
+        }
+      >
+        <InfoVendedor vendedor={producto.vendedor} />
+      </Suspense>
+
       <ProductDetalles
         tamano={`${producto.tamaño} ml`}
         genero={producto.genero}
@@ -155,41 +178,79 @@ function ProductEncabezado({
   );
 }
 
-//TODO: Hacer featch a feedback app para traer la calificación real del producto
-function ProductCalificacion({ calificacion }: { calificacion: number }) {
-  return (
-    <div className="flex items-center gap-3 mt-3">
-      <span className="text-sm font-medium text-foreground">
-        {calificacion.toFixed(1)}
-      </span>
-      <CalificacionEstrellas rating={calificacion} />
-      <span className="text-sm text-muted-foreground">(123 opiniones)</span>
-    </div>
-  );
+async function ProductCalificacion({ idProducto }: { idProducto: string }) {
+  try {
+    const { total, promedio } = await obtenerResenaProducto(idProducto);
+
+    if (!promedio || total === 0) {
+      return null;
+    }
+
+    return (
+      <div className="flex items-center gap-3 mt-3">
+        <span className="text-sm font-medium text-foreground">
+          {promedio.toFixed(1)}
+        </span>
+        <CalificacionEstrellas rating={promedio} />
+        <span className="text-sm text-muted-foreground">
+          ({total} opiniones)
+        </span>
+      </div>
+    );
+  } catch (error) {
+    return null;
+  }
 }
 
-function ProductPrecio({
-  precio,
-  vendedor,
-}: {
-  precio: number;
-  vendedor: string;
-}) {
+function ProductPrecio({ precio }: { precio: number }) {
   return (
     <div className="flex flex-col gap-2 py-4">
       <span className="text-5xl font-bold tracking-tight bg-linear-to-r from-primary to-blue-600 bg-clip-text text-transparent">
         {formatearPrecio(precio)}
       </span>
-
-      {/* Vendedor */}
-      <p className="text-sm text-muted-foreground">
-        Vendido por{" "}
-        <span className="text-primary font-semibold cursor-pointer hover:underline">
-          {vendedor}
-        </span>
-      </p>
     </div>
   );
+}
+
+async function InfoVendedor({ vendedor }: { vendedor: string }) {
+  try {
+    const { total, promedio } = await obtenerResenaVendedor(vendedor);
+
+    return (
+      <div className="flex flex-row gap-1 py-2">
+        <p className="text-sm text-muted-foreground">
+          Vendido por{" "}
+          <span className="text-primary font-semibold cursor-pointer hover:underline">
+            {vendedor}
+          </span>
+        </p>
+        {total > 0 ? (
+          <div className="flex items-center gap-1.5">
+            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+            <span className="text-sm font-bold text-foreground">
+              {promedio.toFixed(1)}
+            </span>
+            <span className="text-xs text-muted-foreground">({total})</span>
+          </div>
+        ) : (
+          <span className="text-xs text-muted-foreground italic">
+            Vendedor nuevo (Sin calificaciones)
+          </span>
+        )}
+      </div>
+    );
+  } catch (error) {
+    return (
+      <div className="flex flex-row gap-1 py-2">
+        <p className="text-sm text-muted-foreground">
+          Vendido por{" "}
+          <span className="text-primary font-semibold cursor-pointer hover:underline">
+            {vendedor}
+          </span>
+        </p>
+      </div>
+    );
+  }
 }
 
 function ProductDescription({ descripcion }: { descripcion: string }) {
