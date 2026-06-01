@@ -1,4 +1,3 @@
-import Header from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
@@ -19,7 +18,6 @@ import { obtenerComprasDelUsuario } from "@/actions/compras";
 import { es } from "date-fns/locale";
 import { Suspense } from "react";
 
-// TODO: Quitar al agregar skeleton
 export const dynamic = "force-dynamic";
 
 export default async function MisComprasPage() {
@@ -28,14 +26,11 @@ export default async function MisComprasPage() {
   return (
     <div className="min-h-screen bg-slate-50/50">
       <main className="container mx-auto px-4 py-8 md:py-12">
-        {/*TODO: Implementar skeleton*/}
-        <Suspense fallback={<p>Cargando historial de compras...</p>}>
-          {itemsComprados ? (
-            <HistorialCompras ordenes={itemsComprados} />
-          ) : (
-            <EstadoVacioCompras />
-          )}
-        </Suspense>
+        {itemsComprados ? (
+          <HistorialCompras ordenes={itemsComprados} />
+        ) : (
+          <EstadoVacioCompras />
+        )}
       </main>
     </div>
   );
