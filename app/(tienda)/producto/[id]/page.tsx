@@ -22,6 +22,7 @@ import { auth } from "@clerk/nextjs/server";
 import { BotonAgregarCarrito } from "@/components/carrito/botonAgregarCarrito";
 import { Star } from "lucide-react";
 import { Suspense } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default async function ProductoDetalle({
   params,
@@ -125,19 +126,18 @@ function ProductInformation({ producto }: { producto: Perfume }) {
       <div className="flex flex-col gap-2 pb-4 border-b border-slate-200">
         <ProductEncabezado marca={producto.marca} nombre={producto.nombre} />
 
-        <Suspense
-          fallback={
-            <div className="h-5 w-24 bg-gray-200 rounded animate-pulse" />
-          }
-        >
+        <Suspense fallback={<Skeleton className="h-5 w-44 mt-3" />}>
           <ProductCalificacion idProducto={producto.id} />
         </Suspense>
       </div>
 
       <ProductPrecio precio={producto.precio} />
+
       <Suspense
         fallback={
-          <div className="h-5 w-24 bg-gray-200 rounded animate-pulse" />
+          <div className="flex min-h-10 flex-wrap items-center gap-x-2 gap-y-1 py-2">
+            <Skeleton className="h-4 w-36 sm:w-48" />
+          </div>
         }
       >
         <InfoVendedor vendedor={producto.vendedor} />
@@ -216,7 +216,7 @@ async function InfoVendedor({ vendedor }: { vendedor: string }) {
     const { total, promedio } = await obtenerResenaVendedor(vendedor);
 
     return (
-      <div className="flex flex-row gap-1 py-2">
+      <div className="flex min-h-10 flex-wrap items-center gap-x-2 gap-y-1 py-2">
         <p className="text-sm text-muted-foreground">
           Vendido por{" "}
           <span className="text-primary font-semibold cursor-pointer hover:underline">
