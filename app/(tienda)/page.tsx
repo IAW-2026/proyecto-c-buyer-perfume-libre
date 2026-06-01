@@ -16,8 +16,6 @@ export default async function Home({ searchParams }: Props) {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header />
-
       <div className="container mx-auto flex gap-6 px-4 md:px-8 py-8">
         <SidebarFiltros />
 

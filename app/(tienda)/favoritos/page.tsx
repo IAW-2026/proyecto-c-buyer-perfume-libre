@@ -20,8 +20,6 @@ export default async function FavoritosPage() {
 
   return (
     <div className="min-h-screen bg-slate-50/50">
-      <Header />
-
       <main className="container mx-auto px-4 py-8 md:py-12 max-w-4xl">
         <h1 className="text-2xl font-bold mb-8 text-foreground">Favoritos</h1>
 
