@@ -1,6 +1,5 @@
 "use client";
 
-import { eliminarFavorito } from "@/actions/favoritos";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatearPrecio, generarUrl } from "@/lib/utils";
@@ -8,36 +7,22 @@ import { PerfumeFavorito } from "@/schema/perfume.schema";
 import { ShoppingCart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
 
 export default function ProductoCardFavoritos({
   producto,
+  onEliminar,
 }: {
   producto: PerfumeFavorito;
+  onEliminar: () => void;
 }) {
-  const [visible, setVisible] = useState(true);
-
-  const handleEliminar = async (e: React.MouseEvent) => {
+  const onClickEliminar = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
-    setVisible(false);
-
-    try {
-      await eliminarFavorito(producto.id);
-    } catch (error) {
-      console.error("Error al eliminar", error);
-      setVisible(true);
-    }
+    onEliminar();
   };
 
-  if (!visible) return null;
-
   return (
-    <Card
-      key={producto.id}
-      className="overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow"
-    >
+    <Card className="overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow">
       <CardContent className="p-0">
         <div className="flex flex-col sm:flex-row items-center sm:items-stretch">
           <ProductImage
@@ -50,7 +35,7 @@ export default function ProductoCardFavoritos({
             nombre={producto.nombre}
             precio={producto.precio}
             id={producto.id}
-            onEliminar={handleEliminar}
+            onEliminar={onClickEliminar}
           />
 
           <ProductAgregarCarrito />
