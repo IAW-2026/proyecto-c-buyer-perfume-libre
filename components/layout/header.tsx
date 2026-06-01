@@ -10,6 +10,7 @@ import Link from "next/link";
 import { SignInButton, Show, UserButton } from "@clerk/nextjs";
 import SiteBrand from "./SiteBrand";
 import { BarraDeBusqueda } from "./BarraDeBusqueda";
+import { BarraDeBusquedaSkeleton } from "@/components/layout/BarraDeBusquedaSkeleton";
 import { obtenerRolUsuario } from "@/actions/usuario";
 import { RolUsuario } from "@/lib/generated/prisma/browser";
 
@@ -21,6 +22,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { Suspense } from "react";
 
 export default function Header() {
   return (
@@ -36,7 +38,9 @@ export default function Header() {
 
         <div className="flex items-center justify-center relative min-h-12 w-full">
           <div className="w-full max-w-md md:max-w-xl mx-auto">
-            <BarraDeBusqueda />
+            <Suspense fallback={<BarraDeBusquedaSkeleton />}>
+              <BarraDeBusqueda />
+            </Suspense>
           </div>
 
           <div className="hidden md:flex absolute right-0 items-center gap-4">
