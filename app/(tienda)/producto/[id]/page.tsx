@@ -6,6 +6,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { Button } from "@/components/ui/button";
+import type { Metadata } from "next";
 import Image from "next/image";
 import CalificacionEstrellas from "@/components/calificacionEstrellas";
 import { formatearPrecio, generarUrl } from "@/lib/utils";
@@ -24,6 +25,34 @@ import { Star } from "lucide-react";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id: slugCompleto } = await params;
+  const idReal = extraerIdDeSlug(slugCompleto);
+
+  if (!idReal) {
+    return {
+      title: "Producto no encontrado",
+    };
+  }
+
+  try {
+    const producto = await obtenerDetallePerfume(idReal);
+
+    return {
+      title: producto.nombre,
+      description: `Información detallada del perfume ${producto.nombre}`,
+    };
+  } catch {
+    return {
+      title: "Producto no encontrado",
+    };
+  }
+}
 
 export default async function ProductoDetalle({
   params,

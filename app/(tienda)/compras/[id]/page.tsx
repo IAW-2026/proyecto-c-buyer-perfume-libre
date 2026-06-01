@@ -26,6 +26,11 @@ type Props = {
   searchParams: Promise<{ itemId?: string }>;
 };
 
+export const metadata = {
+  title: "Detalle de la Compra",
+  description: "Revisa el detalle de tu compra realizada en Perfume Libre",
+};
+
 export default async function DetalleCompraPage({
   params,
   searchParams,

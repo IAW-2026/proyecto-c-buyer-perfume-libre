@@ -1,4 +1,3 @@
-import Header from "@/components/layout/header";
 import ProductGrid from "@/components/home/productGrid";
 import ProductGridSkeleton from "@/components/home/productSkeleton";
 import SidebarFiltros from "@/components/home/sidebarFiltros";
@@ -6,6 +5,11 @@ import { Suspense } from "react";
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
+export const metadata = {
+  title: "Perfume Libre",
+  description: "Explora nuestra tienda online de perfumes",
 };
 
 export default async function Home({ searchParams }: Props) {

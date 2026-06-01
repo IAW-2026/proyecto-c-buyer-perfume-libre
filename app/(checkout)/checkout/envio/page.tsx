@@ -4,6 +4,11 @@ import DireccionesEnvioPanel from "@/components/checkout/envio/DireccionesEnvioP
 
 export const dynamic = "force-dynamic";
 
+export const metadata = {
+  title: "Direcciones de Envío",
+  description: "Gestiona tus direcciones de envío para tus compras",
+};
+
 export default async function CheckoutEnvioPage({
   searchParams,
 }: {

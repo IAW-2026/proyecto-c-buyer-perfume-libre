@@ -11,6 +11,11 @@ type Props = {
   searchParams: Promise<{ direccionId?: string; productoId?: string }>;
 };
 
+export const metadata = {
+  title: "Método de Envío",
+  description: "Selecciona el método de envío para tu compra",
+};
+
 export default async function MetodoEnvioPage({ searchParams }: Props) {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");

@@ -19,6 +19,12 @@ import { es } from "date-fns/locale";
 
 export const dynamic = "force-dynamic";
 
+export const metadata = {
+  title: "Mis Compras",
+  description:
+    "Revisa el historial de tus compras realizadas en Buyer Perfume Libre",
+};
+
 export default async function MisComprasPage() {
   const itemsComprados = await obtenerHistorialDelUsuario();
 

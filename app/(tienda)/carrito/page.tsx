@@ -6,6 +6,11 @@ import { ItemCarrito, PerfumeCarrito } from "@/schema/perfume.schema";
 
 export const dynamic = "force-dynamic";
 
+export const metadata = {
+  title: "Carrito de Compras",
+  description: "Revisa los productos que has agregado a tu carrito",
+};
+
 export default async function CarritoPage() {
   const productosCarritoDb = await obtenerCarritoDelUsuario();
 

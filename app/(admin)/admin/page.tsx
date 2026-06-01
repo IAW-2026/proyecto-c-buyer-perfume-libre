@@ -11,6 +11,12 @@ import {
 import { formatearPrecio } from "@/lib/utils";
 import { Package, TrendingUp, Users } from "lucide-react";
 
+export const metadata = {
+  title: "Panel de Control - Admin",
+  description:
+    "Monitoreo global de transacciones, estados de envío e integraciones.",
+};
+
 export default async function AdminDashboardPage() {
   const { ganancia, ordenes, usuarios, grafico } = await obtenerAdminPageData();
 

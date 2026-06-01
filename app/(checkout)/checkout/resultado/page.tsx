@@ -21,10 +21,41 @@ import { buttonVariants } from "@/components/ui/button";
 import { cn, formatearPrecio } from "@/lib/utils";
 import { obtenerOrdenDeUsuario } from "@/actions/checkout";
 import { EstadosOrden } from "@/schema/perfume.schema";
+import { Metadata } from "next";
 
 type Props = {
   searchParams: Promise<{ status?: string; ordenId?: string }>;
 };
+
+export async function generateMetadata({
+  searchParams,
+}: Props): Promise<Metadata> {
+  const { status, ordenId } = await searchParams;
+
+  if (!ordenId) {
+    return { title: "Resultado del Pago" };
+  }
+
+  try {
+    const orden = await obtenerOrdenDeUsuario(ordenId, [
+      EstadosOrden.enum.Pagado,
+      EstadosOrden.enum.Rechazado,
+    ]);
+
+    const esExitoso = status === "success" && orden.estado === "Pagado";
+
+    return {
+      title: esExitoso ? "Pago Aprobado" : "Pago Rechazado",
+      description: esExitoso
+        ? "Tu transacción fue procesada con éxito. ¡Muchas gracias por tu compra!"
+        : "Hubo un problema al procesar tu pago. No realizamos ningún cargo.",
+    };
+  } catch {
+    return {
+      title: "Estado de la Orden",
+    };
+  }
+}
 
 export default async function CheckoutResultadoPage({ searchParams }: Props) {
   const { userId } = await auth();

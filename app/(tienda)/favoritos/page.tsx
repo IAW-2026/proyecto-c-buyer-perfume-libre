@@ -4,6 +4,11 @@ import { obtenerProductosFavoritos } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
 
+export const metadata = {
+  title: "Favoritos",
+  description: "Lista de perfumes favoritos del usuario",
+};
+
 export default async function FavoritosPage() {
   const obtenerIdsFavoritos = await obtenerFavoritosDelUsuario();
   const perfumesFavoritos =
