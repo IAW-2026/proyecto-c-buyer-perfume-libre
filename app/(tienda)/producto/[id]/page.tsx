@@ -5,12 +5,12 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import type { Metadata } from "next";
 import Image from "next/image";
 import CalificacionEstrellas from "@/components/calificacionEstrellas";
 import { cn, formatearPrecio, generarUrl } from "@/lib/utils";
-import { notFound, redirect } from "next/dist/client/components/navigation";
+import { notFound, redirect } from "next/navigation";
 import {
   obtenerDetallePerfume,
   obtenerResenaProducto,
