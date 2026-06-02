@@ -44,7 +44,7 @@ export async function obtenerAdminPageData() {
       grafico: historialGrafico,
     };
   } catch (error) {
-    throw new Error("Error al cargar los datos del panel de control");
+    return null;
   }
 }
 
