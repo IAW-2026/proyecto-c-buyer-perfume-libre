@@ -34,3 +34,13 @@ export function formatearPrecio(
 export function calcularTotalProductos(items: itemsDeOrdenDb): number {
   return items.reduce((acc, item) => acc + item.precio * item.cantidad, 0);
 }
+
+export function pesosACentavos(valorPesos: string | number): number {
+  const numero =
+    typeof valorPesos === "string" ? Number(valorPesos) : valorPesos;
+  return Math.round(numero * 100);
+}
+
+export function centavosAPesos(centavos: number): number {
+  return centavos / 100;
+}
