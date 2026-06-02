@@ -155,11 +155,12 @@ function ProductoCompra({
         />
 
         <div className="flex items-center gap-3 md:shrink-0 md:justify-end">
-          <Button variant="outline" size="sm" className="shrink-0">
-            <Link href={`/compras/${ordenId}?itemId=${item.itemId}`}>
-              Ver detalle
-            </Link>
-          </Button>
+          <Link
+            href={`/compras/${ordenId}?itemId=${item.itemId}`}
+            className={buttonVariants({ variant: "outline", size: "sm" })}
+          >
+            Ver detalle
+          </Link>
         </div>
       </div>
     </div>
