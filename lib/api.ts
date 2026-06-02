@@ -98,6 +98,18 @@ export async function obtenerDetallePerfume(id: string): Promise<Perfume> {
   return validarTipo(perfume, PerfumeSchema);
 }
 
+export async function obtenerResenaVendedor(id_vendedor: string) {
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  return { total: 127, promedio: 4.8 };
+}
+
+export async function obtenerResenaProducto(id_producto: string) {
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  return { total: 127, promedio: 4.8 };
+}
+
 export async function obtenerProductosFavoritos(
   ids: string[],
 ): Promise<PerfumeFavorito[]> {

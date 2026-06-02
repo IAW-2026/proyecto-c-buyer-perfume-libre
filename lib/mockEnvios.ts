@@ -95,25 +95,25 @@ export async function obtenerCotizacionesEnvio(
     {
       operador: "Correo Argentino",
       tipo_servicio: "Clásico",
-      precio: 350,
+      precio: 350000,
       demora_en_dias: 5,
     },
     {
       operador: "Andreani",
       tipo_servicio: "Rapido",
-      precio: 780,
+      precio: 780000,
       demora_en_dias: 1,
     },
     {
       operador: "OCA",
       tipo_servicio: "Express",
-      precio: 500,
+      precio: 500000,
       demora_en_dias: 3,
     },
     {
       operador: "DHL",
       tipo_servicio: "Internacional",
-      precio: 1200,
+      precio: 1200000,
       demora_en_dias: 2,
     },
   ];

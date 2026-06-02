@@ -5,20 +5,55 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import type { Metadata } from "next";
 import Image from "next/image";
-import Header from "@/components/layout/header";
 import CalificacionEstrellas from "@/components/calificacionEstrellas";
-import { formatearPrecio, generarUrl } from "@/lib/utils";
+import { cn, formatearPrecio, generarUrl } from "@/lib/utils";
 import { notFound, redirect } from "next/dist/client/components/navigation";
-import { obtenerDetallePerfume } from "@/lib/api";
+import {
+  obtenerDetallePerfume,
+  obtenerResenaProducto,
+  obtenerResenaVendedor,
+} from "@/lib/api";
 import { Perfume } from "@/schema/perfume.schema";
 import { productoEstaEnFavoritos } from "@/actions/favoritos";
 import { BotonFavorito } from "@/components/favoritos/BotonFavorito";
 import { auth } from "@clerk/nextjs/server";
 import { BotonAgregarCarrito } from "@/components/carrito/botonAgregarCarrito";
+import { Star } from "lucide-react";
+import { Suspense } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import Link from "next/link";
 
-// TODO: Agregar skeleton mientras se carga el producto
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id: slugCompleto } = await params;
+  const idReal = extraerIdDeSlug(slugCompleto);
+
+  if (!idReal) {
+    return {
+      title: "Producto no encontrado",
+    };
+  }
+
+  try {
+    const producto = await obtenerDetallePerfume(idReal);
+
+    return {
+      title: producto.nombre,
+      description: `Información detallada del perfume ${producto.nombre}`,
+    };
+  } catch {
+    return {
+      title: "Producto no encontrado",
+    };
+  }
+}
+
 export default async function ProductoDetalle({
   params,
 }: {
@@ -27,7 +62,6 @@ export default async function ProductoDetalle({
   const { id: slugCompleto } = await params;
   const idReal = extraerIdDeSlug(slugCompleto);
 
-  // TODO: Manejar error cuando el perfume no exista
   if (!idReal) {
     return notFound();
   }
@@ -55,9 +89,7 @@ export default async function ProductoDetalle({
 
   return (
     <div className="min-h-screen bg-white">
-      <Header />
-
-      <main className="container mx-auto px-4 py-12">
+      <main className="container mx-auto px-4 py-6 lg:py-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
           <ProductImageGallery
             id={producto.id}
@@ -84,27 +116,33 @@ function ProductImageGallery({
   estaEnFavoritos: boolean;
 }) {
   return (
-    <div className="lg:col-span-6 relative flex flex-col items-center justify-center bg-linear-to-br from-slate-50 to-slate-100/50 rounded-2xl p-8 min-h-125 border border-slate-200/50">
-      <BotonFavorito perfumeId={id} esFavoritoInicial={estaEnFavoritos} />
-      <Carousel className="w-full max-w-md">
+    <div className="lg:col-span-6 relative bg-slate-50 rounded-2xl border border-slate-200/50 overflow-hidden h-fit lg:sticky lg:top-24">
+      <div className="absolute top-4 right-4 z-20">
+        <BotonFavorito perfumeId={id} esFavoritoInicial={estaEnFavoritos} />
+      </div>
+
+      <Carousel className="w-full">
         <CarouselContent>
           {imagenesGaleria.map((img, index) => (
             <CarouselItem key={index}>
-              <div className="relative aspect-square">
+              <div className="relative aspect-square lg:aspect-4/5 lg:max-h-[75vh] w-full">
                 <Image
                   src={img}
                   alt={nombre}
                   fill
-                  className="object-contain mix-blend-multiply"
+                  // Si las fotos vienen sin fondo cambiar a "object-contain"
+                  className="object-cover"
+                  priority={index === 0}
                 />
               </div>
             </CarouselItem>
           ))}
         </CarouselContent>
+
         {imagenesGaleria.length > 1 && (
           <>
-            <CarouselPrevious className="-left-6 lg:-left-16 bg-white hover:bg-primary hover:text-white shadow-lg" />
-            <CarouselNext className="-right-6 lg:-right-16 bg-white hover:bg-primary hover:text-white shadow-lg" />
+            <CarouselPrevious className="left-4 bg-white/80 backdrop-blur-sm hover:bg-primary hover:text-white border-none shadow-md" />
+            <CarouselNext className="right-4 bg-white/80 backdrop-blur-sm hover:bg-primary hover:text-white border-none shadow-md" />
           </>
         )}
       </Carousel>
@@ -114,15 +152,27 @@ function ProductImageGallery({
 
 function ProductInformation({ producto }: { producto: Perfume }) {
   return (
-    <div className="lg:col-span-6 flex flex-col gap-6 h-fit">
+    <div className="lg:col-span-6 flex flex-col gap-4 lg:gap-5 h-fit">
       <div className="flex flex-col gap-2 pb-4 border-b border-slate-200">
         <ProductEncabezado marca={producto.marca} nombre={producto.nombre} />
 
-        {/* TODO: Cambiar por fetch a api */}
-        <ProductCalificacion calificacion={producto.calificacion} />
+        <Suspense fallback={<Skeleton className="h-5 w-44 mt-3" />}>
+          <ProductCalificacion idProducto={producto.id} />
+        </Suspense>
       </div>
 
-      <ProductPrecio precio={producto.precio} vendedor={producto.vendedor} />
+      <ProductPrecio precio={producto.precio} />
+
+      <Suspense
+        fallback={
+          <div className="flex min-h-10 flex-wrap items-center gap-x-2 gap-y-1 py-2">
+            <Skeleton className="h-4 w-36 sm:w-48" />
+          </div>
+        }
+      >
+        <InfoVendedor vendedor={producto.vendedor} />
+      </Suspense>
+
       <ProductDetalles
         tamano={`${producto.tamaño} ml`}
         genero={producto.genero}
@@ -157,41 +207,79 @@ function ProductEncabezado({
   );
 }
 
-//TODO: Hacer featch a feedback app para traer la calificación real del producto
-function ProductCalificacion({ calificacion }: { calificacion: number }) {
+async function ProductCalificacion({ idProducto }: { idProducto: string }) {
+  try {
+    const { total, promedio } = await obtenerResenaProducto(idProducto);
+
+    if (!promedio || total === 0) {
+      return null;
+    }
+
+    return (
+      <div className="flex items-center gap-3 mt-3">
+        <span className="text-sm font-medium text-foreground">
+          {promedio.toFixed(1)}
+        </span>
+        <CalificacionEstrellas rating={promedio} />
+        <span className="text-sm text-muted-foreground">
+          ({total} opiniones)
+        </span>
+      </div>
+    );
+  } catch (error) {
+    return null;
+  }
+}
+
+function ProductPrecio({ precio }: { precio: number }) {
   return (
-    <div className="flex items-center gap-3 mt-3">
-      <span className="text-sm font-medium text-foreground">
-        {calificacion.toFixed(1)}
+    <div className="flex flex-col gap-2 py-3">
+      <span className="text-5xl font-bold tracking-tight bg-linear-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+        {formatearPrecio(precio)}
       </span>
-      <CalificacionEstrellas rating={calificacion} />
-      <span className="text-sm text-muted-foreground">(123 opiniones)</span>
     </div>
   );
 }
 
-function ProductPrecio({
-  precio,
-  vendedor,
-}: {
-  precio: number;
-  vendedor: string;
-}) {
-  return (
-    <div className="flex flex-col gap-2 py-4">
-      <span className="text-5xl font-bold tracking-tight bg-linear-to-r from-primary to-blue-600 bg-clip-text text-transparent">
-        {formatearPrecio(precio)}
-      </span>
+async function InfoVendedor({ vendedor }: { vendedor: string }) {
+  try {
+    const { total, promedio } = await obtenerResenaVendedor(vendedor);
 
-      {/* Vendedor */}
-      <p className="text-sm text-muted-foreground">
-        Vendido por{" "}
-        <span className="text-primary font-semibold cursor-pointer hover:underline">
-          {vendedor}
-        </span>
-      </p>
-    </div>
-  );
+    return (
+      <div className="flex min-h-10 flex-wrap items-center gap-x-2 gap-y-1 py-2">
+        <p className="text-sm text-muted-foreground">
+          Vendido por{" "}
+          <span className="text-primary font-semibold cursor-pointer hover:underline">
+            {vendedor}
+          </span>
+        </p>
+        {total > 0 ? (
+          <div className="flex items-center gap-1.5">
+            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+            <span className="text-sm font-bold text-foreground">
+              {promedio.toFixed(1)}
+            </span>
+            <span className="text-xs text-muted-foreground">({total})</span>
+          </div>
+        ) : (
+          <span className="text-xs text-muted-foreground italic">
+            Vendedor nuevo (Sin calificaciones)
+          </span>
+        )}
+      </div>
+    );
+  } catch (error) {
+    return (
+      <div className="flex flex-row gap-1 py-2">
+        <p className="text-sm text-muted-foreground">
+          Vendido por{" "}
+          <span className="text-primary font-semibold cursor-pointer hover:underline">
+            {vendedor}
+          </span>
+        </p>
+      </div>
+    );
+  }
 }
 
 function ProductDescription({ descripcion }: { descripcion: string }) {
@@ -205,16 +293,18 @@ function ProductDescription({ descripcion }: { descripcion: string }) {
   );
 }
 
-// TODO: Agregar acciones
 function ProductActions({ perfumeId }: { perfumeId: string }) {
   return (
-    <div className="flex flex-col gap-3 py-4 border-y border-slate-200">
-      <Button
-        size="lg"
-        className="w-full text-base font-bold h-12 shadow-md hover:shadow-lg transition-all"
+    <div className="flex flex-col gap-3 py-3 border-y border-slate-200">
+      <Link
+        href={`/checkout/envio?productoId=${perfumeId}`}
+        className={cn(
+          buttonVariants({ size: "lg" }),
+          "w-full text-base font-bold h-12 shadow-md hover:shadow-lg transition-all flex items-center justify-center",
+        )}
       >
         Comprar ahora
-      </Button>
+      </Link>
       <BotonAgregarCarrito
         perfumeId={perfumeId}
         variant="outline"

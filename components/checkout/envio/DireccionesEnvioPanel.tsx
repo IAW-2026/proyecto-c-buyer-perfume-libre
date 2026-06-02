@@ -20,8 +20,10 @@ import FormularioDireccion from "./FormularioDireccion";
 
 export default function DireccionesEnvioPanel({
   direcciones,
+  productoId,
 }: {
   direcciones: DireccionDb[];
+  productoId?: string;
 }) {
   const router = useRouter();
   const [modalAbierto, setModalAbierto] = useState(false);
@@ -58,7 +60,9 @@ export default function DireccionesEnvioPanel({
   const handleContinuarCompra = () => {
     if (!seleccionada) return;
 
-    router.push(`/checkout/metodo-envio?direccionId=${seleccionada}`);
+    router.push(
+      `/checkout/metodo-envio?direccionId=${seleccionada}${productoId ? `&productoId=${productoId}` : ""}`,
+    );
   };
 
   return (

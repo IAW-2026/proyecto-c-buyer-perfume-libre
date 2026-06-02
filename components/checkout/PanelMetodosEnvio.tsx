@@ -10,9 +10,11 @@ import { formatearPrecio } from "@/lib/utils";
 export default function PanelMetodosEnvio({
   opciones,
   direccionId,
+  productoId,
 }: {
   opciones: OpcionEnvio[];
   direccionId: string;
+  productoId?: string;
 }) {
   const [isPending, startTransition] = useTransition();
 
@@ -25,7 +27,11 @@ export default function PanelMetodosEnvio({
     if (!opcionSeleccionada) return;
 
     startTransition(async () => {
-      await iniciarProcesamientoCompra(direccionId, opcionSeleccionada);
+      await iniciarProcesamientoCompra(
+        direccionId,
+        opcionSeleccionada,
+        productoId,
+      );
     });
   };
 

@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { obtenerDetallePerfume } from "@/lib/api";
-import { EstadosOrden, ItemCarrito } from "@/schema/perfume.schema";
+import { EstadosOrden } from "@/schema/perfume.schema";
 
 export async function obtenerComprasDelUsuario() {
   try {
@@ -17,7 +17,11 @@ export async function obtenerComprasDelUsuario() {
     const ordenes = await prisma.ordenCompra.findMany({
       where: {
         usuarioId: userId,
-        estado: { not: EstadosOrden.enum.Pendiente },
+        estado: {
+          not: {
+            in: [EstadosOrden.enum.Pendiente, EstadosOrden.enum.Rechazado],
+          },
+        },
       },
       select: {
         id: true,

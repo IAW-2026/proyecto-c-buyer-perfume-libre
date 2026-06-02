@@ -1,4 +1,3 @@
-// app/checkout/resultado/page.tsx
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -6,7 +5,7 @@ import {
   CheckCircle2,
   XCircle,
   ShoppingBag,
-  ArrowRight, // 👈 Import corregido
+  ArrowRight,
   RefreshCw,
 } from "lucide-react";
 
@@ -18,14 +17,45 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { buttonVariants } from "@/components/ui/button"; // 👈 Importamos la magia de shadcn
+import { buttonVariants } from "@/components/ui/button";
 import { cn, formatearPrecio } from "@/lib/utils";
 import { obtenerOrdenDeUsuario } from "@/actions/checkout";
 import { EstadosOrden } from "@/schema/perfume.schema";
+import { Metadata } from "next";
 
 type Props = {
   searchParams: Promise<{ status?: string; ordenId?: string }>;
 };
+
+export async function generateMetadata({
+  searchParams,
+}: Props): Promise<Metadata> {
+  const { status, ordenId } = await searchParams;
+
+  if (!ordenId) {
+    return { title: "Resultado del Pago" };
+  }
+
+  try {
+    const orden = await obtenerOrdenDeUsuario(ordenId, [
+      EstadosOrden.enum.Pagado,
+      EstadosOrden.enum.Rechazado,
+    ]);
+
+    const esExitoso = status === "success" && orden.estado === "Pagado";
+
+    return {
+      title: esExitoso ? "Pago Aprobado" : "Pago Rechazado",
+      description: esExitoso
+        ? "Tu transacción fue procesada con éxito. ¡Muchas gracias por tu compra!"
+        : "Hubo un problema al procesar tu pago. No realizamos ningún cargo.",
+    };
+  } catch {
+    return {
+      title: "Estado de la Orden",
+    };
+  }
+}
 
 export default async function CheckoutResultadoPage({ searchParams }: Props) {
   const { userId } = await auth();
@@ -37,7 +67,10 @@ export default async function CheckoutResultadoPage({ searchParams }: Props) {
 
   let orden;
   try {
-    orden = await obtenerOrdenDeUsuario(ordenId, EstadosOrden.enum.Pagado);
+    orden = await obtenerOrdenDeUsuario(ordenId, [
+      EstadosOrden.enum.Pagado,
+      EstadosOrden.enum.Rechazado,
+    ]);
   } catch {
     redirect("/carrito");
   }
@@ -91,6 +124,7 @@ function PagoRechazado({ ordenId }: { ordenId: string }) {
         </p>
       </CardContent>
 
+      {/* Esto se deberia encargar payments app */}
       <CardFooter className="flex flex-col gap-3 px-6 pb-8 md:px-8">
         <Link
           href={`/checkout/confirmacion?ordenId=${ordenId}`}

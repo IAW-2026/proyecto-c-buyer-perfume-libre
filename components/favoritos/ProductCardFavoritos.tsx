@@ -1,43 +1,28 @@
 "use client";
 
-import { eliminarFavorito } from "@/actions/favoritos";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { formatearPrecio, generarUrl } from "@/lib/utils";
+import { cn, formatearPrecio, generarUrl } from "@/lib/utils";
 import { PerfumeFavorito } from "@/schema/perfume.schema";
-import { ShoppingCart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { BotonAgregarCarrito } from "../carrito/botonAgregarCarrito";
 
 export default function ProductoCardFavoritos({
   producto,
+  onEliminar,
 }: {
   producto: PerfumeFavorito;
+  onEliminar: () => void;
 }) {
-  const [visible, setVisible] = useState(true);
-
-  const handleEliminar = async (e: React.MouseEvent) => {
+  const onClickEliminar = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
-    setVisible(false);
-
-    try {
-      await eliminarFavorito(producto.id);
-    } catch (error) {
-      console.error("Error al eliminar", error);
-      setVisible(true);
-    }
+    onEliminar();
   };
 
-  if (!visible) return null;
-
   return (
-    <Card
-      key={producto.id}
-      className="overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow"
-    >
+    <Card className="overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow">
       <CardContent className="p-0">
         <div className="flex flex-col sm:flex-row items-center sm:items-stretch">
           <ProductImage
@@ -50,10 +35,10 @@ export default function ProductoCardFavoritos({
             nombre={producto.nombre}
             precio={producto.precio}
             id={producto.id}
-            onEliminar={handleEliminar}
+            onEliminar={onClickEliminar}
           />
 
-          <ProductAgregarCarrito />
+          <ProductAgregarCarrito productoId={producto.id} />
         </div>
       </CardContent>
     </Card>
@@ -127,23 +112,27 @@ function ProductActions({
         {"Eliminar"}
       </Button>
       <div className="w-px h-4 bg-slate-200 hidden sm:block" />
-      <Button
-        variant="link"
-        className="text-blue-500 p-0 h-auto font-medium hover:text-blue-700"
+      <Link
+        href={`/checkout/envio?productoId=${perfumeId}`}
+        className={cn(
+          buttonVariants({ variant: "link" }),
+          "text-blue-500 p-0 h-auto font-medium hover:text-blue-700",
+        )}
       >
         Comprar ahora
-      </Button>
+      </Link>
     </div>
   );
 }
 
-function ProductAgregarCarrito() {
+function ProductAgregarCarrito({ productoId }: { productoId: string }) {
   return (
     <div className="p-6 flex items-center justify-center border-t sm:border-t-0 sm:border-l border-slate-100">
-      <Button className="w-full sm:w-auto gap-2 bg-blue-600 hover:bg-blue-700">
-        <ShoppingCart className="h-4 w-4" />
-        Agregar al carrito
-      </Button>
+      <BotonAgregarCarrito
+        perfumeId={productoId}
+        className="w-full sm:w-auto gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+        size="default"
+      />
     </div>
   );
 }

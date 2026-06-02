@@ -20,15 +20,13 @@ export async function obtenerAdminPageData() {
   try {
     const user = await currentUser();
     if (!user) {
-      throw new Error("Usuario no autenticado");
+      return null;
     }
 
     const rolUsuario = await obtenerRolUsuario();
 
-    if (rolUsuario.rol !== RolUsuario.ADMIN) {
-      throw new Error(
-        "Acceso denegado. Solo los administradores pueden acceder a esta página.",
-      );
+    if (rolUsuario?.rol !== RolUsuario.ADMIN) {
+      return null;
     }
 
     const [gananciaNeta, cantOrdenes, cantUsuarios, historialGrafico] =
@@ -46,7 +44,7 @@ export async function obtenerAdminPageData() {
       grafico: historialGrafico,
     };
   } catch (error) {
-    throw new Error("Error al cargar los datos del panel de control");
+    return null;
   }
 }
 

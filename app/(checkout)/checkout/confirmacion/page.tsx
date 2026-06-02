@@ -3,22 +3,22 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ShoppingBag, Truck, ShieldCheck, ChevronRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { calcularTotalProductos, cn, formatearPrecio } from "@/lib/utils";
 import { obtenerOrdenDeUsuario } from "@/actions/checkout";
 import { obtenerDireccionPorId } from "@/actions/direcciones";
 import { obtenerDetallesProducto } from "@/lib/api";
 import { DireccionDb } from "@/schema/direccion.schema";
-import {
-  EstadosOrden,
-  itemsDeOrdenDb,
-  OrdenDeCompraDb,
-  Perfume,
-} from "@/schema/perfume.schema";
+import { EstadosOrden, itemsDeOrdenDb, Perfume } from "@/schema/perfume.schema";
 
 type Props = {
   searchParams: Promise<{ ordenId?: string }>;
+};
+
+export const metadata = {
+  title: "Confirmación de Compra",
+  description: "Revisá los detalles de tu compra antes de pagar",
 };
 
 export default async function ConfirmacionCheckoutPage({
@@ -32,7 +32,10 @@ export default async function ConfirmacionCheckoutPage({
 
   let orden;
   try {
-    orden = await obtenerOrdenDeUsuario(ordenId, EstadosOrden.enum.Pendiente);
+    orden = await obtenerOrdenDeUsuario(ordenId, [
+      EstadosOrden.enum.Pendiente,
+      EstadosOrden.enum.Rechazado,
+    ]);
   } catch {
     redirect("/carrito");
   }

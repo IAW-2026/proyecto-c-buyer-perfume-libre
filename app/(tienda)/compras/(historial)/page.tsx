@@ -1,5 +1,4 @@
-import Header from "@/components/layout/header";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
 import Link from "next/link";
@@ -17,9 +16,7 @@ import {
 import z from "zod";
 import { obtenerComprasDelUsuario } from "@/actions/compras";
 import { es } from "date-fns/locale";
-import { Suspense } from "react";
 
-// TODO: Quitar al agregar skeleton
 export const dynamic = "force-dynamic";
 
 export default async function MisComprasPage() {
@@ -27,16 +24,12 @@ export default async function MisComprasPage() {
 
   return (
     <div className="min-h-screen bg-slate-50/50">
-      <Header />
       <main className="container mx-auto px-4 py-8 md:py-12">
-        {/*TODO: Implementar skeleton*/}
-        <Suspense fallback={<p>Cargando historial de compras...</p>}>
-          {itemsComprados ? (
-            <HistorialCompras ordenes={itemsComprados} />
-          ) : (
-            <EstadoVacioCompras />
-          )}
-        </Suspense>
+        {itemsComprados ? (
+          <HistorialCompras ordenes={itemsComprados} />
+        ) : (
+          <EstadoVacioCompras />
+        )}
       </main>
     </div>
   );
@@ -45,9 +38,6 @@ export default async function MisComprasPage() {
 function EstadoVacioCompras() {
   return (
     <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-6 py-12 text-center shadow-sm">
-      <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-slate-500">
-        <span className="text-lg font-semibold">0</span>
-      </div>
       <h2 className="text-xl font-semibold text-slate-900">
         Todavía no tienes compras
       </h2>
@@ -56,9 +46,9 @@ function EstadoVacioCompras() {
         detalle de cada pedido.
       </p>
       <div className="mt-6 flex justify-center">
-        <Button variant="outline">
-          <Link href="/">Explorar perfumes</Link>
-        </Button>
+        <Link href="/" className={buttonVariants({ variant: "outline" })}>
+          Explorar perfumes
+        </Link>
       </div>
     </div>
   );

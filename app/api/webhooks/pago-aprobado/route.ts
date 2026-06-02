@@ -41,8 +41,6 @@ export async function POST(req: Request) {
 
     await actualizarOrden(id_orden, id_pago, id_envio, nuevoEstadoOrden);
 
-    await vaciarCarrito(orden.usuarioId);
-
     return NextResponse.json({ message: "200 ok" });
   } catch (error) {
     return NextResponse.json(
