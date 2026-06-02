@@ -69,10 +69,10 @@ export async function obtenerCatalogo(
   }
 
   if (precioMin && typeof precioMin === "string") {
-    resultado = resultado.filter((p) => p.precio >= parseInt(precioMin));
+    resultado = resultado.filter((p) => p.precio >= Number(precioMin));
   }
   if (precioMax && typeof precioMax === "string") {
-    resultado = resultado.filter((p) => p.precio <= parseInt(precioMax));
+    resultado = resultado.filter((p) => p.precio <= Number(precioMax));
   }
 
   const total = resultado.length;

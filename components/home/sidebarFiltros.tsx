@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import React, { useState } from "react";
 import { ChevronRight } from "lucide-react";
+import { pesosACentavos } from "@/lib/utils";
 
 function AcordionCheckList({
   title,
@@ -103,8 +104,8 @@ function FiltroPrecio() {
     const params = new URLSearchParams(searchParams);
     params.set("page", "1");
 
-    let valMin = min ? parseInt(min) : null;
-    let valMax = max ? parseInt(max) : null;
+    let valMin = min ? pesosACentavos(min) : null;
+    let valMax = max ? pesosACentavos(max) : null;
 
     if (valMin !== null && valMin < 0) valMin = 0;
     if (valMax !== null && valMax < 0) valMax = 0;
