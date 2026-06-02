@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/card";
 import { formatearPrecio } from "@/lib/utils";
 import { Package, TrendingUp, Users } from "lucide-react";
+import { redirect } from "next/navigation";
 
 export const metadata = {
   title: "Panel de Control - Admin",
@@ -18,7 +19,13 @@ export const metadata = {
 };
 
 export default async function AdminDashboardPage() {
-  const { ganancia, ordenes, usuarios, grafico } = await obtenerAdminPageData();
+  const datos = await obtenerAdminPageData();
+
+  if (!datos) {
+    redirect("/");
+  }
+
+  const { ganancia, ordenes, usuarios, grafico } = datos;
 
   return (
     <div className="space-y-8">
