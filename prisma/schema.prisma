@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum RolUsuario {
+  USER
+  ADMIN
+}
+
+/// * Tanto el id de los productos, direcciones, pagos y envíos se obtienen de las APIs 
+/// * correspondientes por lo que no es necesario crear modelos adicionales para ellos.
+model Usuario {
+  id          String        @id
+  rol         RolUsuario @default(USER)
+  createdAt   DateTime      @default(now())
+  carrito     Carrito[]
+  direcciones Direccion[]
+  favoritos   Favorito[]
+  compras     OrdenCompra[]
+}
+
+model Favorito {
+  id         String  @id @default(cuid())
+  usuarioId  String
+  productoId String
+  usuario    Usuario @relation(fields: [usuarioId], references: [id])
+
+  @@unique([usuarioId, productoId])
+}
+
+model Carrito {
+  id         String  @id @default(cuid())
+  usuarioId  String
+  productoId String
+  cantidad   Int
+  usuario    Usuario @relation(fields: [usuarioId], references: [id])
+
+  @@unique([usuarioId, productoId])
+}
+
+/// * Dejamos libre la direccion y telefono para que
+/// * varios usuarios puedan compartir la misma dirección o teléfono si lo desean.
+model Direccion {
+  id String   @id @default(cuid())
+  usuarioId String
+  provincia String
+  codigoPostal String
+  localidad String
+  calle String
+  altura String
+  pisoDepto String?
+  telefono String
+  nombreDestinatario String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
+}
+
+model OrdenCompra {
+  id         String            @id @default(cuid())
+  usuarioId  String
+  pagoId     String?            @unique
+  envioId    String?           @unique
+  estado     String
+  total      Int
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+  items      ItemOrdenCompra[]
+  direccionId   String            
+  // Datos del envio que usa shipping app. 
+  costoEnvio Int              
+  operadorEnvio String           
+  servicioEnvio String
+  demoraDias Int
+  usuario    Usuario           @relation(fields: [usuarioId], references: [id])
+}
+
+model ItemOrdenCompra {
+  id            String      @id @default(cuid())
+  ordenCompraId String
+  productoId    String
+  precio        Int
+  cantidad      Int
+  ordenCompra   OrdenCompra @relation(fields: [ordenCompraId], references: [id])
+}
