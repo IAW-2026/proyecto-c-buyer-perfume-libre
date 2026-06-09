@@ -1,6 +1,6 @@
 export default function HeroBanner() {
   return (
-    <div className="relative left-1/2 right-1/2 mb-12 w-screen -translate-x-1/2 overflow-hidden bg-[#15100c] px-4 pb-16 pt-20 text-center shadow-md">
+    <div className="relative left-1/2 right-1/2 mb-6 w-screen -translate-x-1/2 overflow-hidden bg-[#15100c] px-4 pb-16 pt-20 text-center shadow-md">
       <div
         className="pointer-events-none absolute inset-0 z-0 opacity-[0.06] mix-blend-screen"
         style={{
