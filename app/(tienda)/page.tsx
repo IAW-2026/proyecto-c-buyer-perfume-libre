@@ -1,3 +1,4 @@
+import HeroBanner from "@/components/home/HeroBanner";
 import TiendaCatalogoClient from "../../components/home/tiendaCatalogoClient";
 import ProductGrid from "@/components/home/productGrid";
 import ProductGridSkeleton from "@/components/home/productSkeleton";
@@ -19,7 +20,9 @@ export default async function Home({ searchParams }: Props) {
   ).toString();
 
   return (
-    <main className="container mx-auto px-4 py-8">
+    <main className="container mx-auto px-4">
+      <HeroBanner />
+
       <TiendaCatalogoClient>
         <Suspense key={suspenseKey} fallback={<ProductGridSkeleton />}>
           <ProductGrid searchParams={params} />
