@@ -20,6 +20,11 @@ import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
+export const metadata = {
+  title: "Mis Compras - Perfume Libre",
+  description: "Historial de compras del usuario",
+};
+
 export default async function MisComprasPage() {
   const itemsComprados = await obtenerHistorialDelUsuario();
 
