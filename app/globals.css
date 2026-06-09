@@ -49,35 +49,28 @@
 }
 
 :root {
-  /* --- PALETA PREMIUM FIGMA (Light Mode) --- */
-  --background: #faf8f4; /* Blanco hueso/crema */
-  --foreground: #1c1510; /* Negro cálido (café muy oscuro) */
-  --card: #ffffff; /* Tarjetas blancas puras para resaltar */
+  --background: #faf8f4;
+  --foreground: #1c1510;
+  --card: #ffffff;
   --card-foreground: #1c1510;
   --popover: #ffffff;
   --popover-foreground: #1c1510;
-  --primary: #1c1510; /* Botones principales oscuros */
-  --primary-foreground: #faf8f4; /* Texto de botones principales */
-  --secondary: #f0ede8; /* Gris/arena sutil para fondos secundarios */
+  --primary: #1c1510;
+  --primary-foreground: #faf8f4;
+  --secondary: #f0ede8;
   --secondary-foreground: #1c1510;
   --muted: #f0ede8;
-  --muted-foreground: #7a6f67; /* Textos secundarios / subtítulos */
-  --accent: #c9a96e; /* Dorado/Arena para hovers o detalles */
+  --muted-foreground: #7a6f67;
+  --accent: #c9a96e;
   --accent-foreground: #1c1510;
   --destructive: #c0392b;
   --destructive-foreground: #ffffff;
-  --border: rgba(
-    28,
-    21,
-    16,
-    0.12
-  ); /* Bordes sutiles basados en el texto oscuro */
-  --input: rgba(28, 21, 16, 0.15); /* Bordes de inputs */
-  --ring: #c9a96e; /* Anillo de focus dorado */
+  --border: rgba(28, 21, 16, 0.12);
+  --input: rgba(28, 21, 16, 0.15);
+  --ring: #c9a96e;
 
-  --radius: 0.5rem; /* Bordes apenas redondeados, más elegantes */
+  --radius: 0.5rem;
 
-  /* Graficos y Sidebar (Mantenemos la escala por si los usas) */
   --chart-1: #1c1510;
   --chart-2: #c9a96e;
   --chart-3: #7a6f67;
@@ -94,14 +87,13 @@
 }
 
 .dark {
-  /* --- PALETA PREMIUM FIGMA (Dark Mode Invertido) --- */
   --background: #1c1510;
   --foreground: #faf8f4;
   --card: #2a211a;
   --card-foreground: #faf8f4;
   --popover: #2a211a;
   --popover-foreground: #faf8f4;
-  --primary: #c9a96e; /* El dorado resalta mucho en dark mode */
+  --primary: #c9a96e;
   --primary-foreground: #1c1510;
   --secondary: #3d3126;
   --secondary-foreground: #faf8f4;

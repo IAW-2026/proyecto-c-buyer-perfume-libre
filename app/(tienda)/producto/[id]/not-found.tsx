@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function NotFoundProducto() {
   return (
-    <div className="flex-1 w-full bg-white flex items-center justify-center overflow-hidden">
+    <div className="flex-1 w-full bg-background flex items-center justify-center overflow-hidden">
       <main className="container mx-auto px-4 text-center max-w-md">
         <h1 className="text-2xl font-bold mb-2 text-foreground">
           Perfume no encontrado

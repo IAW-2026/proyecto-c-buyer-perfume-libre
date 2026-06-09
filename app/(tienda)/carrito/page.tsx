@@ -16,7 +16,7 @@ export default async function CarritoPage() {
 
   if (productosCarritoDb.length === 0) {
     return (
-      <div className="min-h-screen bg-slate-50/50">
+      <div className="min-h-screen bg-background">
         <CarritoVacio />
       </div>
     );
@@ -32,7 +32,7 @@ export default async function CarritoPage() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50/50">
+    <div className="min-h-screen bg-background">
       <main className="container mx-auto px-4 py-8 md:py-12">
         <h1 className="text-2xl font-bold mb-8">Carrito de compras</h1>
         <CarritoWrapper productosIniciales={itemsCarrito} />
