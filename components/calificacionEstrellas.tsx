@@ -12,7 +12,6 @@ export default function CalificacionEstrellas({ rating }: EstrellasProps) {
 
   return (
     <div className="flex items-center gap-0.5">
-      {/* Estrellas Llenas usando el color Accent (Dorado) */}
       {[...Array(estrellaPiso)].map((_, i) => (
         <Star key={`full-${i}`} className="h-3 w-3 fill-accent text-accent" />
       ))}
