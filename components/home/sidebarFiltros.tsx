@@ -74,7 +74,7 @@ function AcordionCheckList({
                 id={`${paramName}-${item}`}
                 checked={isChecked}
                 onCheckedChange={(c) => handleCheckedChange(item, c as boolean)}
-                className="h-4 w-4 rounded-full border border-[#1c1510] transition-colors cursor-pointer [&_svg]:hidden data-[state=unchecked]:bg-[#1c1510] data-[state=checked]:border-accent data-[state=checked]:bg-accent"
+                className="h-4 w-4 rounded-full border-none bg-secondary transition-colors cursor-pointer [&_svg]:hidden data-[state=checked]:bg-accent"
               />
 
               <Label
@@ -188,7 +188,7 @@ export default function SidebarFiltros({ isOpen }: { isOpen: boolean }) {
     <div
       className={`shrink-0 overflow-y-auto overflow-x-hidden transition-all duration-300 ease-in-out [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-thumb]:rounded-full ${
         isOpen
-          ? "w-68 max-h-[calc(100vh-160px)] opacity-100"
+          ? "w-68 mr-4 max-h-[calc(100vh-160px)] opacity-100"
           : "w-0 max-h-0 opacity-0"
       }`}
     >
