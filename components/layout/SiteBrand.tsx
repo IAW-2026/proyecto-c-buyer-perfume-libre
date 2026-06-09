@@ -2,12 +2,26 @@ import Link from "next/link";
 
 export default function SiteBrand() {
   return (
-    <Link
-      href="/"
-      aria-label="PerfumeLibre - Ir a inicio"
-      className="text-4xl md:text-5xl font-extrabold tracking-tighter"
-    >
-      Perfume<span className="text-primary">Libre</span>
+    <Link href="/" style={{ textDecoration: "none", flexShrink: 0 }}>
+      <span
+        style={{
+          fontFamily: "'Playfair Display', serif",
+          fontSize: "22px",
+          color: "#1a1a1a",
+          letterSpacing: "-0.01em",
+          fontWeight: 500,
+        }}
+      >
+        Perfume{" "}
+        <em
+          style={{
+            color: "#c2a679",
+            fontStyle: "italic",
+          }}
+        >
+          Libre
+        </em>
+      </span>
     </Link>
   );
 }
