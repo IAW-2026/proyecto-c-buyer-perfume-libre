@@ -31,7 +31,6 @@ function AcordionCheckList({
   const searchParams = useSearchParams();
 
   const seleccionadosEnUrl = searchParams.getAll(paramName);
-
   const [seleccionados, setSeleccionados] =
     useState<string[]>(seleccionadosEnUrl);
 
@@ -61,27 +60,32 @@ function AcordionCheckList({
   };
 
   return (
-    <AccordionItem value={title}>
-      <AccordionTrigger className="text-base font-semibold">
+    <AccordionItem value={title} className="border-none">
+      <AccordionTrigger className="py-3 text-[11px] font-bold uppercase tracking-[0.09em] text-foreground hover:no-underline">
         {title}
       </AccordionTrigger>
-      <AccordionContent className="flex flex-col gap-3 pt-2">
+      <AccordionContent className="flex flex-col gap-3.5 pb-4 pt-1">
         {items.map((item) => {
           const isChecked = seleccionados.includes(item);
 
           return (
-            <div key={item} className="flex items-center space-x-2">
+            <div key={item} className="flex items-center space-x-3">
               <Checkbox
                 id={`${paramName}-${item}`}
                 checked={isChecked}
                 onCheckedChange={(c) => handleCheckedChange(item, c as boolean)}
+                className="h-3.5 w-3.5 rounded-xs border-muted-foreground/40 data-[state=checked]:border-accent data-[state=checked]:bg-accent data-[state=checked]:text-accent-foreground"
               />
               <Label
                 htmlFor={`${paramName}-${item}`}
-                className="text-sm cursor-pointer"
+                className="cursor-pointer text-[13px] font-normal leading-none text-muted-foreground hover:text-foreground transition-colors peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
                 {item}
-                {suffix}
+                {suffix && (
+                  <span className="ml-1 text-muted-foreground/70">
+                    {suffix}
+                  </span>
+                )}
               </Label>
             </div>
           );
@@ -124,40 +128,40 @@ function FiltroPrecio() {
     if (valMax !== null) params.set("precioMax", valMax.toString());
     else params.delete("precioMax");
 
-    router.push(`${pathname}?${params.toString()}`);
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
   const noSpinnersClass =
     "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none";
 
   return (
-    <AccordionItem value="Precio">
-      <AccordionTrigger className="text-base font-semibold">
+    <AccordionItem value="Precio" className="border-none">
+      <AccordionTrigger className="py-3 text-[11px] font-bold uppercase tracking-[0.09em] text-foreground hover:no-underline">
         Precio
       </AccordionTrigger>
-      <AccordionContent className="pt-2">
+      <AccordionContent className="pb-4 pt-1">
         <form onSubmit={aplicarPrecio} className="flex items-center gap-2">
           <Input
             type="number"
             min="0"
             placeholder="Mínimo"
-            className={`h-8 text-xs ${noSpinnersClass}`}
+            className={`h-9 text-[13px] bg-secondary/30 border-border/60 focus-visible:ring-accent ${noSpinnersClass}`}
             value={min}
             onChange={(e) => setMin(e.target.value)}
           />
-          <span className="text-muted-foreground text-sm">-</span>
+          <span className="text-muted-foreground">-</span>
           <Input
             type="number"
             min="0"
             placeholder="Máximo"
-            className={`h-8 text-xs ${noSpinnersClass}`}
+            className={`h-9 text-[13px] bg-secondary/30 border-border/60 focus-visible:ring-accent ${noSpinnersClass}`}
             value={max}
             onChange={(e) => setMax(e.target.value)}
           />
           <Button
             type="submit"
             size="icon"
-            className="h-8 w-8 shrink-0 rounded-full"
+            className="h-9 w-9 shrink-0 rounded-md bg-foreground text-background hover:bg-foreground/90 transition-colors"
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
@@ -178,30 +182,40 @@ const MARCAS_MOCK = [
 const TAMANOS_MOCK = ["30", "50", "75", "100", "200"];
 const GENEROS_MOCK = ["Hombre", "Mujer", "Unisex"];
 
-export default function SidebarFiltros() {
+export default function SidebarFiltros({ isOpen }: { isOpen: boolean }) {
   return (
-    <aside className="w-64 shrink-0 hidden md:block border-r pr-2 h-[calc(100vh-160px)] overflow-y-auto sticky top-24 pb-16 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-slate-200 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-300">
-      <h2 className="font-bold text-xl mb-4 tracking-tight pl-2">Filtros</h2>
-
-      <Accordion multiple defaultValue={[]}>
-        <AcordionCheckList
-          title="Marca"
-          paramName="marca"
-          items={MARCAS_MOCK}
-        />
-        <AcordionCheckList
-          title="Género"
-          paramName="genero"
-          items={GENEROS_MOCK}
-        />
-        <FiltroPrecio />
-        <AcordionCheckList
-          title="Tamaño"
-          paramName="tamano"
-          items={TAMANOS_MOCK}
-          suffix="ml"
-        />
-      </Accordion>
-    </aside>
+    <div
+      className={`shrink-0 overflow-y-auto overflow-x-hidden transition-all duration-300 ease-in-out [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-thumb]:rounded-full ${
+        isOpen
+          ? "w-60 mr-8 max-h-[calc(100vh-160px)] opacity-100"
+          : "w-0 mr-0 max-h-0 opacity-0"
+      }`}
+    >
+      <div className="w-60 pb-16 pr-2">
+        <Accordion
+          multiple
+          defaultValue={["Marca", "Género", "Precio", "Tamaño"]}
+          className="w-full space-y-1"
+        >
+          <AcordionCheckList
+            title="Marca"
+            paramName="marca"
+            items={MARCAS_MOCK}
+          />
+          <AcordionCheckList
+            title="Género"
+            paramName="genero"
+            items={GENEROS_MOCK}
+          />
+          <FiltroPrecio />
+          <AcordionCheckList
+            title="Tamaño"
+            paramName="tamano"
+            items={TAMANOS_MOCK}
+            suffix="ml"
+          />
+        </Accordion>
+      </div>
+    </div>
   );
 }

@@ -1,7 +1,6 @@
+import TiendaCatalogoClient from "../../components/home/tiendaCatalogoClient";
 import ProductGrid from "@/components/home/productGrid";
 import ProductGridSkeleton from "@/components/home/productSkeleton";
-import SidebarFiltros from "@/components/home/sidebarFiltros";
-import { SidebarFiltrosSkeleton } from "@/components/home/SidebarFiltrosSkeleton";
 import { Suspense } from "react";
 
 type Props = {
@@ -20,18 +19,12 @@ export default async function Home({ searchParams }: Props) {
   ).toString();
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <div className="container mx-auto flex gap-6 px-4 md:px-8 py-8">
-        <Suspense fallback={<SidebarFiltrosSkeleton />}>
-          <SidebarFiltros />
+    <main className="container mx-auto px-4 py-8">
+      <TiendaCatalogoClient>
+        <Suspense key={suspenseKey} fallback={<ProductGridSkeleton />}>
+          <ProductGrid searchParams={params} />
         </Suspense>
-
-        <main className="flex-1">
-          <Suspense key={suspenseKey} fallback={<ProductGridSkeleton />}>
-            <ProductGrid searchParams={params} />
-          </Suspense>
-        </main>
-      </div>
-    </div>
+      </TiendaCatalogoClient>
+    </main>
   );
 }

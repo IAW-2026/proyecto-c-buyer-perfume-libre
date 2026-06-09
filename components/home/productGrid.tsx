@@ -22,8 +22,8 @@ export default async function ProductGrid({
   });
 
   return (
-    <div className="space-y-10">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-6">
+    <div className="w-full min-w-0 space-y-10">
+      <div className="grid grid-cols-1 justify-center gap-4 sm:[grid-template-columns:repeat(auto-fit,minmax(235px,235px))]">
         {items.map((perfume) => (
           <ProductCard key={perfume.id} {...perfume} />
         ))}
