@@ -74,8 +74,9 @@ function AcordionCheckList({
                 id={`${paramName}-${item}`}
                 checked={isChecked}
                 onCheckedChange={(c) => handleCheckedChange(item, c as boolean)}
-                className="h-3.5 w-3.5 rounded-xs border-muted-foreground/40 data-[state=checked]:border-accent data-[state=checked]:bg-accent data-[state=checked]:text-accent-foreground"
+                className="h-4 w-4 rounded-full border border-[#1c1510] transition-colors cursor-pointer [&_svg]:hidden data-[state=unchecked]:bg-[#1c1510] data-[state=checked]:border-accent data-[state=checked]:bg-accent"
               />
+
               <Label
                 htmlFor={`${paramName}-${item}`}
                 className="cursor-pointer text-[13px] font-normal leading-none text-muted-foreground hover:text-foreground transition-colors peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -187,11 +188,11 @@ export default function SidebarFiltros({ isOpen }: { isOpen: boolean }) {
     <div
       className={`shrink-0 overflow-y-auto overflow-x-hidden transition-all duration-300 ease-in-out [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-thumb]:rounded-full ${
         isOpen
-          ? "w-60 mr-8 max-h-[calc(100vh-160px)] opacity-100"
-          : "w-0 mr-0 max-h-0 opacity-0"
+          ? "w-68 max-h-[calc(100vh-160px)] opacity-100"
+          : "w-0 max-h-0 opacity-0"
       }`}
     >
-      <div className="w-60 pb-16 pr-2">
+      <div className="w-64 pb-16 pr-2">
         <Accordion
           multiple
           defaultValue={["Marca", "Género", "Precio", "Tamaño"]}

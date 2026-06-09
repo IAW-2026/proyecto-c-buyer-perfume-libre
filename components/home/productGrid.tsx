@@ -23,13 +23,13 @@ export default async function ProductGrid({
 
   return (
     <div className="w-full min-w-0 space-y-10">
-      <div className="grid grid-cols-1 justify-center gap-4 sm:[grid-template-columns:repeat(auto-fit,minmax(235px,235px))]">
+      <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-[repeat(auto-fill,minmax(220px,1fr))] lg:gap-x-6">
         {items.map((perfume) => (
           <ProductCard key={perfume.id} {...perfume} />
         ))}
       </div>
 
-      <div className="flex justify-center border-t pt-8">
+      <div className="flex justify-center border-t border-border pt-8">
         <Paginador total={total} limite={limit} paginaActual={page} />
       </div>
     </div>
