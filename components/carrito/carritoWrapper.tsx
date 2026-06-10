@@ -12,7 +12,7 @@ import { cn, formatearPrecio } from "@/lib/utils";
 import { Separator } from "../ui/separator";
 import { Card } from "../ui/card";
 import Link from "next/link";
-import { Button, buttonVariants } from "../ui/button";
+import { buttonVariants } from "../ui/button";
 
 type AccionOptimista =
   | { tipo: "ELIMINAR"; id: string }
@@ -74,8 +74,8 @@ export function CarritoWrapper({
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-      <div className="lg:col-span-8 flex flex-col gap-4">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12">
+      <div className="lg:col-span-8 flex flex-col gap-5">
         {optimisticProductos.map((producto) => (
           <ProductCardCarrito
             key={producto.id}
@@ -96,18 +96,20 @@ function ResumenCompra({ productos }: { productos: ItemCarrito[] }) {
 
   return (
     <div className="lg:col-span-4">
-      <Card className="sticky top-24 border-none shadow-sm h-fit">
+      <Card className="sticky top-24 rounded-sm border border-border/60 bg-card shadow-sm h-fit">
         <div className="p-6">
-          <h2 className="text-lg font-bold mb-4">Resumen de compra</h2>
+          <h2 className="text-[13px] uppercase tracking-[0.08em] font-bold text-foreground mb-5">
+            Resumen de compra
+          </h2>
 
-          <div className="space-y-3">
+          <div className="space-y-4">
             <ResumenProductos productos={productos} />
 
-            <Separator className="my-4" />
+            <Separator className="my-4 border-border/60" />
 
             <ResumenTotal total={total} />
 
-            <BotonContinuarCompra productos={productos} total={total} />
+            <BotonContinuarCompra />
           </div>
         </div>
       </Card>
@@ -117,11 +119,16 @@ function ResumenCompra({ productos }: { productos: ItemCarrito[] }) {
 
 function ResumenProductos({ productos }: { productos: ItemCarrito[] }) {
   return (
-    <div className="flex flex-col gap-2 text-sm">
+    <div className="flex flex-col gap-2.5 text-[13px] font-light text-muted-foreground">
       {productos.map((prod) => (
-        <div className="flex justify-between items-start gap-2" key={prod.id}>
-          <span>{`${prod.nombre} `}</span>
-          <span>{formatearPrecio(prod.precio, prod.cantidad)}</span>{" "}
+        <div className="flex justify-between items-start gap-3" key={prod.id}>
+          <span className="truncate">
+            {prod.nombre}{" "}
+            <span className="text-[11px] opacity-60">({prod.cantidad})</span>
+          </span>
+          <span className="font-medium text-foreground shrink-0">
+            {formatearPrecio(prod.precio * prod.cantidad)}
+          </span>{" "}
         </div>
       ))}
     </div>
@@ -130,26 +137,24 @@ function ResumenProductos({ productos }: { productos: ItemCarrito[] }) {
 
 function ResumenTotal({ total }: { total: number }) {
   return (
-    <div className="flex justify-between text-lg font-bold">
-      <span>Subtotal</span>
-      <span>{formatearPrecio(total)}</span>
+    <div className="flex justify-between items-baseline">
+      <span className="text-[11px] uppercase tracking-[0.08em] font-bold text-foreground">
+        Subtotal
+      </span>
+      <span className="font-serif text-[24px] text-foreground font-normal">
+        {formatearPrecio(total)}
+      </span>
     </div>
   );
 }
 
-function BotonContinuarCompra({
-  productos,
-  total,
-}: {
-  productos: ItemCarrito[];
-  total: number;
-}) {
+function BotonContinuarCompra() {
   return (
     <Link
       href="/checkout/envio"
       className={cn(
-        buttonVariants(),
-        "w-full mt-6 h-12 text-base font-bold bg-blue-600 hover:bg-blue-700 shadow-md flex items-center justify-center",
+        buttonVariants({ variant: "default" }),
+        "w-full mt-6 h-14 text-[13px] uppercase tracking-wider font-semibold bg-foreground text-background hover:bg-foreground/90 transition-all rounded-sm shadow-md hover:shadow-lg flex items-center justify-center",
       )}
     >
       Continuar compra
@@ -157,6 +162,7 @@ function BotonContinuarCompra({
   );
 }
 
+// TODO: Mover a libs
 function calcularTotal(productos: ItemCarrito[]) {
   return productos.reduce((acc, prod) => acc + prod.precio * prod.cantidad, 0);
 }

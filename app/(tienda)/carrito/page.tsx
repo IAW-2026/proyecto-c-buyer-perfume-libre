@@ -3,11 +3,12 @@ import CarritoVacio from "@/components/carrito/CarritoVacio";
 import { CarritoWrapper } from "@/components/carrito/carritoWrapper";
 import { obtenerProductosCarrito } from "@/lib/api";
 import { ItemCarrito, PerfumeCarrito } from "@/schema/perfume.schema";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Carrito de Compras",
+  title: "Carrito de Compras - Perfume Libre",
   description: "Revisa los productos que has agregado a tu carrito",
 };
 
@@ -16,8 +17,24 @@ export default async function CarritoPage() {
 
   if (productosCarritoDb.length === 0) {
     return (
-      <div className="min-h-screen bg-background">
-        <CarritoVacio />
+      <div className="bg-background">
+        <main className="container mx-auto max-w-6xl px-4 py-8 md:py-12">
+          <nav className="mb-6 text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+            <Link href="/" className="hover:text-accent transition-colors">
+              Inicio
+            </Link>
+            <span className="mx-2">/</span>
+            <span className="text-foreground">Carrito</span>
+          </nav>
+
+          <div className="mb-10">
+            <h1 className="text-[clamp(28px,4vw,36px)] font-serif font-normal text-foreground leading-[1.1] tracking-tight">
+              Tu Carrito
+            </h1>
+          </div>
+
+          <CarritoVacio />
+        </main>
       </div>
     );
   }
@@ -32,9 +49,22 @@ export default async function CarritoPage() {
   );
 
   return (
-    <div className="min-h-screen bg-background">
-      <main className="container mx-auto px-4 py-8 md:py-12">
-        <h1 className="text-2xl font-bold mb-8">Carrito de compras</h1>
+    <div className="bg-background">
+      <main className="container mx-auto max-w-6xl px-4 py-8 md:py-12">
+        <nav className="mb-6 text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+          <Link href="/" className="hover:text-accent transition-colors">
+            Inicio
+          </Link>
+          <span className="mx-2">/</span>
+          <span className="text-foreground">Carrito</span>
+        </nav>
+
+        <div className="mb-10">
+          <h1 className="text-[clamp(28px,4vw,36px)] font-serif font-normal text-foreground leading-[1.1] tracking-tight">
+            Tu Carrito
+          </h1>
+        </div>
+
         <CarritoWrapper productosIniciales={itemsCarrito} />
       </main>
     </div>
