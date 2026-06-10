@@ -2,7 +2,7 @@ import {
   obtenerCantidadDeProductosComprados,
   obtenerItemDeOrden,
 } from "@/actions/compras";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { cn, formatearPrecio } from "@/lib/utils";
@@ -17,17 +17,13 @@ import { obtenerDetallePerfume, obtenerHistorialEnvio } from "@/lib/api";
 import { SeccionResenas } from "@/components/compras/SeccionResenas";
 import { SimuladorEnvio } from "@/components/compras/SelectorEnvio";
 
-// Se podria utilizar suspense aqui dentro para mostrar
-// Detalles del producto independientemente de si el fetch a Shipping app funciona
-// pero por temas de tiempo se omitio en esta entrega.
-
 type Props = {
   params: Promise<{ id: string }>;
   searchParams: Promise<{ itemId?: string }>;
 };
 
 export const metadata = {
-  title: "Detalle de la Compra",
+  title: "Detalle de la Compra - Perfume Libre",
   description: "Revisa el detalle de tu compra realizada en Perfume Libre",
 };
 
@@ -48,10 +44,8 @@ export default async function DetalleCompraPage({
 
   return (
     <div className="min-h-screen bg-background">
-      <main className="container mx-auto px-4 py-8 md:py-12">
-        <div className="min-h-screen bg-background">
-          <DetalleCompra orden={orden} />
-        </div>
+      <main className="container mx-auto px-4 py-8 md:py-12 max-w-5xl">
+        <DetalleCompra orden={orden} />
       </main>
     </div>
   );
@@ -59,16 +53,16 @@ export default async function DetalleCompraPage({
 
 function DetalleCompra({ orden }: { orden: ItemDeOrdenDetallado }) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex justify-between items-center">
         <Link
           href="/compras"
           className={cn(
             buttonVariants({ variant: "ghost", size: "sm" }),
-            "text-slate-600 -ml-2 font-medium",
+            "text-[11px] uppercase tracking-[0.08em] font-bold text-muted-foreground hover:text-foreground -ml-4 transition-colors",
           )}
         >
-          <ArrowLeft className="mr-2 h-4 w-4" />
+          <ArrowLeft className="mr-2 h-3.5 w-3.5" />
           Volver al historial
         </Link>
 
@@ -77,15 +71,24 @@ function DetalleCompra({ orden }: { orden: ItemDeOrdenDetallado }) {
 
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-            Detalle de la Compra
+          <h1 className="font-serif text-[clamp(28px,4vw,36px)] font-normal text-foreground leading-[1.1] tracking-tight">
+            Detalle del Pedido
           </h1>
-          <p className="text-sm text-slate-500 font-mono mt-1">
-            Orden #{orden.ordenCompraId.toUpperCase()}
-          </p>
-          <p className="text-xs text-slate-400 font-mono mt-1">
-            item #{orden.idItem.toUpperCase()}
-          </p>
+          <div className="mt-3 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-[10px] uppercase tracking-widest font-semibold text-muted-foreground">
+            <p>
+              Orden{" "}
+              <span className="text-foreground">
+                #{orden.ordenCompraId.slice(0, 8)}
+              </span>
+            </p>
+            <span className="hidden sm:inline text-border">|</span>
+            <p>
+              Item{" "}
+              <span className="text-foreground">
+                #{orden.idItem.slice(0, 8)}
+              </span>
+            </p>
+          </div>
         </div>
       </div>
 
@@ -96,8 +99,8 @@ function DetalleCompra({ orden }: { orden: ItemDeOrdenDetallado }) {
 
 function PanelPrincipal({ orden }: { orden: ItemDeOrdenDetallado }) {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div className="lg:col-span-2 space-y-6">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="lg:col-span-2 space-y-8">
         <CardSeguimiento orden={orden} />
 
         <ResumenProductoComprado orden={orden} />
@@ -119,26 +122,28 @@ function PanelPrincipal({ orden }: { orden: ItemDeOrdenDetallado }) {
 
 function CardSeguimiento({ orden }: { orden: ItemDeOrdenDetallado }) {
   return (
-    <Card className="overflow-hidden border-slate-200/80 shadow-sm">
-      <CardHeader className="bg-slate-50/50 pb-4 border-b">
+    <Card className="overflow-hidden rounded-sm border-border/60 shadow-sm">
+      <CardHeader className="bg-secondary/30 pb-4 border-b border-border/60">
         <div className="flex justify-between items-center">
-          <div className="flex items-center gap-2 text-slate-700">
-            <Truck className="h-5 w-5 text-blue-600" />
-            <CardTitle className="text-base font-semibold">
+          <div className="flex items-center gap-2.5 text-foreground">
+            <Truck className="h-4 w-4" />
+            <CardTitle className="text-[13px] uppercase tracking-[0.08em] font-bold">
               Seguimiento del Envío
             </CardTitle>
           </div>
-          <span className="text-xs font-mono text-slate-500">
+          <span className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">
             TRK: {orden.ordenCompra.envioId}
           </span>
         </div>
       </CardHeader>
-      <CardContent className="pt-6">
-        <div className="mb-6">
-          <p className="text-sm font-medium text-slate-900">
-            Estado actual:{" "}
-            <span className="text-blue-600">{orden.ordenCompra.estado}</span>
+      <CardContent className="pt-8">
+        <div className="mb-8 flex items-center gap-2">
+          <p className="text-[12px] uppercase tracking-wider font-semibold text-muted-foreground">
+            Estado actual:
           </p>
+          <span className="text-[12px] uppercase tracking-wider font-bold text-accent">
+            {orden.ordenCompra.estado}
+          </span>
         </div>
 
         <HistorialEnvio historialEnvio={orden.historialEnvio} />
@@ -153,20 +158,26 @@ function HistorialEnvio({
   historialEnvio: { fecha: string; ubicacion: string }[];
 }) {
   return (
-    <div className="border-l-2 border-blue-100 ml-2 pl-6 space-y-6 relative">
+    <div className="border-l border-border/80 ml-2 pl-8 space-y-8 relative">
       {historialEnvio.map((evento, idx) => (
         <div key={idx} className="relative">
           <span
-            className={`absolute -left-7.25 top-1 h-3 w-3 rounded-full ring-4 ring-white ${
-              idx === 0 ? "bg-blue-600" : "bg-slate-300"
+            className={`absolute -left-9.25 top-1 h-2.5 w-2.5 rounded-full ring-4 ring-card ${
+              idx === 0 ? "bg-accent" : "bg-border"
             }`}
           />
           <p
-            className={`text-sm ${idx === 0 ? "font-semibold text-slate-900" : "text-slate-600"}`}
+            className={`text-[14px] leading-none ${
+              idx === 0
+                ? "font-semibold text-foreground"
+                : "font-light text-muted-foreground"
+            }`}
           >
             {evento.ubicacion}
           </p>
-          <p className="text-xs text-slate-400 mt-1">{evento.fecha}</p>
+          <p className="text-[11px] text-muted-foreground mt-2 uppercase tracking-wide">
+            {evento.fecha}
+          </p>
         </div>
       ))}
     </div>
@@ -175,36 +186,37 @@ function HistorialEnvio({
 
 function ResumenProductoComprado({ orden }: { orden: ItemDeOrdenDetallado }) {
   return (
-    <Card className="border-slate-200/80 shadow-sm">
-      <CardHeader>
-        <CardTitle className="text-base font-semibold">
+    <Card className="rounded-sm border-border/60 shadow-sm">
+      <CardHeader className="pb-4">
+        <CardTitle className="text-[13px] uppercase tracking-[0.08em] font-bold text-foreground">
           Detalle del Producto
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="flex gap-4 items-center">
-          <div className="relative h-20 w-20 shrink-0 bg-slate-50 rounded-lg border border-slate-100 overflow-hidden">
+        <div className="flex gap-5 items-center">
+          <div className="relative w-16 sm:w-20 shrink-0 aspect-3/4 bg-secondary rounded-sm border border-border/40 overflow-hidden">
             <Image
               src={orden.imagenUrl}
               alt={orden.nombreProducto}
               fill
               sizes="80px"
-              className="object-cover"
+              className="object-cover mix-blend-multiply"
             />
           </div>
 
           <div className="grow min-w-0">
-            <h4 className="font-medium text-slate-900 line-clamp-1">
+            <h4 className="font-serif text-[20px] text-foreground line-clamp-1">
               {orden.nombreProducto}
             </h4>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-[11px] uppercase tracking-wider text-muted-foreground mt-1.5">
               Vendedor:{" "}
-              <span className="font-medium text-slate-700">
+              <span className="font-semibold text-foreground/80">
                 {orden.vendedor}
               </span>
             </p>
-            <p className="text-sm text-slate-500 mt-2">
-              {orden.cantidad} u. <span className="mx-2 text-slate-300">|</span>{" "}
+            <p className="text-[12px] font-medium text-foreground mt-3">
+              {orden.cantidad} {orden.cantidad > 1 ? "unidades" : "unidad"}{" "}
+              <span className="mx-2 text-border">|</span>{" "}
               {formatearPrecio(orden.precio)} c/u
             </p>
           </div>
@@ -217,67 +229,69 @@ function ResumenProductoComprado({ orden }: { orden: ItemDeOrdenDetallado }) {
 function ResumenPago({ orden }: { orden: ItemDeOrdenDetallado }) {
   return (
     <div className="space-y-6">
-      <Card className="border-slate-200/80 shadow-sm sticky top-6">
-        <CardHeader>
-          <CardTitle className="text-base font-semibold">
+      <Card className="rounded-sm border-border/60 shadow-sm sticky top-24">
+        <CardHeader className="bg-secondary/30 pb-4 border-b border-border/60">
+          <CardTitle className="text-[13px] uppercase tracking-[0.08em] font-bold text-foreground">
             Resumen de costos
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex justify-between text-sm text-slate-600">
+        <CardContent className="space-y-4 pt-6">
+          <div className="flex justify-between text-[13px] font-light text-muted-foreground">
             <span>
               {orden.ordenCompra.itemsComprados > 1
-                ? `productos (${orden.ordenCompra.itemsComprados})`
-                : "producto"}
+                ? `Productos (${orden.ordenCompra.itemsComprados})`
+                : "Producto (1)"}
             </span>
-            <span>
+            <span className="font-medium text-foreground">
               {formatearPrecio(
                 orden.ordenCompra.total - orden.ordenCompra.costoEnvio,
               )}
             </span>
           </div>
 
-          <div className="flex justify-between text-sm text-slate-600">
+          <div className="flex justify-between text-[13px] font-light text-muted-foreground">
             <span>Envío</span>
             {orden.ordenCompra.costoEnvio > 0 ? (
-              <span>{formatearPrecio(orden.ordenCompra.costoEnvio)}</span>
+              <span className="font-medium text-foreground">
+                {formatearPrecio(orden.ordenCompra.costoEnvio)}
+              </span>
             ) : (
-              <span className="text-green-600 font-medium">Gratis</span>
+              <span className="text-accent font-bold uppercase tracking-wider text-[11px]">
+                Gratis
+              </span>
             )}
           </div>
 
-          <Separator className="my-2" />
+          <Separator className="my-4 border-border/60" />
 
           <div className="flex justify-between items-baseline">
-            <span className="font-bold text-slate-900">Total pagado</span>
-            <span className="text-xl font-extrabold text-slate-900">
+            <span className="text-[11px] uppercase tracking-[0.08em] font-bold text-foreground">
+              Total pagado
+            </span>
+            <span className="font-serif text-[24px] text-foreground">
               {formatearPrecio(orden.ordenCompra.total)}
             </span>
           </div>
 
-          <Separator className="my-2" />
+          <Separator className="my-4 border-border/60" />
 
-          {/* DETALLES DE TRANSACCIÓN */}
-          <div className="space-y-3 pt-1">
-            <div className="flex items-center gap-2 text-xs text-slate-500">
-              <Calendar className="h-3.5 w-3.5 text-slate-400" />
+          <div className="space-y-3">
+            <div className="flex items-center gap-3 text-[11px] uppercase tracking-wider text-muted-foreground">
+              <Calendar className="h-3.5 w-3.5" />
               <span>
-                Comprado el{" "}
-                {format(
-                  orden.ordenCompra.createdAt,
-                  "d 'de' MMMM, yyyy HH:mm",
-                  {
-                    locale: es,
-                  },
-                )}
+                {format(orden.ordenCompra.createdAt, "d 'de' MMMM, yyyy", {
+                  locale: es,
+                })}
               </span>
             </div>
 
-            <div className="flex items-center gap-2 text-xs text-slate-500">
-              <CreditCard className="h-3.5 w-3.5 text-slate-400" />
+            <div className="flex items-center gap-3 text-[11px] uppercase tracking-wider text-muted-foreground">
+              <CreditCard className="h-3.5 w-3.5" />
               <span className="truncate">
-                ID de Pago:{" "}
-                <span className="font-mono">{orden.ordenCompra.pagoId}</span>
+                ID Pago:{" "}
+                <span className="font-semibold text-foreground/80">
+                  {orden.ordenCompra.pagoId}
+                </span>
               </span>
             </div>
           </div>
