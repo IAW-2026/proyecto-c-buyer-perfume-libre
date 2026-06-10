@@ -2,7 +2,11 @@ import { CheckCircle2, ShieldCheck } from "lucide-react";
 import CardPrimerFormulario from "./CardPrimerFormulario";
 import InfoOperacion from "./InfoOperacion";
 
-export default function PrimeraDireccionPantalla() {
+export default function PrimeraDireccionPantalla({
+  productoId,
+}: {
+  productoId?: string;
+}) {
   return (
     <section className="mx-auto max-w-6xl px-0 py-4 md:py-6 space-y-6">
       <InfoOperacion
@@ -12,7 +16,7 @@ export default function PrimeraDireccionPantalla() {
       />
 
       <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] items-start">
-        <CardPrimerFormulario />
+        <CardPrimerFormulario productoId={productoId} />
         <ColumnaAyuda />
       </div>
     </section>

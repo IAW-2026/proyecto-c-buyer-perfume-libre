@@ -21,7 +21,7 @@ export default async function CheckoutEnvioPage({
     <div className="w-full bg-linear-to-b from-background via-background to-secondary/10">
       <main className="container mx-auto px-4 py-8 md:px-8 max-w-6xl">
         {direcciones.length === 0 ? (
-          <PrimeraDireccionPantalla />
+          <PrimeraDireccionPantalla productoId={productoId} />
         ) : (
           <DireccionesEnvioPanel
             direcciones={direcciones}

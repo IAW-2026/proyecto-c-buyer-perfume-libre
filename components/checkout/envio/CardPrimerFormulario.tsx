@@ -5,12 +5,18 @@ import { MapPin } from "lucide-react";
 import FormularioDireccion from "./FormularioDireccion";
 import { useRouter } from "next/navigation";
 
-export default function CardFormulario() {
+export default function CardFormulario({
+  productoId,
+}: {
+  productoId?: string;
+}) {
   const router = useRouter();
 
   const handleGuardadoExitoso = (idDireccion?: string) => {
     if (idDireccion) {
-      router.push(`/checkout/metodo-envio?direccionId=${idDireccion}`);
+      router.push(
+        `/checkout/metodo-envio?direccionId=${idDireccion}${productoId ? `&productoId=${productoId}` : ""}`,
+      );
     } else {
       router.push("/checkout/envio");
     }
