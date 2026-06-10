@@ -1,12 +1,11 @@
 "use client";
 
-import { Button, buttonVariants } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { cn, formatearPrecio, generarUrl } from "@/lib/utils";
+import { formatearPrecio, generarUrl } from "@/lib/utils";
 import { PerfumeFavorito } from "@/schema/perfume.schema";
 import Image from "next/image";
 import Link from "next/link";
 import { BotonAgregarCarrito } from "../carrito/botonAgregarCarrito";
+import { Trash2 } from "lucide-react";
 
 export default function ProductoCardFavoritos({
   producto,
@@ -22,26 +21,21 @@ export default function ProductoCardFavoritos({
   };
 
   return (
-    <Card className="overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow">
-      <CardContent className="p-0">
-        <div className="flex flex-col sm:flex-row items-center sm:items-stretch">
-          <ProductImage
-            imagenUrl={producto.imagenUrl}
-            nombre={producto.nombre}
-          />
+    <div className="overflow-hidden rounded-sm border border-border/60 bg-card transition-shadow duration-300 hover:shadow-[0_12px_40px_rgba(28,21,16,0.06)]">
+      <div className="flex flex-col sm:flex-row items-center sm:items-stretch p-0">
+        <ProductImage imagenUrl={producto.imagenUrl} nombre={producto.nombre} />
 
-          <ProductInfo
-            marca={producto.marca}
-            nombre={producto.nombre}
-            precio={producto.precio}
-            id={producto.id}
-            onEliminar={onClickEliminar}
-          />
+        <ProductInfo
+          marca={producto.marca}
+          nombre={producto.nombre}
+          precio={producto.precio}
+          id={producto.id}
+          onEliminar={onClickEliminar}
+        />
 
-          <ProductAgregarCarrito productoId={producto.id} />
-        </div>
-      </CardContent>
-    </Card>
+        <ProductAgregarCarrito productoId={producto.id} />
+      </div>
+    </div>
   );
 }
 
@@ -53,8 +47,14 @@ function ProductImage({
   nombre: string;
 }) {
   return (
-    <div className="relative h-40 w-40 p-4 shrink-0 flex items-center justify-center bg-white border-r border-slate-100">
-      <Image src={imagenUrl} alt={nombre} fill className="object-contain p-2" />
+    <div className="relative w-full sm:w-40 shrink-0 aspect-3/4 sm:aspect-auto sm:min-h-45 overflow-hidden bg-secondary border-b sm:border-b-0 sm:border-r border-border/40">
+      <Image
+        src={imagenUrl}
+        alt={nombre}
+        fill
+        sizes="(max-width: 640px) 100vw, 160px"
+        className="object-cover mix-blend-multiply"
+      />
     </div>
   );
 }
@@ -73,18 +73,18 @@ function ProductInfo({
   onEliminar: (e: React.MouseEvent) => void;
 }) {
   return (
-    <div className="flex flex-col flex-1 p-6 justify-between text-center sm:text-left">
+    <div className="flex flex-col flex-1 p-5 sm:p-6 justify-between text-center sm:text-left">
       <div className="flex flex-col gap-1">
-        <span className="text-[10px] font-bold uppercase tracking-widest text-primary/80">
+        <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">
           {marca}
         </span>
         <Link href={`/producto/${generarUrl(nombre, id)}`}>
-          <h3 className="text-lg font-medium text-foreground hover:text-blue-600 transition-colors leading-tight">
+          <h3 className="font-serif text-[22px] font-normal text-foreground hover:text-accent transition-colors leading-tight">
             {nombre}
           </h3>
         </Link>
         <div className="mt-2 flex flex-col">
-          <span className="text-2xl font-semibold text-foreground">
+          <span className="text-[18px] font-semibold tracking-[-0.02em] text-foreground">
             {formatearPrecio(precio)}
           </span>
         </div>
@@ -104,20 +104,19 @@ function ProductActions({
 }) {
   return (
     <div className="flex items-center justify-center sm:justify-start gap-4 mt-6 sm:mt-0">
-      <Button
-        variant="link"
-        className="text-blue-500 p-0 h-auto font-medium hover:text-red-600 transition-colors"
+      <button
         onClick={onEliminar}
+        className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground hover:text-destructive transition-colors flex items-center gap-1.5 outline-none"
       >
-        {"Eliminar"}
-      </Button>
-      <div className="w-px h-4 bg-slate-200 hidden sm:block" />
+        <Trash2 className="w-3.5 h-3.5" />
+        Eliminar
+      </button>
+
+      <div className="w-px h-3 bg-border hidden sm:block" />
+
       <Link
         href={`/checkout/envio?productoId=${perfumeId}`}
-        className={cn(
-          buttonVariants({ variant: "link" }),
-          "text-blue-500 p-0 h-auto font-medium hover:text-blue-700",
-        )}
+        className="text-[11px] uppercase tracking-wider font-semibold text-foreground hover:text-accent transition-colors hidden sm:block"
       >
         Comprar ahora
       </Link>
@@ -127,10 +126,10 @@ function ProductActions({
 
 function ProductAgregarCarrito({ productoId }: { productoId: string }) {
   return (
-    <div className="p-6 flex items-center justify-center border-t sm:border-t-0 sm:border-l border-slate-100">
+    <div className="p-5 sm:p-6 flex items-center justify-center border-t sm:border-t-0 sm:border-l border-border/40 shrink-0 w-full sm:w-auto">
       <BotonAgregarCarrito
         perfumeId={productoId}
-        className="w-full sm:w-auto gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+        className="w-full sm:w-auto h-12 px-6 text-[11px] uppercase tracking-[0.08em] font-bold rounded-sm bg-foreground text-background hover:bg-foreground/90 transition-all shadow-md hover:shadow-lg"
         size="default"
       />
     </div>
