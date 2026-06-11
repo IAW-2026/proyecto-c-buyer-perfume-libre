@@ -80,7 +80,7 @@ export default async function CheckoutResultadoPage({ searchParams }: Props) {
   const esExitoso = status === "success" && orden.estado === "Pagado";
 
   return (
-    <div className="w-full bg-background flex flex-1 items-center justify-center p-4 py-12 md:py-20">
+    <div className="w-full bg-background flex flex-1 items-center justify-center p-4">
       <Card className="w-full max-w-md shadow-lg border-border/60 rounded-sm bg-card overflow-hidden">
         {esExitoso ? (
           <PagoExitoso ordenId={orden.id} total={orden.total} />
@@ -181,7 +181,7 @@ function PagoExitoso({ ordenId, total }: { ordenId: string; total: number }) {
             <span className="text-[11px] uppercase tracking-[0.08em] font-bold text-muted-foreground">
               Total abonado
             </span>
-            <span className="font-serif text-[24px] font-normal text-foreground leading-none">
+            <span className="font-light tracking-[-0.02em] text-[24px] text-foreground leading-none">
               {formatearPrecio(total)}
             </span>
           </div>
