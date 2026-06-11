@@ -29,9 +29,9 @@ export default async function MisComprasPage() {
   const itemsComprados = await obtenerHistorialDelUsuario();
 
   return (
-    <div className="min-h-screen bg-background">
-      <main className="container mx-auto px-4 py-8 md:py-12 max-w-5xl">
-        <nav className="mb-6 text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+    <div className="w-full bg-background flex flex-col flex-1">
+      <main className="container mx-auto px-4 py-8 md:py-12 max-w-5xl flex flex-col flex-1">
+        <nav className="mb-6 text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground shrink-0">
           <Link href="/" className="hover:text-accent transition-colors">
             Inicio
           </Link>
@@ -42,7 +42,9 @@ export default async function MisComprasPage() {
         {itemsComprados ? (
           <HistorialCompras ordenes={itemsComprados} />
         ) : (
-          <EstadoVacioCompras />
+          <div className="flex flex-1 items-center justify-center pb-8 md:pb-12">
+            <EstadoVacioCompras />
+          </div>
         )}
       </main>
     </div>
@@ -51,8 +53,8 @@ export default async function MisComprasPage() {
 
 function EstadoVacioCompras() {
   return (
-    <div className="flex flex-col items-center justify-center rounded-sm border border-border/50 bg-card px-6 py-20 text-center shadow-sm">
-      <h2 className="font-serif text-[clamp(24px,3vw,32px)] font-normal text-foreground mb-3">
+    <div className="flex w-full flex-col items-center justify-center rounded-sm border border-border/60 bg-card px-6 py-16 md:py-24 text-center shadow-sm">
+      <h2 className="font-serif text-[clamp(24px,3vw,32px)] font-normal text-foreground mb-3 tracking-tight">
         Aún no tienes compras
       </h2>
       <p className="mx-auto max-w-md text-[14px] font-light text-muted-foreground leading-relaxed">
@@ -64,7 +66,7 @@ function EstadoVacioCompras() {
           href="/?page=1"
           className={cn(
             buttonVariants({ variant: "default", size: "lg" }),
-            "h-12 px-8 text-[11px] uppercase tracking-widest font-bold rounded-sm bg-foreground text-background hover:bg-foreground/90 transition-all",
+            "h-12 px-8 text-[11px] uppercase tracking-widest font-bold rounded-sm bg-foreground text-background hover:bg-foreground/90 transition-all shadow-md",
           )}
         >
           Explorar fragancias
@@ -81,7 +83,7 @@ export function HistorialCompras({ ordenes }: { ordenes: OrdenAgrupada[] }) {
         <h1 className="text-[clamp(28px,4vw,36px)] font-serif font-normal text-foreground leading-[1.1] tracking-tight">
           Historial de Pedidos
         </h1>
-        <p className="mt-2 text-[14px] text-muted-foreground">
+        <p className="mt-2 text-[14px] font-light text-muted-foreground">
           Revisa el estado y detalle de tus adquisiciones recientes.
         </p>
       </div>
@@ -130,8 +132,8 @@ function HeaderCompra({
           <p className="text-[12px] font-bold uppercase tracking-[0.08em] text-foreground">
             {format(fecha, "d 'de' MMMM, yyyy", { locale: es })}
           </p>
-          <span className="hidden sm:inline text-muted-foreground/50">|</span>
-          <p className="text-[12px] font-medium text-muted-foreground">
+          <span className="hidden sm:inline text-border/60">|</span>
+          <p className="text-[12px] font-light text-muted-foreground">
             {cantidadProductos}{" "}
             {cantidadProductos === 1 ? "artículo" : "artículos"}
           </p>
@@ -141,7 +143,7 @@ function HeaderCompra({
           <Badge
             className={cn(
               COLOR_ESTADOS[estado],
-              "uppercase tracking-widest text-[10px] rounded-sm px-2.5 py-0.5",
+              "uppercase tracking-widest font-bold text-[9px] rounded-sm px-2.5 py-1",
             )}
             variant="secondary"
           >
@@ -162,7 +164,7 @@ function ProductoCompra({
 }) {
   return (
     <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center">
-      <div className="relative w-20 shrink-0 aspect-3/4 overflow-hidden rounded-sm bg-secondary border border-border/30">
+      <div className="relative w-20 shrink-0 aspect-3/4 overflow-hidden rounded-sm bg-secondary border border-border/40">
         <Image
           src={item.imagenUrl}
           alt={item.nombre}
@@ -184,7 +186,7 @@ function ProductoCompra({
             href={`/compras/${ordenId}?itemId=${item.itemId}`}
             className={cn(
               buttonVariants({ variant: "outline", size: "sm" }),
-              "h-9 px-4 text-[10px] uppercase tracking-widest font-bold border border-border bg-transparent text-foreground hover:border-accent hover:text-accent transition-all rounded-sm w-full sm:w-auto",
+              "h-10 px-5 text-[10px] uppercase tracking-widest font-bold border border-border/60 bg-transparent text-foreground hover:bg-secondary/20 hover:text-accent hover:border-accent/40 transition-all rounded-sm w-full sm:w-auto",
             )}
           >
             Ver detalle
@@ -206,14 +208,14 @@ function DetallesProducto({
 }) {
   return (
     <div className="flex min-w-0 flex-col grow">
-      <h4 className="font-serif text-[18px] text-foreground line-clamp-1">
+      <h4 className="font-serif text-[20px] font-normal text-foreground line-clamp-1 leading-none">
         {nombre}
       </h4>
-      <p className="mt-1 text-[11px] uppercase tracking-wider text-muted-foreground">
+      <p className="mt-2 text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
         Vendedor:{" "}
         <span className="font-semibold text-foreground/80">{vendedor}</span>
       </p>
-      <p className="mt-1 text-[11px] uppercase tracking-wider text-muted-foreground">
+      <p className="mt-1 text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
         {cantidad > 1 ? `Unidades: ${cantidad}` : `Unidad: ${cantidad}`}
       </p>
     </div>
