@@ -2,10 +2,10 @@ import { Loader2 } from "lucide-react";
 
 export default function LoadingAdmin() {
   return (
-    <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4">
-      <Loader2 className="h-10 w-10 animate-spin text-primary" />
-      <p className="text-sm text-muted-foreground font-medium">
-        Cargando panel de administración...
+    <div className="flex min-h-[60vh] flex-col items-center justify-center gap-5">
+      <Loader2 className="h-8 w-8 animate-spin text-accent" strokeWidth={1.5} />
+      <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+        Cargando métricas...
       </p>
     </div>
   );
