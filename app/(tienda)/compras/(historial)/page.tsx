@@ -220,7 +220,6 @@ function DetallesProducto({
   );
 }
 
-// ... Las funciones fusionarCompradoConDetalles y obtenerHistorialDelUsuario siguen igual
 function fusionarCompradoConDetalles(
   compradoDb: OrdenDeCompraDb[],
   productoDetalle: PerfumeComprado[],
