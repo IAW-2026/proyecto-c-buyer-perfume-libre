@@ -237,3 +237,37 @@ export async function limpiarDatosPrueba() {
     throw new Error("Hubo un problema limpiando los datos de prueba.");
   }
 }
+
+interface FiltrosOrdenes {
+  q?: string;
+  estado?: string;
+}
+
+export async function obtenerOrdenes(filtros?: FiltrosOrdenes) {
+  try {
+    const whereClause: any = {};
+
+    if (filtros?.q) {
+      whereClause.id = {
+        contains: filtros.q,
+        mode: "insensitive",
+      };
+    }
+
+    if (filtros?.estado && filtros.estado !== "todos") {
+      whereClause.estado = filtros.estado;
+    }
+
+    const ordenes = await prisma.ordenCompra.findMany({
+      where: whereClause,
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    return ordenes;
+  } catch (error) {
+    console.error(error);
+    throw new Error("No se pudieron obtener las órdenes");
+  }
+}
