@@ -1,6 +1,4 @@
-import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/prisma";
 import { RolUsuario } from "@/lib/generated/prisma/client";
 import { obtenerRolUsuario } from "@/actions/usuario";
 import AdminHeader from "@/components/admin/AdminHeader";
