@@ -42,14 +42,14 @@ export function HerramientasDesarrollo() {
         onClick={handleGenerar}
         disabled={isPending}
         className={cn(
-          buttonVariants({ variant: "outline", size: "sm" }),
-          "gap-2 border-dashed border-primary text-primary hover:bg-primary/10",
+          buttonVariants({ variant: "outline" }),
+          "h-10 px-4 text-[10px] uppercase tracking-widest font-bold rounded-sm border-border/60 text-foreground hover:border-accent hover:text-accent hover:bg-transparent transition-colors",
         )}
       >
         {isPending ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
+          <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
         ) : (
-          <Wand2 className="h-4 w-4" />
+          <Wand2 className="mr-2 h-3.5 w-3.5" />
         )}
         Generar Datos
       </button>
@@ -58,8 +58,8 @@ export function HerramientasDesarrollo() {
         <AlertDialogTrigger
           disabled={isPending}
           className={cn(
-            buttonVariants({ variant: "ghost", size: "sm" }),
-            "gap-2 text-destructive hover:bg-destructive/10 hover:text-destructive",
+            buttonVariants({ variant: "ghost", size: "icon" }),
+            "h-10 w-10 rounded-sm text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors",
           )}
         >
           {isPending ? (
@@ -69,24 +69,32 @@ export function HerramientasDesarrollo() {
           )}
         </AlertDialogTrigger>
 
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-sm border-border/60 bg-card">
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Estás completamente seguro?</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="font-serif text-[22px] font-normal text-foreground">
+              ¿Estás completamente seguro?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-[13px] font-light text-muted-foreground">
               Esta acción eliminará todos los usuarios y órdenes generadas de
-              prueba. No afectará a las compras reales.
+              prueba. No afectará a las transacciones reales.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isPending}>Cancelar</AlertDialogCancel>
-
+          <AlertDialogFooter className="mt-4">
+            <AlertDialogCancel
+              disabled={isPending}
+              className="rounded-sm h-11 text-[11px] uppercase tracking-widest font-bold"
+            >
+              Cancelar
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleLimpiar}
               disabled={isPending}
-              className={buttonVariants({ variant: "destructive" })}
+              className="rounded-sm h-11 bg-destructive text-destructive-foreground hover:bg-destructive/90 text-[11px] uppercase tracking-widest font-bold"
             >
-              {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Sí, eliminar todo
+              {isPending && (
+                <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+              )}
+              Sí, eliminar datos de prueba
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
