@@ -29,7 +29,7 @@ export default async function ProductGrid({
         ))}
       </div>
 
-      <div className="flex justify-center border-t border-border pt-8">
+      <div className="flex justify-center border-t border-border pt-4 pb-4">
         <Paginador total={total} limite={limit} paginaActual={page} />
       </div>
     </div>
