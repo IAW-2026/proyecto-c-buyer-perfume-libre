@@ -28,7 +28,7 @@ export async function GET(request: Request) {
     await actualizarRol(user.id, nuevoRol);
 
     if (nuevoRol === RolUsuario.ADMIN) {
-      return NextResponse.redirect(new URL("/admin", request.url));
+      return NextResponse.redirect(new URL("/admin/dashboard", request.url));
     } else {
       return NextResponse.redirect(new URL("/", request.url));
     }

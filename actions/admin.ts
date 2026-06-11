@@ -160,7 +160,7 @@ export async function generarDatosPrueba(x: number = 6) {
       data: ordenesData,
     });
 
-    revalidatePath("/admin");
+    revalidatePath("/admin/dashboard");
     return { success: true };
   } catch (error) {
     throw new Error("Hubo un problema generando los datos de prueba." + error);
@@ -232,7 +232,7 @@ export async function limpiarDatosPrueba() {
       }),
     ]);
 
-    revalidatePath("/admin");
+    revalidatePath("/admin/dashboard");
   } catch (error) {
     throw new Error("Hubo un problema limpiando los datos de prueba.");
   }
