@@ -48,7 +48,7 @@ export default async function ConfirmacionCheckoutPage({
   const subtotalProductos = calcularTotalProductos(orden.items);
 
   return (
-    <div className="min-h-screen bg-slate-50/50 py-8 md:py-12">
+    <div className="w-full bg-background py-8 md:py-12">
       <div className="container mx-auto px-4 max-w-5xl">
         <Encabezado />
 
@@ -81,11 +81,12 @@ export default async function ConfirmacionCheckoutPage({
 function Encabezado() {
   return (
     <div className="mb-8">
-      <h1 className="text-2xl md:text-3xl font-bold text-slate-900">
-        Revisá y confirmá tu compra
+      <h1 className="font-serif text-[clamp(28px,4vw,36px)] font-normal text-foreground leading-[1.1] tracking-tight">
+        Revisa y confirma tu orden
       </h1>
-      <p className="text-sm md:text-base text-slate-500 mt-1">
-        Último paso. Verificá que todo esté correcto para ir a pagar.
+      <p className="text-[14px] font-light text-muted-foreground mt-2">
+        Último paso antes del pago seguro. Verifica que los datos de entrega y
+        productos sean correctos.
       </p>
     </div>
   );
@@ -101,37 +102,41 @@ function DetallesEnvio({
   direccion: DireccionDb;
 }) {
   return (
-    <Card className="border-border/70 shadow-sm overflow-hidden">
-      <CardHeader className="bg-slate-50/50 border-b pb-4 pt-5 px-6">
-        <CardTitle className="text-base flex items-center gap-2 text-slate-800">
-          <Truck className="w-5 h-5 text-blue-600" />
+    <Card className="rounded-sm border-border/60 shadow-sm overflow-hidden bg-card">
+      <CardHeader className="bg-secondary/30 border-b border-border/40 pb-4 pt-5 px-6">
+        <CardTitle className="text-[11px] font-bold uppercase tracking-widest flex items-center gap-2.5 text-foreground">
+          <Truck className="w-4 h-4 text-accent" />
           Datos de entrega
         </CardTitle>
       </CardHeader>
       <CardContent className="p-6">
         <div className="flex flex-col md:flex-row md:justify-between gap-6">
-          {/* Datos del correo (Estos los tenés en tu orden) */}
-          <div className="space-y-1">
-            <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-2">
-              Método elegido
+          <div className="space-y-1 text-left">
+            <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-bold mb-2.5">
+              Método de envío
             </p>
-            <p className="font-medium text-slate-900">{operadorEnvio}</p>
-            <p className="text-sm text-slate-600">Servicio {servicioEnvio}</p>
+            <p className="font-serif text-[18px] font-normal text-foreground leading-none">
+              {operadorEnvio}
+            </p>
+            <p className="text-[13px] font-light text-muted-foreground mt-1.5">
+              Servicio {servicioEnvio}
+            </p>
           </div>
 
-          <div className="space-y-1 md:text-right">
-            <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-2 md:text-right">
-              Destino
+          <div className="space-y-1 text-left md:text-right">
+            <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-bold mb-2.5 md:text-right">
+              Domicilio de destino
             </p>
-            <p className="font-medium text-slate-900">
-              {direccion.calle}, {direccion.altura}
+            <p className="font-serif text-[18px] font-normal text-foreground leading-none">
+              {direccion.calle} {direccion.altura}
             </p>
-            <p className="text-sm text-slate-600">
-              {direccion.localidad}, {direccion.provincia} (CP{" "}
-              {direccion.codigoPostal})
+            <p className="text-[13px] font-light text-muted-foreground mt-1.5">
+              {direccion.localidad}, {direccion.provincia}{" "}
+              <span className="mx-1 text-border/60">·</span> CP{" "}
+              {direccion.codigoPostal}
             </p>
-            <p className="text-sm text-slate-500 pt-1">
-              Recibe: {direccion.nombreDestinatario}
+            <p className="text-[12px] font-medium text-foreground/80 pt-2 uppercase tracking-wide">
+              Destinatario: {direccion.nombreDestinatario}
             </p>
           </div>
         </div>
@@ -148,24 +153,23 @@ function ProductosResumen({
   productosInfo: Perfume[];
 }) {
   return (
-    <Card className="border-border/70 shadow-sm overflow-hidden">
-      <CardHeader className="bg-slate-50/50 border-b pb-4 pt-5 px-6">
+    <Card className="rounded-sm border-border/60 shadow-sm overflow-hidden bg-card">
+      <CardHeader className="bg-secondary/30 border-b border-border/40 pb-4 pt-5 px-6">
         <div className="flex justify-between items-center">
-          <CardTitle className="text-base flex items-center gap-2 text-slate-800">
-            <ShoppingBag className="w-5 h-5 text-blue-600" />
-            Productos en tu orden
+          <CardTitle className="text-[11px] font-bold uppercase tracking-widest flex items-center gap-2.5 text-foreground">
+            <ShoppingBag className="w-4 h-4 text-accent" />
+            Artículos en la orden
           </CardTitle>
-          <span className="text-sm font-medium text-slate-500 bg-white px-3 py-1 rounded-full border">
-            {items.length} {items.length === 1 ? "item" : "items"}
+          <span className="text-[10px] uppercase tracking-[0.08em] font-bold text-muted-foreground bg-background px-2.5 py-0.5 rounded-sm border border-border/60">
+            {items.length} {items.length === 1 ? "artículo" : "artículos"}
           </span>
         </div>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="divide-y divide-border/60">
+        <div className="divide-y divide-border/40">
           {items.map((item) => (
-            <div key={item.id} className="flex gap-4 p-6">
-              {/* CUADRADO DE IMAGEN (REEMPLAZAR CON URL DEL FETCH) */}
-              <div className="h-20 w-20 shrink-0 rounded-lg bg-slate-100 border flex items-center justify-center">
+            <div key={item.id} className="flex gap-5 p-5 sm:p-6 items-center">
+              <div className="relative w-16 sm:w-20 shrink-0 aspect-3/4 bg-secondary rounded-sm border border-border/40 overflow-hidden flex items-center justify-center">
                 <img
                   src={
                     productosInfo.find((p) => p.id === item.productoId)
@@ -175,27 +179,31 @@ function ProductosResumen({
                     productosInfo.find((p) => p.id === item.productoId)
                       ?.nombre || "Producto"
                   }
-                  className="h-full object-contain"
+                  className="h-full w-full object-cover mix-blend-multiply"
                 />
               </div>
 
-              <div className="flex flex-1 flex-col justify-between">
-                <div className="flex justify-between">
-                  <div>
-                    <h3 className="font-medium text-slate-900">
+              <div className="flex flex-1 flex-col justify-between min-w-0">
+                <div className="flex justify-between items-start gap-4">
+                  <div className="text-left">
+                    <h3 className="font-serif text-[18px] font-normal text-foreground leading-tight line-clamp-1">
                       {productosInfo.find((p) => p.id === item.productoId)
                         ?.nombre || "Producto desconocido"}
                     </h3>
-                    <p className="text-sm text-slate-500 mt-1">
-                      Cant: {item.cantidad}
+                    <p className="text-[11px] uppercase tracking-wider text-muted-foreground mt-1.5">
+                      Cantidad:{" "}
+                      <span className="font-semibold text-foreground/80">
+                        {item.cantidad}
+                      </span>
                     </p>
                   </div>
-                  <div className="text-right">
-                    <p className="font-mono font-medium text-slate-900">
+
+                  <div className="text-right shrink-0">
+                    <p className="text-[16px] font-semibold tracking-[-0.02em] text-foreground">
                       {formatearPrecio(item.precio * item.cantidad)}
                     </p>
                     {item.cantidad > 1 && (
-                      <p className="text-xs text-slate-400 mt-1">
+                      <p className="text-[11px] text-muted-foreground mt-0.5 uppercase tracking-wide">
                         {formatearPrecio(item.precio)} c/u
                       </p>
                     )}
@@ -223,33 +231,35 @@ function TicketCompra({
 }) {
   return (
     <div className="relative">
-      <Card className="border-border/70 shadow-lg lg:sticky lg:top-24 overflow-hidden">
-        <CardContent className="p-6 md:p-8 space-y-6">
-          <h2 className="text-lg font-bold text-slate-900">
+      <Card className="rounded-sm border-border/60 shadow-sm lg:sticky lg:top-24 overflow-hidden bg-card">
+        <CardContent className="p-6 md:p-8 space-y-5">
+          <h2 className="text-[13px] uppercase tracking-[0.08em] font-bold text-foreground mb-4">
             Resumen de cuenta
           </h2>
 
-          <div className="space-y-3 text-sm text-slate-600">
+          <div className="space-y-3 text-[13px] font-light text-muted-foreground">
             <div className="flex justify-between">
               <span>Subtotal productos</span>
-              <span className="font-mono font-medium text-slate-900">
+              <span className="font-medium text-foreground">
                 {formatearPrecio(subtotal)}
               </span>
             </div>
 
             <div className="flex justify-between">
               <span>Costo de envío</span>
-              <span className="font-mono font-medium text-slate-900">
-                {formatearPrecio(costoEnvio)}
+              <span className="font-medium text-foreground">
+                {costoEnvio > 0 ? formatearPrecio(costoEnvio) : "Gratis"}
               </span>
             </div>
           </div>
 
-          <Separator className="border-dashed" />
+          <Separator className="border-border/60" />
 
-          <div className="flex justify-between items-end">
-            <span className="font-bold text-slate-900">Total a pagar</span>
-            <span className="text-2xl md:text-3xl font-extrabold text-blue-600 font-mono tracking-tight">
+          <div className="flex justify-between items-baseline py-1">
+            <span className="text-[11px] uppercase tracking-[0.08em] font-bold text-foreground">
+              Total a pagar
+            </span>
+            <span className="font-light tracking-[-0.02em] text-[26px] text-foreground">
               {formatearPrecio(total)}
             </span>
           </div>
@@ -259,16 +269,16 @@ function TicketCompra({
               href={`/simulador-pagos?ordenId=${ordenId}`}
               className={cn(
                 buttonVariants({ size: "lg" }),
-                "w-full h-14 text-base font-semibold shadow-md rounded-xl bg-slate-900 hover:bg-slate-800 text-white transition-all flex items-center justify-center",
+                "w-full h-14 text-[13px] uppercase tracking-wider font-bold bg-foreground text-background hover:bg-foreground/90 transition-all rounded-sm shadow-md hover:shadow-lg flex items-center justify-center gap-2",
               )}
             >
-              Pagar de forma segura{" "}
-              <ChevronRight className="w-5 h-5 ml-2 opacity-70" />
+              Pagar de forma segura
+              <ChevronRight className="w-4 h-4 opacity-80" />
             </Link>
 
-            <div className="flex items-center justify-center gap-2 text-xs text-slate-500">
-              <ShieldCheck className="w-4 h-4 text-green-600" />
-              Serás redirigido a la pasarela corporativa.
+            <div className="flex items-center justify-center gap-2 text-[11px] font-light text-muted-foreground">
+              <ShieldCheck className="w-3.5 h-3.5 text-accent" />
+              <span>Serás redirigido a la pasarela cifrada corporativa.</span>
             </div>
           </div>
         </CardContent>

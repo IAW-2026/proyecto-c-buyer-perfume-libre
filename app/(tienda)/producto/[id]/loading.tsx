@@ -1,56 +1,59 @@
-// app/producto/[id]/loading-producto.tsx
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function LoadingProducto() {
   return (
-    <div className="min-h-screen bg-white">
-      <main className="container mx-auto px-4 py-6 lg:py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
-          {/* LADO IZQUIERDO: Skeleton de la Imagen */}
-          <div className="lg:col-span-6 relative bg-slate-50 rounded-2xl border border-slate-200/50 overflow-hidden h-fit lg:sticky lg:top-24">
-            <div className="relative aspect-square lg:aspect-4/5 lg:max-h-[75vh] w-full">
-              <Skeleton className="w-full h-full rounded-none" />
+    <div className="min-h-screen bg-background">
+      <main className="container mx-auto px-4 py-8 lg:py-12 max-w-6xl">
+        {/* Skeleton de nav*/}
+        <Skeleton className="mb-6 h-3 w-48 bg-secondary/80 rounded-sm" />
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16">
+          {/* Skeleton de la Imagen */}
+          <div className="lg:col-span-6 relative bg-secondary rounded-sm overflow-hidden h-fit lg:sticky lg:top-24">
+            <div className="relative aspect-3/4 w-full">
+              <Skeleton className="w-full h-full rounded-none bg-secondary/80" />
             </div>
           </div>
 
-          {/* LADO DERECHO: Skeleton de la Información */}
-          <div className="lg:col-span-6 flex flex-col gap-4 lg:gap-5 h-fit">
-            {/* Encabezado */}
-            <div className="flex flex-col gap-2 pb-4 border-b border-slate-200">
-              <Skeleton className="h-4 w-24 mb-1" /> {/* Marca */}
-              <Skeleton className="h-10 md:h-12 w-5/6" />{" "}
-              {/* Nombre producto */}
-              <Skeleton className="h-5 w-40 mt-3" /> {/* Estrellas */}
+          {/* Skeleton de la Información */}
+          <div className="lg:col-span-6 flex flex-col pt-4 h-fit">
+            {/* 1. Encabezado */}
+            <div className="flex flex-col gap-2">
+              <Skeleton className="h-3 w-28 bg-secondary/80 rounded-sm" />
+              <Skeleton className="h-8 md:h-10 w-4/5 bg-secondary/80 rounded-sm" />
             </div>
 
-            {/* Precio */}
-            <div className="flex flex-col gap-2 py-3">
-              <Skeleton className="h-14 w-48" />
+            {/* 2. Calificación Estrellas */}
+            <Skeleton className="h-5 w-44 mt-3" />
+
+            {/* 3. Precio */}
+            <div className="mt-6">
+              <Skeleton className="h-8 w-48 bg-secondary/80 rounded-sm" />
             </div>
 
-            {/* Vendedor */}
-            <div className="flex flex-col gap-2 py-2">
-              <Skeleton className="h-4 w-56" />
-            </div>
+            {/* 4. Vendedor */}
+            <Skeleton className="h-4 w-36 my-4" />
 
-            {/* Detalles (Tamaño y Género) */}
-            <div className="bg-slate-50 rounded-xl p-5 border border-slate-200">
-              <div className="grid grid-cols-2 gap-4">
+            {/* 5. Detalles */}
+            <div className="mt-6 border-y border-border/60 py-5">
+              <div className="grid grid-cols-2 gap-8">
                 <div>
-                  <Skeleton className="h-3 w-16 mb-2" />
-                  <Skeleton className="h-6 w-20" />
+                  <Skeleton className="h-2.5 w-16 mb-2.5 bg-secondary/80 rounded-sm" />
+                  <Skeleton className="h-5 w-24 bg-secondary/80 rounded-sm" />
                 </div>
                 <div>
-                  <Skeleton className="h-3 w-16 mb-2" />
-                  <Skeleton className="h-6 w-24" />
+                  <Skeleton className="h-2.5 w-16 mb-2.5 bg-secondary/80 rounded-sm" />
+                  <Skeleton className="h-5 w-28 bg-secondary/80 rounded-sm" />
                 </div>
               </div>
             </div>
 
-            {/* Acciones (Botones de compra) */}
-            <div className="flex flex-col gap-3 py-4 border-y border-slate-200">
-              <Skeleton className="h-12 w-full rounded-md" />
-              <Skeleton className="h-12 w-full rounded-md border-2 bg-transparent" />
+            {/* 6. Acciones */}
+            <div className="mt-8 flex flex-col gap-3">
+              {/* Botón Comprar Ahora */}
+              <Skeleton className="h-14 w-full rounded-sm bg-foreground/10" />
+              {/* Botón Agregar al Carrito */}
+              <Skeleton className="h-14 w-full rounded-sm border border-border/60 bg-transparent" />
             </div>
           </div>
         </div>

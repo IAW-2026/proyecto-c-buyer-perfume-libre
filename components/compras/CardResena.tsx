@@ -1,41 +1,35 @@
-// components/compras/CardResena.tsx
 "use client";
 
 import { useState } from "react";
-import { Star } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+} from "../ui/card";
+import { Star } from "lucide-react";
+import { Textarea } from "../ui/textarea";
+import { Button } from "../ui/button";
 
-// 📝 El "contrato" de props exacto que dedujiste
-type Props = {
+export default function CardResena({
+  titulo,
+  descripcion,
+  id,
+  usuarioId,
+  onEnviar,
+}: {
   titulo: string;
   descripcion: string;
-  colorEstrellas: string;
   id: string;
   usuarioId: string;
   onEnviar: (
     id: string,
-    usuarioId: string,
+    userId: string,
     rating: number,
-    comentario?: string,
+    comentario: string,
   ) => Promise<void>;
-};
-
-export function CardResena({
-  titulo,
-  descripcion,
-  colorEstrellas,
-  id,
-  usuarioId,
-  onEnviar,
-}: Props) {
+}) {
   const [rating, setRating] = useState(0);
   const [comentario, setComentario] = useState("");
   const [estado, setEstado] = useState<"idle" | "enviando" | "enviado">("idle");
@@ -43,34 +37,41 @@ export function CardResena({
   const manejarEnvio = async () => {
     if (rating === 0) return;
     setEstado("enviando");
-
-    // 🪄 Llamamos a la función que nos pasó el padre
     await onEnviar(id, usuarioId, rating, comentario);
-
     setEstado("enviado");
   };
 
+  // ESTADO DE ÉXITO PREMIUM
   if (estado === "enviado") {
     return (
-      <Card className="bg-green-50 border-green-200 shadow-sm">
-        <CardContent className="pt-6 text-center text-green-800">
-          <p className="font-semibold">¡Gracias por tu calificación!</p>
-          <p className="text-sm mt-1">Tu reseña fue publicada con éxito.</p>
+      <Card className="rounded-sm border-accent/30 bg-accent/5 shadow-none flex items-center justify-center h-full min-h-55">
+        <CardContent className="pt-6 text-center">
+          <Star className="w-8 h-8 mx-auto mb-3 text-accent fill-accent" />
+          <p className="text-[14px] font-semibold text-foreground">
+            ¡Gracias por tu reseña!
+          </p>
+          <p className="text-[12px] mt-1.5 text-muted-foreground">
+            Tu opinión fue publicada con éxito.
+          </p>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card className="border-slate-200 shadow-sm h-full flex flex-col">
-      <CardHeader className="pb-4 border-b bg-slate-50/50">
-        <CardTitle className="text-base">{titulo}</CardTitle>
-        <CardDescription className="text-xs">{descripcion}</CardDescription>
+    <Card className="rounded-sm border-border/60 shadow-sm h-full flex flex-col">
+      <CardHeader className="pb-4 border-b border-border/40 bg-secondary/30">
+        <CardTitle className="text-[13px] uppercase tracking-[0.08em] font-bold text-foreground">
+          {titulo}
+        </CardTitle>
+        <CardDescription className="text-[13px] font-light text-muted-foreground mt-1">
+          {descripcion}
+        </CardDescription>
       </CardHeader>
 
-      <CardContent className="pt-4 flex flex-col grow gap-4">
-        {/* LAS ESTRELLAS */}
-        <div className="flex gap-1">
+      <CardContent className="pt-5 flex flex-col grow gap-5">
+        {/* ESTRELLAS DORADAS */}
+        <div className="flex gap-1.5 justify-center sm:justify-start">
           {[1, 2, 3, 4, 5].map((star) => (
             <button
               key={star}
@@ -79,8 +80,8 @@ export function CardResena({
               className="focus:outline-none transition-transform hover:scale-110"
             >
               <Star
-                className={`h-7 w-7 ${
-                  rating >= star ? colorEstrellas : "text-slate-200"
+                className={`h-7 w-7 transition-colors ${
+                  rating >= star ? "fill-accent text-accent" : "text-border"
                 }`}
               />
             </button>
@@ -91,15 +92,15 @@ export function CardResena({
           placeholder="Dejá un comentario (opcional)..."
           value={comentario}
           onChange={(e) => setComentario(e.target.value)}
-          className="resize-none h-20 text-sm"
+          className="resize-none h-20 text-[13px] bg-secondary/20 border-border/60 focus-visible:ring-accent rounded-sm"
         />
 
-        {/* Usamos mt-auto para empujar el botón siempre hacia abajo, así las cards quedan parejas */}
         <div className="flex justify-end mt-auto pt-2">
           <Button
             size="sm"
             onClick={manejarEnvio}
             disabled={estado === "enviando" || rating === 0}
+            className="rounded-sm bg-foreground text-background uppercase tracking-[0.08em] text-[10px] font-bold hover:bg-foreground/90 h-10 px-5"
           >
             {estado === "enviando" ? "Enviando..." : "Publicar reseña"}
           </Button>

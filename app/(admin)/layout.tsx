@@ -17,7 +17,7 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-muted/20 flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col selection:bg-accent/30 selection:text-foreground">
       <AdminHeader />
 
       <main className="flex-1 container mx-auto p-4 md:p-8 max-w-7xl animate-in fade-in duration-300">

@@ -12,7 +12,7 @@ type Props = {
 };
 
 export const metadata = {
-  title: "Método de Envío",
+  title: "Método de Envío - Perfume Libre",
   description: "Selecciona el método de envío para tu compra",
 };
 
@@ -36,17 +36,17 @@ export default async function MetodoEnvioPage({ searchParams }: Props) {
   );
 
   return (
-    <main className="min-h-screen bg-slate-50/50 py-10 px-4 sm:px-6">
+    <main className="w-full bg-background px-4 py-8 md:px-8">
       <div className="mx-auto max-w-6xl">
         <div className="grid gap-8 lg:grid-cols-[1fr_350px] items-start">
           <div className="space-y-6">
             <InfoOperacion
               pasoActual="Paso 2 de 2"
-              accion="Elegí el método de envío"
-              informacion="Seleccioná la opción que mejor se adapte a tus tiempos. Los costos se sumarán al total de tu orden."
+              accion="Opciones de entrega"
+              informacion="Selecciona el servicio logístico que mejor se adapte a tus necesidades. El costo se sumará al total de tu compra."
             />
 
-            <Card className="border-border/70 shadow-sm overflow-hidden bg-white">
+            <Card className="rounded-sm border-border/60 shadow-sm overflow-hidden bg-card">
               <CardContent className="p-0">
                 <PanelMetodosEnvio
                   opciones={opcionesDeEnvio}
@@ -90,21 +90,21 @@ function DireccionSeleccionadaCard({
 }) {
   return (
     <aside className="sticky top-24 space-y-4">
-      <Card className="border-border/70 bg-white shadow-sm overflow-hidden">
-        <CardHeader className="bg-muted/30 border-b pb-4 pt-5 px-5">
+      <Card className="rounded-sm border-border/60 bg-card shadow-sm overflow-hidden">
+        <CardHeader className="bg-secondary/30 border-b border-border/40 pb-4 pt-5 px-5">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-primary">
-              <MapPinned className="h-5 w-5" />
-              <CardTitle className="text-sm font-semibold uppercase tracking-wider text-slate-800">
+            <div className="flex items-center gap-2.5 text-foreground">
+              <MapPinned className="h-4 w-4" />
+              <CardTitle className="text-[11px] font-bold uppercase tracking-widest text-foreground">
                 Destino del envío
               </CardTitle>
             </div>
           </div>
         </CardHeader>
 
-        <CardContent className="p-5">
-          <div className="space-y-1.5 text-sm text-slate-600">
-            <p className="font-medium text-slate-900 text-base mb-2">
+        <CardContent className="p-6">
+          <div className="space-y-1.5 text-[13px] font-light text-muted-foreground leading-relaxed">
+            <p className="font-serif font-normal text-foreground text-[20px] mb-2 leading-none">
               {calle} {altura} {pisoDepto && `- ${pisoDepto}`}
             </p>
             <p>CP: {codigoPostal}</p>

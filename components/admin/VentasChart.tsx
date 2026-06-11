@@ -4,26 +4,28 @@ import {
   Bar,
   BarChart,
   ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  Tooltip,
 } from "recharts";
 import { formatearPrecio } from "@/lib/utils";
 
 interface VentasChartProps {
-  data: { mes: string; ventas: number }[];
+  data: any[];
 }
 
 export function VentasChart({ data }: VentasChartProps) {
   return (
-    <ResponsiveContainer width="100%" height={300}>
-      <BarChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+    <ResponsiveContainer width="100%" height="100%">
+      <BarChart data={data} margin={{ top: 20, right: 10, left: 0, bottom: 0 }}>
         <XAxis
           dataKey="mes"
           stroke="#888888"
-          fontSize={12}
+          fontSize={11}
+          fontWeight={600}
           tickLine={false}
           axisLine={false}
+          className="uppercase tracking-widest"
         />
         <YAxis
           stroke="#888888"
@@ -33,19 +35,32 @@ export function VentasChart({ data }: VentasChartProps) {
           tickFormatter={(value) => formatearPrecio(value)}
         />
         <Tooltip
-          cursor={{ fill: "transparent" }}
+          cursor={{ fill: "rgba(201,169,110,0.05)" }}
           contentStyle={{
-            backgroundColor: "#0f172a",
-            border: "none",
-            borderRadius: "8px",
-            color: "#fff",
+            backgroundColor: "#15100c",
+            border: "1px solid rgba(201,169,110,0.2)",
+            borderRadius: "4px",
+            color: "#FAF8F4",
+            boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
+          }}
+          itemStyle={{
+            fontSize: "14px",
+            fontWeight: 600,
+            color: "#c2a679",
+          }}
+          labelStyle={{
+            fontSize: "10px",
+            textTransform: "uppercase",
+            letterSpacing: "0.1em",
+            color: "#888888",
+            marginBottom: "4px",
           }}
           formatter={(value: any) => [
             formatearPrecio(Number(value || 0)),
-            "Ganancia",
+            "Facturación",
           ]}
         />
-        <Bar dataKey="ventas" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+        <Bar dataKey="ventas" fill="#c2a679" radius={[2, 2, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   );

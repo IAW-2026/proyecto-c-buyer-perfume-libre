@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { generarUrl, formatearPrecio } from "@/lib/utils";
 import { ItemCarrito } from "@/schema/perfume.schema";
 import { Trash2, Plus, Minus } from "lucide-react";
@@ -16,37 +15,35 @@ export default function productCardCarrito({
   onEliminar: (id: string) => void;
 }) {
   return (
-    <Card className="overflow-hidden border-none shadow-sm">
-      <CardContent className="p-4 md:p-6">
-        <div className="flex gap-4 md:gap-6">
-          <ProductImagen
-            imagenUrl={producto.imagenUrl}
-            nombre={producto.nombre}
+    <div className="overflow-hidden rounded-sm border border-border/60 bg-card transition-shadow duration-300 hover:shadow-[0_12px_40px_rgba(28,21,16,0.06)]">
+      <div className="p-0 flex flex-col sm:flex-row items-center sm:items-stretch">
+        <ProductImagen
+          imagenUrl={producto.imagenUrl}
+          nombre={producto.nombre}
+        />
+
+        <div className="flex flex-col flex-1 justify-between p-5 sm:p-6 w-full">
+          <ProductoDetalles
+            idProducto={producto.id}
+            nombreProducto={producto.nombre}
+            vendedor={producto.vendedor}
+            handleEliminar={onEliminar}
           />
 
-          <div className="flex flex-col flex-1 justify-between py-1">
-            <ProductoDetalles
+          <div className="flex justify-between items-end mt-6">
+            <SelectorDeCantidad
               idProducto={producto.id}
-              nombreProducto={producto.nombre}
-              vendedor={producto.vendedor}
-              handleEliminar={onEliminar}
+              cantidad={producto.cantidad}
+              handleCambiarCantidad={onCambiarCantidad}
             />
-
-            <div className="flex justify-between items-end mt-4">
-              <SelectorDeCantidad
-                idProducto={producto.id}
-                cantidad={producto.cantidad}
-                handleCambiarCantidad={onCambiarCantidad}
-              />
-              <ProductPrecio
-                precio={producto.precio}
-                cantidad={producto.cantidad}
-              />
-            </div>
+            <ProductPrecio
+              precio={producto.precio}
+              cantidad={producto.cantidad}
+            />
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
 
@@ -58,8 +55,14 @@ function ProductImagen({
   nombre: string;
 }) {
   return (
-    <div className="relative h-24 w-24 md:h-32 md:w-32 shrink-0 border rounded-md overflow-hidden bg-white">
-      <Image src={imagenUrl} alt={nombre} fill className="object-contain p-2" />
+    <div className="relative w-full sm:w-32 shrink-0 aspect-3/4 sm:aspect-auto sm:min-h-40 overflow-hidden bg-secondary border-b sm:border-b-0 sm:border-r border-border/40">
+      <Image
+        src={imagenUrl}
+        alt={nombre}
+        fill
+        sizes="(max-width: 640px) 100vw, 128px"
+        className="object-cover mix-blend-multiply"
+      />
     </div>
   );
 }
@@ -78,24 +81,25 @@ function ProductoDetalles({
   const url = generarUrl(nombreProducto, idProducto);
 
   return (
-    <div className="flex justify-between items-start gap-2">
-      <div>
-        <Link
-          href={`/producto/${url}`}
-          className="hover:text-primary transition-colors"
-        >
-          <h3 className="font-medium text-sm md:text-base leading-tight">
+    <div className="flex justify-between items-start gap-4">
+      <div className="text-left">
+        <Link href={`/producto/${url}`} className="group">
+          <h3 className="font-serif text-[20px] font-normal text-foreground hover:text-accent transition-colors leading-tight">
             {nombreProducto}
           </h3>
         </Link>
-        <p className="text-xs text-muted-foreground mt-1">
-          Vendido por <span className="text-blue-500">{vendedor}</span>
+        <p className="text-[11px] uppercase tracking-wider text-muted-foreground mt-1.5">
+          Vendido por:{" "}
+          <span className="font-semibold text-foreground/80 underline underline-offset-4 cursor-pointer hover:text-accent transition-colors">
+            {vendedor}
+          </span>
         </p>
       </div>
+
       <Button
         variant="ghost"
         size="icon"
-        className="text-muted-foreground hover:text-destructive shrink-0"
+        className="text-muted-foreground/60 hover:text-destructive hover:bg-transparent shrink-0 h-8 w-8 -mr-2 -mt-1"
         onClick={() => handleEliminar(idProducto)}
         aria-label="Eliminar producto del carrito"
       >
@@ -115,24 +119,26 @@ function SelectorDeCantidad({
   handleCambiarCantidad: (id: string, cant: number) => void;
 }) {
   return (
-    <div className="flex items-center border rounded-md h-9">
+    <div className="flex items-center border border-border/60 bg-secondary/10 rounded-sm h-9 overflow-hidden">
       <Button
         variant="ghost"
         size="icon"
-        className="h-8 w-8 rounded-none border-r"
+        className="h-8 w-8 rounded-none border-r border-border/40 text-foreground/70 hover:bg-secondary/40"
         onClick={() => handleCambiarCantidad(idProducto, cantidad - 1)}
         disabled={cantidad <= 1}
         aria-label="Disminuir cantidad"
       >
         <Minus className="h-3 w-3" />
       </Button>
-      <span className="w-10 text-center text-sm font-medium">{cantidad}</span>
+      <span className="w-9 text-center text-xs font-semibold text-foreground">
+        {cantidad}
+      </span>
       <Button
         variant="ghost"
         size="icon"
-        className="h-8 w-8 rounded-none border-l"
+        className="h-8 w-8 rounded-none border-l border-border/40 text-foreground/70 hover:bg-secondary/40"
         onClick={() => handleCambiarCantidad(idProducto, cantidad + 1)}
-        aria-label="aumentar cantidad"
+        aria-label="Aumentar cantidad"
       >
         <Plus className="h-3 w-3" />
       </Button>
@@ -140,6 +146,7 @@ function SelectorDeCantidad({
   );
 }
 
+//TODO: mover a libs
 function ProductPrecio({
   precio,
   cantidad,
@@ -148,9 +155,9 @@ function ProductPrecio({
   cantidad: number;
 }) {
   return (
-    <div className="text-right">
-      <span className="text-lg md:text-xl font-semibold">
-        {formatearPrecio(precio, cantidad)}
+    <div className="text-right shrink-0">
+      <span className="text-[18px] font-semibold tracking-[-0.02em] text-foreground">
+        {formatearPrecio(precio * cantidad)}
       </span>
     </div>
   );

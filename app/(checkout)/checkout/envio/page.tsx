@@ -5,7 +5,7 @@ import DireccionesEnvioPanel from "@/components/checkout/envio/DireccionesEnvioP
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Direcciones de Envío",
+  title: "Direcciones de Envío - Perfume Libre",
   description: "Gestiona tus direcciones de envío para tus compras",
 };
 
@@ -15,14 +15,13 @@ export default async function CheckoutEnvioPage({
   searchParams: Promise<{ productoId?: string }>;
 }) {
   const { productoId } = await searchParams;
-
   const direcciones = await obtenerDireccionesUsuario();
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-background via-background to-muted/20">
-      <main className="container mx-auto px-4 py-8 md:px-8">
+    <div className="w-full bg-linear-to-b from-background via-background to-secondary/10">
+      <main className="container mx-auto px-4 py-8 md:px-8 max-w-6xl">
         {direcciones.length === 0 ? (
-          <PrimeraDireccionPantalla />
+          <PrimeraDireccionPantalla productoId={productoId} />
         ) : (
           <DireccionesEnvioPanel
             direcciones={direcciones}

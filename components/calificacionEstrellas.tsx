@@ -1,6 +1,6 @@
 import { Star, StarHalf } from "lucide-react";
 
-// Cambiar por zod asumimos que max es 5 y min es 0 puede ser decimal
+//TODO: Cambiar por zod asumimos que max es 5 y min es 0 puede ser decimal
 interface EstrellasProps {
   rating: number;
 }
@@ -12,22 +12,18 @@ export default function CalificacionEstrellas({ rating }: EstrellasProps) {
 
   return (
     <div className="flex items-center gap-0.5">
-      {/* Estrellas Llenas */}
       {[...Array(estrellaPiso)].map((_, i) => (
-        <Star
-          key={`full-${i}`}
-          className="w-4 h-4 fill-yellow-400 text-yellow-400"
-        />
+        <Star key={`full-${i}`} className="h-3 w-3 fill-accent text-accent" />
       ))}
 
       {/* Media Estrella */}
       {hayMediaEstrella && (
-        <StarHalf className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+        <StarHalf className="h-3 w-3 fill-accent text-accent" />
       )}
 
-      {/* Estrellas Vacías */}
+      {/* Estrellas Vacías con color sutil */}
       {[...Array(estrellasVacias)].map((_, i) => (
-        <Star key={`empty-${i}`} className="w-4 h-4 text-gray-300" />
+        <Star key={`empty-${i}`} className="h-3 w-3 text-muted-foreground/40" />
       ))}
     </div>
   );

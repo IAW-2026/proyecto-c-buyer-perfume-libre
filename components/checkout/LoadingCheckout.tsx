@@ -6,17 +6,24 @@ interface LoadingCheckoutProps {
 }
 
 export default function LoadingCheckout({
-  mensaje = "Preparando tu compra",
+  mensaje = "Preparando tu compra...",
   Icono = ShieldCheck,
 }: LoadingCheckoutProps) {
   return (
-    <div className="min-h-[70vh] flex flex-col items-center justify-center bg-slate-50/50 px-4">
+    <div className="min-h-[70vh] flex flex-col items-center justify-center bg-background px-4">
       <div className="flex flex-col items-center text-center max-w-md">
-        <Loader2 className="h-12 w-12 animate-spin text-blue-600 mb-6" />
-        <h2 className="text-xl font-semibold text-slate-900 mb-2">{mensaje}</h2>
-        <p className="text-sm text-slate-500 flex items-center justify-center gap-1.5">
-          <Icono className="h-4 w-4 text-green-600" />
-          Tus datos están protegidos
+        <Loader2
+          className="h-10 w-10 animate-spin text-accent mb-6"
+          strokeWidth={1.5}
+        />
+
+        <h2 className="font-serif text-[24px] md:text-[28px] font-normal text-foreground tracking-tight mb-3">
+          {mensaje}
+        </h2>
+
+        <p className="text-[13px] font-light text-muted-foreground flex items-center justify-center gap-2">
+          <Icono className="h-4 w-4 text-accent" strokeWidth={1.5} />
+          Tus datos están encriptados y protegidos
         </p>
       </div>
     </div>
