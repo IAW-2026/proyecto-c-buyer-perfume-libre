@@ -104,7 +104,7 @@ function ResumenCard({
         {icono}
       </CardHeader>
       <CardContent className="px-6 pb-6 pt-0">
-        <div className="font-serif text-[32px] font-normal text-foreground leading-none">
+        <div className="text-[32px] font-light tracking-[-0.02em] text-foreground leading-none">
           {valor}
         </div>
         <p className="text-[11px] uppercase tracking-wide text-muted-foreground mt-3 opacity-80">

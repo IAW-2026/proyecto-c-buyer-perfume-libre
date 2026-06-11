@@ -141,7 +141,7 @@ function ResumenTotal({ total }: { total: number }) {
       <span className="text-[11px] uppercase tracking-[0.08em] font-bold text-foreground">
         Subtotal
       </span>
-      <span className="font-serif text-[24px] text-foreground font-normal">
+      <span className="font-light tracking-[-0.02em] text-[24px] text-foreground">
         {formatearPrecio(total)}
       </span>
     </div>

@@ -259,7 +259,7 @@ function TicketCompra({
             <span className="text-[11px] uppercase tracking-[0.08em] font-bold text-foreground">
               Total a pagar
             </span>
-            <span className="font-serif text-[26px] font-normal text-foreground">
+            <span className="font-light tracking-[-0.02em] text-[26px] text-foreground">
               {formatearPrecio(total)}
             </span>
           </div>

@@ -268,7 +268,7 @@ function ResumenPago({ orden }: { orden: ItemDeOrdenDetallado }) {
             <span className="text-[11px] uppercase tracking-[0.08em] font-bold text-foreground">
               Total pagado
             </span>
-            <span className="font-serif text-[24px] text-foreground">
+            <span className="font-light text-[24px] text-foreground">
               {formatearPrecio(orden.ordenCompra.total)}
             </span>
           </div>
