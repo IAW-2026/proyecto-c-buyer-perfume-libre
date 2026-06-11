@@ -49,9 +49,9 @@ export default async function AdminOrdenesPage({
       <FiltrosOrdenes />
 
       <Card className="rounded-sm border-border/60 bg-secondary/30 shadow-sm overflow-hidden">
-        <CardContent className="p-0 bg-card">
+        <CardContent className="p-0">
           <Table>
-            <TableHeader className="bg-secondary/30 border-b border-border/40">
+            <TableHeader className="border-b border-border/40">
               <TableRow className="hover:bg-transparent">
                 <TableHead className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground px-6 h-12">
                   Fecha
@@ -74,7 +74,7 @@ export default async function AdminOrdenesPage({
               </TableRow>
             </TableHeader>
 
-            <TableBody className="divide-y divide-border/40">
+            <TableBody className="bg-card divide-y divide-border/40">
               {ordenes.length === 0 ? (
                 <TableRow>
                   <TableCell
