@@ -233,6 +233,18 @@ export function validarTipo<TSchema extends z.ZodTypeAny>(
   return resultado.data;
 }
 
+export function obtenerDetallesProductos(ids: string[]) {
+  // En etapa 3 cambiar por fetch a la API real.
+  return mockPerfumes
+    .filter((perfume) => ids.includes(perfume.id))
+    .map((perfume) => ({
+      id: perfume.id,
+      imagen: perfume.imagenesUrl[0],
+      nombre: perfume.nombre,
+      vendedor: perfume.vendedor,
+    }));
+}
+
 // TODO: Charlar con el equipo acerca de los parametros. El id_vendedor no lo tengo deberia pedirlo y
 // puede ser distinto por cada producto.
 export async function generarOrden(

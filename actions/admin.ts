@@ -1,6 +1,7 @@
 "use server";
 
-import { currentUser } from "@clerk/nextjs/server";
+import { createClerkClient, currentUser } from "@clerk/nextjs/server";
+import { clerkClient } from "@clerk/nextjs/server";
 import { obtenerRolUsuario } from "./usuario";
 import { RolUsuario } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
@@ -269,5 +270,85 @@ export async function obtenerOrdenes(filtros?: FiltrosOrdenes) {
   } catch (error) {
     console.error(error);
     throw new Error("No se pudieron obtener las órdenes");
+  }
+}
+
+export async function obtenerOrdenPorId(ordenId: string) {
+  try {
+    const orden = await prisma.ordenCompra.findUnique({
+      where: { id: ordenId },
+      include: {
+        items: true,
+      },
+    });
+
+    if (!orden) {
+      return { orden: null, direccion: null };
+    }
+
+    const direccion = await prisma.direccion.findUnique({
+      where: { id: orden?.direccionId },
+      select: {
+        localidad: true,
+        provincia: true,
+        codigoPostal: true,
+        telefono: true,
+      },
+    });
+
+    return { orden, direccion };
+  } catch (error) {
+    console.error(error);
+    throw new Error("No se pudo obtener la orden");
+  }
+}
+
+export async function obtenerDatosUsuario(usuarioId: string) {
+  try {
+    const client = await clerkClient();
+
+    const usuarioClerk = await client.users.getUser(usuarioId);
+
+    if (!usuarioClerk) {
+      throw new Error(
+        "El usuario no fue encontrado en los registros de autenticación.",
+      );
+    }
+
+    const email = usuarioClerk.emailAddresses[0]?.emailAddress;
+    const nombreCompleto =
+      `${usuarioClerk.firstName ?? ""} ${usuarioClerk.lastName ?? ""}`.trim();
+
+    return { email, nombreCompleto };
+  } catch (error) {
+    console.error("Error al obtener datos del usuario desde Clerk:", error);
+    return { email: "Desconocido", nombreCompleto: "Usuario Desconocido" };
+  }
+}
+
+export async function actualizarEstadoOrdenAdmin(
+  ordenId: string,
+  nuevoEstado: string,
+) {
+  try {
+    // Validamos que el estado enviado pertenezca a los enums permitidos
+    const estadoValido = EstadosOrden.safeParse(nuevoEstado);
+    if (!estadoValido.success) {
+      throw new Error("Estado de orden no válido");
+    }
+
+    await prisma.ordenCompra.update({
+      where: { id: ordenId },
+      data: { estado: nuevoEstado as any },
+    });
+
+    // Revalidamos la ruta para que la UI muestre el cambio de inmediato
+    revalidatePath(`/admin/ordenes/${ordenId}`);
+    revalidatePath("/admin/ordenes");
+
+    return { success: true };
+  } catch (error) {
+    console.error(error);
+    return { success: false, error: "No se pudo actualizar el estado" };
   }
 }
