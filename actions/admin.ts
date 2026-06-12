@@ -352,3 +352,47 @@ export async function actualizarEstadoOrdenAdmin(
     return { success: false, error: "No se pudo actualizar el estado" };
   }
 }
+
+export async function obtenerUsuarios() {
+  try {
+    const client = await clerkClient();
+    const response = await client.users.getUserList();
+
+    return response.data.map((user) => ({
+      id: user.id,
+      nombre:
+        `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "Sin nombre",
+      email: user.emailAddresses[0]?.emailAddress || "Sin email",
+      imagenUrl: user.imageUrl,
+      fechaRegistro: user.createdAt,
+      estaBaneado: user.banned,
+    }));
+  } catch (error) {
+    console.error("Error al obtener usuarios:", error);
+    return [];
+  }
+}
+
+export async function alternarEstadoUsuario(
+  usuarioId: string,
+  estaBaneado: boolean,
+) {
+  try {
+    const client = await clerkClient();
+
+    if (estaBaneado) {
+      await client.users.unbanUser(usuarioId);
+    } else {
+      await client.users.banUser(usuarioId);
+    }
+
+    revalidatePath("/admin/usuarios");
+    return { success: true };
+  } catch (error) {
+    console.error("Error al cambiar estado del usuario:", error);
+    return {
+      success: false,
+      error: "No se pudo modificar el acceso del usuario.",
+    };
+  }
+}
