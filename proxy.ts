@@ -6,6 +6,7 @@ const isPublicRoute = createRouteMatcher([
   "/sign-up(.*)",
   "/sing-up(.*)",
   "/producto/(.*)",
+  "/api(.*)",
 ]); // Agrega aquí las rutas públicas que no requieren autenticación
 
 export default clerkMiddleware(async (auth, req) => {
