@@ -13,6 +13,11 @@ const nextConfig: NextConfig = {
         hostname: "www.perfumerianormy.com.ar",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "img.clerk.com",
+        pathname: "/**",
+      },
     ],
   },
 };

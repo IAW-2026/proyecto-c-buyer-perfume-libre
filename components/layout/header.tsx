@@ -75,7 +75,11 @@ async function AccionesUsuario() {
   return (
     <Show when="signed-in">
       {rolUsuario?.rol === RolUsuario.ADMIN && (
-        <HeaderButton href="/admin" icon={LayoutDashboard} label="Admin" />
+        <HeaderButton
+          href="/admin/dashboard"
+          icon={LayoutDashboard}
+          label="Admin"
+        />
       )}
       <HeaderButton href="/compras" icon={ShoppingBag} label="Compras" />
       <HeaderButton href="/favoritos" icon={Heart} label="Favoritos" />
@@ -169,7 +173,7 @@ async function MenuMovil() {
 
             {rolUsuario?.rol === RolUsuario.ADMIN && (
               <MobileMenuLink
-                href="/admin"
+                href="/admin/dashboard"
                 icon={LayoutDashboard}
                 label="Panel de Control"
               />

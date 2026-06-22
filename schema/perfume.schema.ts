@@ -25,6 +25,17 @@ export const COLOR_ESTADOS: Record<EstadoOrdenType, string> = {
   Rechazado: "bg-red-100 text-red-800 hover:bg-red-100",
 };
 
+// TODO: Fix rapido
+export const COLOR_ESTADOS_STRING: Record<string, string> = {
+  Pendiente: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100",
+  Pagado: "bg-gray-100 text-gray-800 hover:bg-gray-100",
+  "En proceso": "bg-amber-100 text-amber-800 hover:bg-amber-100",
+  Enviado: "bg-blue-100 text-blue-800 hover:bg-blue-100",
+  Entregado: "bg-green-100 text-green-800 hover:bg-green-100",
+  Cancelado: "bg-red-100 text-red-800 hover:bg-red-100",
+  Rechazado: "bg-red-100 text-red-800 hover:bg-red-100",
+};
+
 // Esquema principal del perfume, con toda la información detallada
 export const PerfumeSchema = z.object({
   id: z.string().min(1, "El ID no puede estar vacío"),

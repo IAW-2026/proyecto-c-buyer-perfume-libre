@@ -1,6 +1,6 @@
 import { obtenerAdminPageData } from "@/actions/admin";
-import { HerramientasDesarrollo } from "@/components/admin/HerramientasDesarollo";
-import { VentasChart } from "@/components/admin/VentasChart";
+import { HerramientasDesarrollo } from "@/components/admin/dashboard/HerramientasDesarollo";
+import { VentasChart } from "@/components/admin/dashboard/VentasChart";
 import {
   Card,
   CardContent,
