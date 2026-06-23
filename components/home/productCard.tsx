@@ -12,6 +12,7 @@ export default function ProductCard({
   precio,
   tamaño,
   imagenUrl,
+  calificacion,
 }: PerfumeCard) {
   const slug = generarUrl(nombre, id);
   const urlDetalle = `/producto/${slug}`;
@@ -27,6 +28,7 @@ export default function ProductCard({
           nombre={nombre}
           tamaño={tamaño}
           precio={precio}
+          calificacion={calificacion}
         />
       </Card>
     </Link>
@@ -57,7 +59,11 @@ function ProductCardContenido({
   marca,
   nombre,
   precio,
-}: Pick<PerfumeCard, "id" | "marca" | "nombre" | "tamaño" | "precio">) {
+  calificacion,
+}: Pick<
+  PerfumeCard,
+  "id" | "marca" | "nombre" | "tamaño" | "precio" | "calificacion"
+>) {
   return (
     <CardContent className="flex flex-1 flex-col p-4.5">
       <span className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
@@ -68,12 +74,8 @@ function ProductCardContenido({
         {nombre}
       </h3>
 
-      {/* TODO: Implementar rating dinamico */}
       <div className="mb-2.5 flex items-center gap-1.5">
-        <CalificacionEstrellas rating={4.8} />
-        <span className="text-[11px] font-medium text-muted-foreground">
-          4.8 (2.348)
-        </span>
+        <CalificacionEstrellas rating={calificacion} />
       </div>
 
       <div className="mt-auto pt-1">
