@@ -737,12 +737,51 @@ async function obtenerHistorialEnvioReal(
   }
 }
 
-// ====================================
-// ESTOY AQUI
-// ====================================
 export async function obtenerPreciosDeProductos(ids: string[]) {
-  // En etapa 3 cambiar por fetch a la API real.
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+  if (!ids || ids.length === 0) return [];
+
+  const usarApiReal = process.env.USE_REAL_API === "true";
+
+  if (usarApiReal) {
+    return obtenerPreciosDeProductosReal(ids);
+  } else {
+    return obtenerPreciosDeProductosMock(ids);
+  }
+}
+
+async function obtenerPreciosDeProductosReal(ids: string[]) {
+  try {
+    const promesas = ids.map((id) =>
+      fetchProductoDesdeSeller(id).catch((err) => {
+        console.warn(
+          `No se pudo cargar el precio del producto ${id}:`,
+          err.message,
+        );
+        return null;
+      }),
+    );
+
+    const resultadosRaw = await Promise.all(promesas);
+
+    const preciosMapeados = resultadosRaw
+      .filter((prod) => prod !== null)
+      .map((prod) => ({
+        id: String(prod.producto_id),
+        precio: Number(prod.precio),
+      }));
+
+    return preciosMapeados;
+  } catch (error) {
+    console.error(
+      "⚠️ Error crítico obteniendo precios reales, usando Mock:",
+      error,
+    );
+    return obtenerPreciosDeProductosMock(ids);
+  }
+}
+
+async function obtenerPreciosDeProductosMock(ids: string[]) {
+  await new Promise((resolve) => setTimeout(resolve, 600));
 
   const preciosFiltrados = mockPerfumes
     .filter((perfume) => ids.includes(perfume.id))
@@ -754,8 +793,53 @@ export async function obtenerPreciosDeProductos(ids: string[]) {
   return preciosFiltrados;
 }
 
-export function obtenerDetallesProductos(ids: string[]) {
-  // En etapa 3 cambiar por fetch a la API real.
+export async function obtenerDetallesProductos(ids: string[]) {
+  if (!ids || ids.length === 0) return [];
+
+  const usarApiReal = process.env.USE_REAL_API === "true";
+
+  if (usarApiReal) {
+    return obtenerDetallesProductosReal(ids);
+  } else {
+    return obtenerDetallesProductosMock(ids);
+  }
+}
+
+async function obtenerDetallesProductosReal(ids: string[]) {
+  try {
+    const promesas = ids.map((id) =>
+      fetchProductoDesdeSeller(id).catch((err) => {
+        console.warn(
+          `No se pudo cargar el resumen del producto ${id}:`,
+          err.message,
+        );
+        return null;
+      }),
+    );
+
+    const resultadosRaw = await Promise.all(promesas);
+    const resumenMapeado = resultadosRaw
+      .filter((prod) => prod !== null)
+      .map((prod) => ({
+        id: String(prod.producto_id),
+        imagen: prod.imagen || "/placeholder-perfume.jpg",
+        nombre: prod.titulo,
+        vendedor: String(prod.vendedor_id || "Boutique Oficial"),
+      }));
+
+    return resumenMapeado;
+  } catch (error) {
+    console.error(
+      "⚠️ Error obteniendo detalles básicos reales, usando Mock:",
+      error,
+    );
+    return obtenerDetallesProductosMock(ids);
+  }
+}
+
+async function obtenerDetallesProductosMock(ids: string[]) {
+  await new Promise((resolve) => setTimeout(resolve, 600));
+
   return mockPerfumes
     .filter((perfume) => ids.includes(perfume.id))
     .map((perfume) => ({
@@ -766,20 +850,94 @@ export function obtenerDetallesProductos(ids: string[]) {
     }));
 }
 
-// TODO: Charlar con el equipo acerca de los parametros. El id_vendedor no lo tengo deberia pedirlo y
-// puede ser distinto por cada producto.
-export async function generarOrden(
+// ====================================
+// ESTOY AQUI
+// ====================================
+export async function generarOrdenEnvio(
   id_orden: string,
   id_comprador: string,
   direccion_entrega: string,
   items: any[],
-  id_vendedor: string,
-  servicio_elegido: OpcionEnvio,
+  servicio_elegido: any,
 ) {
-  // Simulación de generación de orden de shipping app, devuelve el id track.
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+  const usarApiReal = process.env.USE_REAL_API === "true";
 
-  return `envio_mock_${Math.floor(Math.random() * 10000)}`;
+  if (usarApiReal) {
+    return generarOrdenEnvioReal(
+      id_orden,
+      id_comprador,
+      direccion_entrega,
+      items,
+      servicio_elegido,
+    );
+  } else {
+    return generarOrdenEnvioMock();
+  }
+}
+
+async function generarOrdenEnvioReal(
+  id_orden: string,
+  id_comprador: string,
+  direccion_entrega: string,
+  items: any[],
+  servicio_elegido: any,
+) {
+  try {
+    let id_vendedor = "vendedor_desconocido";
+    if (items && items.length > 0) {
+      try {
+        const prodData = await fetchProductoDesdeSeller(items[0].productoId);
+        if (prodData.vendedor_id) {
+          id_vendedor = String(prodData.vendedor_id);
+        }
+      } catch (err) {
+        console.warn("No se pudo obtener el id_vendedor, usando genérico.");
+      }
+    }
+
+    const bodyData = {
+      id_orden: id_orden,
+      id_comprador: id_comprador,
+      id_vendedor: id_vendedor,
+      direccion_entrega: direccion_entrega,
+      items: items,
+      servicio_elegido: servicio_elegido,
+      usuarioId: id_comprador,
+    };
+
+    const shippingBaseUrl =
+      process.env.SHIPPING_API_URL ||
+      "https://proyecto-c-shipping2-perfume-libre.vercel.app/api";
+
+    const response = await fetch(`${shippingBaseUrl}/shipping/ordenes`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(bodyData),
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        `Error al generar envío en Shipping App: ${response.status}`,
+      );
+    }
+
+    const data = await response.json();
+
+    return data.trackingId || `TRK-${id_orden.slice(-4)}`;
+  } catch (error) {
+    console.error("⚠️ Falló la creación del envío real, usando Mock:", error);
+    return generarOrdenEnvioMock();
+  }
+}
+
+// =========================================================
+// 3. ESTRATEGIA MOCK
+// =========================================================
+async function generarOrdenEnvioMock() {
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+  return `TRK_MOCK_${Math.floor(Math.random() * 10000)}`;
 }
 
 async function fetchProductoDesdeSeller(id: string) {
