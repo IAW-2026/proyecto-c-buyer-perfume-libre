@@ -932,9 +932,6 @@ async function generarOrdenEnvioReal(
   }
 }
 
-// =========================================================
-// 3. ESTRATEGIA MOCK
-// =========================================================
 async function generarOrdenEnvioMock() {
   await new Promise((resolve) => setTimeout(resolve, 1000));
   return `TRK_MOCK_${Math.floor(Math.random() * 10000)}`;
