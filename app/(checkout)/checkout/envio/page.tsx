@@ -12,20 +12,21 @@ export const metadata = {
 export default async function CheckoutEnvioPage({
   searchParams,
 }: {
-  searchParams: Promise<{ productoId?: string }>;
+  searchParams: Promise<{ items?: string; directo?: string }>;
 }) {
-  const { productoId } = await searchParams;
+  const { items, directo } = await searchParams;
   const direcciones = await obtenerDireccionesUsuario();
 
   return (
     <div className="w-full bg-linear-to-b from-background via-background to-secondary/10">
       <main className="container mx-auto px-4 py-8 md:px-8 max-w-6xl">
         {direcciones.length === 0 ? (
-          <PrimeraDireccionPantalla productoId={productoId} />
+          <PrimeraDireccionPantalla items={items} directo={directo} />
         ) : (
           <DireccionesEnvioPanel
             direcciones={direcciones}
-            productoId={productoId}
+            items={items}
+            directo={directo}
           />
         )}
       </main>

@@ -13,7 +13,11 @@ import {
 } from "@/schema/perfume.schema";
 import { mockPerfumes } from "./mockPerfumes";
 import { z } from "zod";
-import { obtenerHistorialSimulado, OpcionEnvio } from "./mockEnvios";
+import {
+  obtenerCotizacionesEnvioMock,
+  obtenerHistorialSimulado,
+  OpcionEnvio,
+} from "./mockEnvios";
 import { auth } from "@clerk/nextjs/server";
 
 export interface FiltrosCatalogo {
@@ -937,7 +941,62 @@ async function generarOrdenEnvioMock() {
   return `TRK_MOCK_${Math.floor(Math.random() * 10000)}`;
 }
 
-async function fetchProductoDesdeSeller(id: string) {
+export async function obtenerCotizacionesEnvio(
+  codigo_postal: string,
+  direccion_entrega: string,
+) {
+  const usarApiReal = process.env.USE_REAL_API === "true";
+
+  if (usarApiReal) {
+    return obtenerCotizacionesEnvioReal(codigo_postal, direccion_entrega);
+  } else {
+    return obtenerCotizacionesEnvioMock();
+  }
+}
+async function obtenerCotizacionesEnvioReal(
+  codigo_postal: string,
+  direccion_entrega: string,
+) {
+  try {
+    const shippingBaseUrl =
+      process.env.SHIPPING_API_URL ||
+      "https://proyecto-c-shipping2-perfume-libre.vercel.app/api";
+
+    const bodyData = {
+      codigo_postal: codigo_postal,
+      direccion_entrega: direccion_entrega,
+    };
+
+    const response = await fetch(`${shippingBaseUrl}/shipping/cotizar`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(bodyData),
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error API Shipping al cotizar: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (!data.opciones || !Array.isArray(data.opciones)) {
+      throw new Error("La API de Shipping no devolvió el formato esperado");
+    }
+
+    return data.opciones;
+  } catch (error) {
+    console.error(
+      "⚠️ Falló la cotización real, usando Mock de contingencia:",
+      error,
+    );
+    return obtenerCotizacionesEnvioMock();
+  }
+}
+
+export async function fetchProductoDesdeSeller(id: string) {
   const baseUrl =
     process.env.SELLER_API_URL ||
     "https://proyecto-c-seller-perfume-libre.vercel.app/api";

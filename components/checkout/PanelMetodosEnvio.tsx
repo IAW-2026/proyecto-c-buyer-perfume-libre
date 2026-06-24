@@ -7,17 +7,22 @@ import { iniciarProcesamientoCompra } from "@/actions/checkout";
 import { OpcionEnvio } from "@/lib/mockEnvios";
 import { formatearPrecio } from "@/lib/utils";
 
+const obtenerIdVirtual = (opcion: OpcionEnvio) => {
+  return `${opcion.operador}-${opcion.tipo_servicio}`;
+};
+
 export default function PanelMetodosEnvio({
   opciones,
   direccionId,
-  productoId,
+  productosIds,
+  esCompraDirecta,
 }: {
   opciones: OpcionEnvio[];
   direccionId: string;
-  productoId?: string;
+  productosIds: string[];
+  esCompraDirecta: boolean;
 }) {
   const [isPending, startTransition] = useTransition();
-
   const [seleccionadoId, setSeleccionadoId] = useState<string | undefined>();
 
   const opcionSeleccionada =
@@ -30,7 +35,8 @@ export default function PanelMetodosEnvio({
       await iniciarProcesamientoCompra(
         direccionId,
         opcionSeleccionada,
-        productoId,
+        productosIds,
+        esCompraDirecta,
       );
     });
   };
@@ -40,50 +46,45 @@ export default function PanelMetodosEnvio({
       <div className="divide-y divide-border/40 border-b border-border/40 bg-transparent">
         {opciones.map((opcion) => {
           const idVirtual = obtenerIdVirtual(opcion);
-          const esSeleccionado =
-            opcionSeleccionada &&
-            opcionSeleccionada.operador === opcion.operador &&
-            opcionSeleccionada.tipo_servicio === opcion.tipo_servicio;
+          const isSelected =
+            seleccionadoId === idVirtual ||
+            (!seleccionadoId && idVirtual === obtenerIdVirtual(opciones[0]));
 
           return (
             <label
               key={idVirtual}
-              className={`flex cursor-pointer items-center justify-between p-6 transition-all duration-200 hover:bg-secondary/10 ${
-                esSeleccionado ? "bg-accent/5" : ""
+              className={`flex flex-col sm:flex-row sm:items-center justify-between p-6 cursor-pointer transition-colors hover:bg-secondary/20 ${
+                isSelected ? "bg-secondary/30" : ""
               }`}
               onClick={() => setSeleccionadoId(idVirtual)}
             >
-              <div className="flex items-center gap-5">
-                <div
-                  className={`flex h-4 w-4 items-center justify-center rounded-full border transition-colors ${
-                    esSeleccionado
-                      ? "border-accent bg-accent"
-                      : "border-border/80"
-                  }`}
-                >
-                  {esSeleccionado && (
-                    <div className="h-1.5 w-1.5 rounded-full bg-white" />
-                  )}
+              <div className="flex items-start sm:items-center gap-4 mb-4 sm:mb-0">
+                <div className="mt-1 sm:mt-0 shrink-0">
+                  <div
+                    className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                      isSelected
+                        ? "border-accent bg-accent"
+                        : "border-muted-foreground/30"
+                    }`}
+                  >
+                    {isSelected && (
+                      <div className="w-2 h-2 rounded-full bg-background" />
+                    )}
+                  </div>
                 </div>
 
-                <div className="flex flex-col gap-1">
-                  <div className="flex items-center gap-2.5">
-                    <Truck
-                      className={`h-4 w-4 ${esSeleccionado ? "text-accent" : "text-muted-foreground"}`}
-                    />
-                    <span
-                      className={`font-serif text-[18px] font-normal leading-none ${
-                        esSeleccionado ? "text-accent" : "text-foreground"
-                      }`}
-                    >
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-2">
+                    <Truck className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-[14px] font-bold text-foreground">
                       {opcion.operador}
                     </span>
                   </div>
                   <span className="text-[12px] font-light text-muted-foreground uppercase tracking-wide mt-1">
                     {opcion.tipo_servicio}{" "}
                     <span className="mx-1.5 opacity-50">|</span> Llega en{" "}
-                    {opcion.demora_en_dias}{" "}
-                    {opcion.demora_en_dias === 1 ? "día" : "días"}
+                    {opcion.demora_dias}{" "}
+                    {opcion.demora_dias === 1 ? "día" : "días"}
                   </span>
                 </div>
               </div>
@@ -101,7 +102,9 @@ export default function PanelMetodosEnvio({
       <div className="p-6 bg-transparent flex justify-end">
         <Button
           className="h-12 w-full md:w-auto md:min-w-60 text-[11px] uppercase tracking-widest font-bold rounded-sm bg-foreground text-background hover:bg-foreground/90 transition-all shadow-md"
-          disabled={!opcionSeleccionada || isPending}
+          disabled={
+            !opcionSeleccionada || isPending || productosIds.length === 0
+          }
           onClick={handleConfirmarEnvio}
         >
           {isPending ? (
@@ -109,13 +112,9 @@ export default function PanelMetodosEnvio({
           ) : (
             <CheckCircle2 className="mr-2 h-4 w-4" />
           )}
-          {isPending ? "Preparando pago..." : "Ir a pagar"}
+          {isPending ? "Procesando..." : "Confirmar Envío"}
         </Button>
       </div>
     </div>
   );
-}
-
-function obtenerIdVirtual(opcion: OpcionEnvio) {
-  return `${opcion.operador}-${opcion.tipo_servicio}`;
 }

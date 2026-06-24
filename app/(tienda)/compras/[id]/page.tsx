@@ -316,7 +316,10 @@ async function obtenerItemOrden(
 
   const [productoDetalle, datosEnvio] = await Promise.all([
     obtenerDetallePerfume(ordenDb.productoId),
-    obtenerHistorialEnvio(ordenDb.ordenCompra.estado),
+    obtenerHistorialEnvio(
+      ordenDb.ordenCompra.envioId?.toString() || "",
+      ordenDb.ordenCompra.estado,
+    ),
   ]);
 
   if (!productoDetalle) {

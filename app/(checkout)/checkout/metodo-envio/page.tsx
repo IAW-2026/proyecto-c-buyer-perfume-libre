@@ -8,7 +8,11 @@ import { redirect } from "next/navigation";
 import InfoOperacion from "@/components/checkout/envio/InfoOperacion";
 
 type Props = {
-  searchParams: Promise<{ direccionId?: string; productoId?: string }>;
+  searchParams: Promise<{
+    direccionId?: string;
+    items?: string;
+    directo?: string;
+  }>;
 };
 
 export const metadata = {
@@ -20,8 +24,11 @@ export default async function MetodoEnvioPage({ searchParams }: Props) {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
 
-  const { direccionId, productoId } = await searchParams;
+  const { direccionId, items, directo } = await searchParams;
   if (!direccionId) redirect("/checkout/envio");
+
+  const productosIds = items ? items.split(",") : [];
+  const esCompraDirecta = directo === "true";
 
   let direccion;
   try {
@@ -36,37 +43,32 @@ export default async function MetodoEnvioPage({ searchParams }: Props) {
   );
 
   return (
-    <main className="w-full bg-background px-4 py-8 md:px-8">
-      <div className="mx-auto max-w-6xl">
-        <div className="grid gap-8 lg:grid-cols-[1fr_350px] items-start">
-          <div className="space-y-6">
-            <InfoOperacion
-              pasoActual="Paso 2 de 2"
-              accion="Opciones de entrega"
-              informacion="Selecciona el servicio logístico que mejor se adapte a tus necesidades. El costo se sumará al total de tu compra."
-            />
-
-            <Card className="rounded-sm border-border/60 shadow-sm overflow-hidden bg-card">
-              <CardContent className="p-0">
-                <PanelMetodosEnvio
-                  opciones={opcionesDeEnvio}
-                  direccionId={direccionId}
-                  productoId={productoId}
-                />
-              </CardContent>
-            </Card>
+    <main className="container mx-auto px-4 py-8 md:px-8 max-w-6xl animate-in fade-in duration-300">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        <div className="lg:col-span-2 space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
+            <h1 className="font-serif text-[28px] md:text-[32px] text-foreground leading-tight">
+              Elegí el envío
+            </h1>
           </div>
 
-          <div className="relative">
-            <DireccionSeleccionadaCard
-              calle={direccion.calle}
-              altura={direccion.altura}
-              pisoDepto={direccion.pisoDepto}
-              localidad={direccion.localidad}
-              provincia={direccion.provincia}
-              codigoPostal={direccion.codigoPostal}
+          <div className="bg-card border border-border/60 rounded-sm shadow-sm overflow-hidden flex flex-col h-full">
+            <PanelMetodosEnvio
+              opciones={opcionesDeEnvio}
+              direccionId={direccionId}
+              productosIds={productosIds}
+              esCompraDirecta={esCompraDirecta}
             />
           </div>
+        </div>
+
+        <div className="lg:col-span-1 space-y-6">
+          <DireccionSeleccionadaCard {...direccion} />
+          <InfoOperacion
+            pasoActual="Paso 2 de 2"
+            accion="Opciones de entrega"
+            informacion="Selecciona el servicio logístico que mejor se adapte a tus necesidades. El costo se sumará al total de tu compra."
+          />
         </div>
       </div>
     </main>

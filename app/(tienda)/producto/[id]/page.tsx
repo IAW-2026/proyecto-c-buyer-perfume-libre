@@ -305,7 +305,7 @@ function ProductActions({ perfumeId }: { perfumeId: string }) {
   return (
     <div className="flex flex-col gap-3">
       <Link
-        href={`/checkout/envio?productoId=${perfumeId}`}
+        href={`/checkout/envio?items=${perfumeId}&directo=true`}
         className={cn(
           buttonVariants({ size: "lg" }),
           "w-full text-[13px] uppercase tracking-wider font-semibold h-14 bg-foreground text-background hover:bg-foreground/90 transition-all rounded-sm",

@@ -3,7 +3,7 @@ import {
   obtenerOrden,
   vaciarCarrito,
 } from "@/actions/checkout";
-import { generarOrden } from "@/lib/api";
+import { generarOrdenEnvio } from "@/lib/api";
 import { EstadosOrden } from "@/schema/perfume.schema";
 import { NextResponse } from "next/server";
 
@@ -16,8 +16,6 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { id_orden, id_pago, estado } = body;
 
-    // validarToken(headers); (en la def no estaba header asiq lo respetamos por ahora)
-
     const nuevoEstadoOrden =
       estado === "aprobado"
         ? EstadosOrden.enum.Pagado
@@ -25,18 +23,12 @@ export async function POST(req: Request) {
 
     const orden = await obtenerOrden(id_orden);
 
-    const id_envio = await generarOrden(
+    const id_envio = await generarOrdenEnvio(
       id_orden,
       orden.usuarioId,
       orden.direccionId,
       orden.items,
-      "id_vendedor_mock",
-      {
-        operador: orden.operadorEnvio,
-        tipo_servicio: orden.servicioEnvio,
-        precio: orden.costoEnvio,
-        demora_en_dias: orden.demoraDias,
-      },
+      orden.servicioEnvio,
     );
 
     await actualizarOrden(id_orden, id_pago, id_envio, nuevoEstadoOrden);

@@ -115,7 +115,7 @@ function ProductActions({
       <div className="w-px h-3 bg-border hidden sm:block" />
 
       <Link
-        href={`/checkout/envio?productoId=${perfumeId}`}
+        href={`/checkout/envio?items=${perfumeId}&directo=true`}
         className="text-[11px] uppercase tracking-wider font-semibold text-foreground hover:text-accent transition-colors hidden sm:block"
       >
         Comprar ahora

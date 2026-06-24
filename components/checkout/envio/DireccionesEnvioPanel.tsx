@@ -21,10 +21,12 @@ import { cn } from "@/lib/utils";
 
 export default function DireccionesEnvioPanel({
   direcciones,
-  productoId,
+  items,
+  directo,
 }: {
   direcciones: DireccionDb[];
-  productoId?: string;
+  items?: string;
+  directo?: string;
 }) {
   const router = useRouter();
   const [modalAbierto, setModalAbierto] = useState(false);
@@ -61,9 +63,12 @@ export default function DireccionesEnvioPanel({
   const handleContinuarCompra = () => {
     if (!seleccionada) return;
 
-    router.push(
-      `/checkout/metodo-envio?direccionId=${seleccionada}${productoId ? `&productoId=${productoId}` : ""}`,
-    );
+    const queryParams = new URLSearchParams();
+    queryParams.set("direccionId", seleccionada);
+    if (items) queryParams.set("items", items);
+    if (directo) queryParams.set("directo", directo);
+
+    router.push(`/checkout/metodo-envio?${queryParams.toString()}`);
   };
 
   return (
