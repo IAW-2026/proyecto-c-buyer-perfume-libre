@@ -248,3 +248,30 @@ export async function generarOrden(
 
   return `envio_mock_${Math.floor(Math.random() * 10000)}`;
 }
+
+export async function fetchProductoDesdeSeller(id: string) {
+  const baseUrl =
+    process.env.SELLER_API_URL ||
+    "https://proyecto-c-seller-perfume-libre.vercel.app/api";
+  const url = `${baseUrl}/seller/productos/${id}`;
+
+  const headers = new Headers();
+  headers.append(
+    "seller_api_key",
+    process.env.SELLER_API_KEY || "perfumelibre2026",
+  );
+
+  const res = await fetch(url, {
+    method: "GET",
+    headers: headers,
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    throw new Error(
+      `Error API Seller al obtener producto ${id}: ${res.status}`,
+    );
+  }
+
+  return res.json();
+}
