@@ -110,7 +110,7 @@ function PanelPrincipal({ orden }: { orden: ItemDeOrdenDetallado }) {
             productoId={orden.productoId}
             nombreProducto={orden.nombreProducto}
             vendedor={orden.vendedor}
-            usuarioId={orden.ordenCompra.usuarioId}
+            ordenId={orden.ordenCompraId}
           />
         )}
       </div>

@@ -1,6 +1,4 @@
 export async function obtenerHistorialSimulado(estado: string) {
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-
   const fechaBase = new Date();
 
   const haceHoras = (horas: number) => {
@@ -12,76 +10,137 @@ export async function obtenerHistorialSimulado(estado: string) {
     });
   };
 
-  switch (estado) {
-    case "Pagado":
+  const estadoNormalizado = estado?.toUpperCase() || "DESCONOCIDO";
+
+  switch (estadoNormalizado) {
+    case "CREADO":
       return {
-        estadoActual: "En proceso",
+        estadoActual: "Registrado",
         historial: [
           {
             fecha: haceHoras(1),
-            ubicacion: "El vendedor está preparando tu paquete.",
-          },
-          {
-            fecha: haceHoras(2),
-            ubicacion: "Pago confirmado. Esperando despacho.",
-          },
-        ],
-      };
-    case "En proceso":
-      return {
-        estadoActual: "En proceso",
-        historial: [
-          {
-            fecha: haceHoras(1),
-            ubicacion: "El vendedor está preparando tu paquete.",
-          },
-          {
-            fecha: haceHoras(2),
-            ubicacion: "Pago confirmado. Esperando despacho.",
-          },
-        ],
-      };
-    case "Enviado":
-      return {
-        estadoActual: "Enviado",
-        historial: [
-          {
-            fecha: haceHoras(0.5),
-            ubicacion: "El paquete está en camino a tu domicilio.",
-          },
-          {
-            fecha: haceHoras(4),
-            ubicacion: "El paquete llegó al centro de distribución local.",
-          },
-          {
-            fecha: haceHoras(24),
-            ubicacion: "El vendedor despachó el paquete.",
+            ubicacion: "Envío registrado. Esperando preparación del vendedor.",
           },
         ],
       };
 
-    case "Entregado":
+    case "PREPARANDO":
       return {
-        estadoActual: "Entregado",
+        estadoActual: "Preparando",
         historial: [
-          { fecha: haceHoras(0), ubicacion: "Paquete entregado al comprador." },
+          {
+            fecha: haceHoras(1),
+            ubicacion: "El vendedor está empacando tu pedido.",
+          },
+          {
+            fecha: haceHoras(4),
+            ubicacion: "Envío registrado. Esperando preparación del vendedor.",
+          },
+        ],
+      };
+
+    case "RETIRADO":
+      return {
+        estadoActual: "Retirado",
+        historial: [
+          {
+            fecha: haceHoras(1),
+            ubicacion: "El operador logístico retiró el paquete del vendedor.",
+          },
+          {
+            fecha: haceHoras(5),
+            ubicacion: "El vendedor terminó de empacar tu pedido.",
+          },
+          {
+            fecha: haceHoras(12),
+            ubicacion: "Envío registrado. Esperando preparación del vendedor.",
+          },
+        ],
+      };
+
+    case "EN_TRANSITO":
+      return {
+        estadoActual: "En camino",
+        historial: [
           {
             fecha: haceHoras(2),
             ubicacion: "El paquete está en camino a tu domicilio.",
           },
           {
+            fecha: haceHoras(14),
+            ubicacion: "El paquete llegó al centro de distribución regional.",
+          },
+          {
             fecha: haceHoras(24),
-            ubicacion: "El paquete llegó al centro de distribución local.",
+            ubicacion: "El operador logístico retiró el paquete del vendedor.",
+          },
+          {
+            fecha: haceHoras(28),
+            ubicacion: "El vendedor terminó de empacar tu pedido.",
+          },
+        ],
+      };
+
+    case "ENTREGADO":
+      return {
+        estadoActual: "Entregado",
+        historial: [
+          {
+            fecha: haceHoras(0),
+            ubicacion: "Paquete entregado al comprador exitosamente.",
+          },
+          {
+            fecha: haceHoras(4),
+            ubicacion: "El paquete está en camino a tu domicilio.",
+          },
+          {
+            fecha: haceHoras(24),
+            ubicacion: "El paquete llegó al centro de distribución regional.",
           },
           {
             fecha: haceHoras(48),
-            ubicacion: "El vendedor despachó el paquete.",
+            ubicacion: "El operador logístico retiró el paquete del vendedor.",
+          },
+        ],
+      };
+
+    case "NO_ENTREGADO":
+      return {
+        estadoActual: "Intento fallido",
+        historial: [
+          {
+            fecha: haceHoras(0),
+            ubicacion:
+              "Intento de entrega fallido. Se reprogramará una nueva visita.",
+          },
+          {
+            fecha: haceHoras(4),
+            ubicacion: "El paquete está en camino a tu domicilio.",
+          },
+          {
+            fecha: haceHoras(24),
+            ubicacion: "El paquete llegó al centro de distribución regional.",
+          },
+        ],
+      };
+
+    case "CANCELADO":
+      return {
+        estadoActual: "Cancelado",
+        historial: [
+          { fecha: haceHoras(0), ubicacion: "El envío ha sido cancelado." },
+          {
+            fecha: haceHoras(24),
+            ubicacion: "Envío registrado. Esperando preparación del vendedor.",
           },
         ],
       };
 
     default:
-      return { estadoActual: "Desconocido", historial: [] };
+      return {
+        estadoActual: estado || "Desconocido",
+        historial: [],
+      };
   }
 }
 

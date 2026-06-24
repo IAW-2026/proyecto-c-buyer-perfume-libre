@@ -11,11 +11,7 @@ import Image from "next/image";
 import CalificacionEstrellas from "@/components/calificacionEstrellas";
 import { cn, formatearPrecio, generarUrl } from "@/lib/utils";
 import { notFound, redirect } from "next/navigation";
-import {
-  obtenerDetallePerfume,
-  obtenerResenaProducto,
-  obtenerResenaVendedor,
-} from "@/lib/api";
+import { obtenerDetallePerfume } from "@/lib/api";
 import { Perfume } from "@/schema/perfume.schema";
 import { productoEstaEnFavoritos } from "@/actions/favoritos";
 import { BotonFavorito } from "@/components/favoritos/BotonFavorito";

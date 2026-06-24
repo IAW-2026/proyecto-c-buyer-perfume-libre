@@ -16,32 +16,38 @@ export default function CardResena({
   titulo,
   descripcion,
   id,
-  usuarioId,
+  ordenId,
   onEnviar,
 }: {
   titulo: string;
   descripcion: string;
   id: string;
-  usuarioId: string;
+  ordenId: string;
   onEnviar: (
     id: string,
-    userId: string,
+    ordenId: string,
     rating: number,
     comentario: string,
-  ) => Promise<void>;
+  ) => Promise<any>;
 }) {
   const [rating, setRating] = useState(0);
   const [comentario, setComentario] = useState("");
-  const [estado, setEstado] = useState<"idle" | "enviando" | "enviado">("idle");
+  const [estado, setEstado] = useState<
+    "idle" | "enviando" | "enviado" | "error"
+  >("idle");
 
   const manejarEnvio = async () => {
     if (rating === 0) return;
     setEstado("enviando");
-    await onEnviar(id, usuarioId, rating, comentario);
-    setEstado("enviado");
+    try {
+      await onEnviar(id, ordenId, rating, comentario);
+      setEstado("enviado");
+    } catch (e) {
+      console.error(e);
+      setEstado("error");
+    }
   };
 
-  // ESTADO DE ÉXITO PREMIUM
   if (estado === "enviado") {
     return (
       <Card className="rounded-sm border-accent/30 bg-accent/5 shadow-none flex items-center justify-center h-full min-h-55">

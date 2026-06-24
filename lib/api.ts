@@ -14,6 +14,7 @@ import {
 import { mockPerfumes } from "./mockPerfumes";
 import { z } from "zod";
 import { obtenerHistorialSimulado, OpcionEnvio } from "./mockEnvios";
+import { auth } from "@clerk/nextjs/server";
 
 export interface FiltrosCatalogo {
   q?: string | string[];
@@ -29,7 +30,120 @@ export interface FiltrosCatalogo {
 export async function obtenerCatalogo(
   filtros: FiltrosCatalogo,
 ): Promise<{ items: PerfumeCard[]; total: number }> {
-  // En etapa 3 cambiar por fetch a la API real.
+  const usarApiReal = process.env.USE_REAL_API === "true";
+
+  if (usarApiReal) {
+    return obtenerCatalogoReal(filtros);
+  } else {
+    return obtenerCatalogoMock(filtros);
+  }
+}
+
+async function obtenerCatalogoReal(
+  filtros: FiltrosCatalogo,
+): Promise<{ items: PerfumeCard[]; total: number }> {
+  try {
+    const { q, marca, genero, tamano, precioMin, precioMax, page, limit } =
+      filtros;
+
+    const categorias: string[] = [];
+    if (marca) {
+      const marcasArr = Array.isArray(marca) ? marca : [marca];
+      categorias.push(...marcasArr.map((m) => m.toLowerCase()));
+    }
+    if (genero) {
+      const generosArr = Array.isArray(genero) ? genero : [genero];
+      categorias.push(...generosArr.map((g) => g.toLowerCase()));
+    }
+
+    const headers = new Headers();
+    headers.append("titulo", q ? q.toString() : " ");
+    headers.append("categorias", JSON.stringify(categorias));
+    headers.append("pagina", String(page || 1));
+    headers.append("cantidad_pagina", String(limit || 12));
+
+    headers.append("seller_api_key", process.env.SELLER_API_KEY || "");
+
+    const baseUrl =
+      process.env.SELLER_API_URL ||
+      "https://proyecto-c-seller-perfume-libre.vercel.app/api";
+    const response = await fetch(`${baseUrl}/seller/productos`, {
+      method: "GET",
+      headers: headers,
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error de la API Seller: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    let itemsMapeados: PerfumeCard[] = (data.items || []).map((prod: any) => ({
+      id: String(prod.producto_id),
+      nombre: prod.titulo,
+      precio: Number(prod.precio),
+      imagenUrl: prod.imagen || "/placeholder-perfume.jpg",
+      marca: prod.titulo.split(" ")[0] || "Marca Desconocida",
+      tamaño: 100,
+      calificacion: 0,
+    }));
+
+    try {
+      const feedbackBaseUrl =
+        process.env.FEEDBACK_API_URL ||
+        "https://proyecto-c-feedback2-perfume-libre.vercel.app/api/";
+
+      const promesasCalificaciones = itemsMapeados.map((item) =>
+        fetch(`${feedbackBaseUrl}/resenas/producto/${item.id}/resumen`, {
+          cache: "no-store",
+        })
+          .then((res) => (res.ok ? res.json() : null))
+          .catch(() => null),
+      );
+
+      const resultadosCalificaciones = await Promise.all(
+        promesasCalificaciones,
+      );
+
+      itemsMapeados = itemsMapeados.map((item, index) => {
+        const ratingData = resultadosCalificaciones[index];
+        if (ratingData && ratingData.promedio_producto) {
+          item.calificacion = Number(ratingData.promedio_producto);
+        }
+        return item;
+      });
+    } catch (errFeedback) {
+      console.warn(
+        "Aviso: No se pudieron cargar las calificaciones masivas",
+        errFeedback,
+      );
+    }
+
+    if (precioMin) {
+      itemsMapeados = itemsMapeados.filter(
+        (p) => p.precio >= Number(precioMin),
+      );
+    }
+    if (precioMax) {
+      itemsMapeados = itemsMapeados.filter(
+        (p) => p.precio <= Number(precioMax),
+      );
+    }
+
+    return {
+      items: itemsMapeados,
+      total: data.total || 0,
+    };
+  } catch (error) {
+    console.error("Error al obtener catálogo real:", error);
+    return { items: [], total: 0 };
+  }
+}
+
+async function obtenerCatalogoMock(
+  filtros: FiltrosCatalogo,
+): Promise<{ items: PerfumeCard[]; total: number }> {
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
   const { q, marca, genero, tamano, precioMin, precioMax, page, limit } =
@@ -86,37 +200,128 @@ export async function obtenerCatalogo(
 }
 
 export async function obtenerDetallePerfume(id: string): Promise<Perfume> {
-  // En etapa 3 cambiar por fetch a la API real.
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+  const usarApiReal = process.env.USE_REAL_API === "true";
 
-  // En etapa 3 quitar esta parte y usar el resultado del fetch
-  const perfume = mockPerfumes.find((p) => p.id === id);
-  if (!perfume) {
-    throw new Error("Perfume no encontrado");
+  if (usarApiReal) {
+    return obtenerDetallePerfumeReal(id);
+  } else {
+    return obtenerDetallePerfumeMock(id);
   }
-
-  return validarTipo(perfume, PerfumeSchema);
 }
 
-export async function obtenerResenaVendedor(id_vendedor: string) {
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+async function obtenerDetallePerfumeMock(id: string): Promise<Perfume> {
+  {
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
-  return { total: 127, promedio: 4.8 };
+    const perfume = mockPerfumes.find((p) => p.id === id);
+    if (!perfume) {
+      throw new Error("Perfume no encontrado");
+    }
+
+    return validarTipo(perfume, PerfumeSchema);
+  }
 }
 
-export async function obtenerResenaProducto(id_producto: string) {
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+async function obtenerDetallePerfumeReal(id: string): Promise<Perfume> {
+  try {
+    const sellerUrl =
+      process.env.SELLER_API_URL ||
+      "https://proyecto-c-seller-perfume-libre.vercel.app/api";
+    const headersSeller = new Headers();
+    headersSeller.append(
+      "seller_api_key",
+      process.env.SELLER_API_KEY || "perfumelibre2026",
+    );
 
-  return { total: 127, promedio: 4.8 };
+    const resSeller = await fetch(`${sellerUrl}/seller/productos/${id}`, {
+      method: "GET",
+      headers: headersSeller,
+      cache: "no-store",
+    });
+
+    if (!resSeller.ok) {
+      throw new Error(`Error API Seller: ${resSeller.status}`);
+    }
+
+    const dataSeller = await resSeller.json();
+    const vendedorId = String(dataSeller.vendedor_id || "Boutique Oficial");
+
+    // OBTENER CALIFICACIONES EN PARALELO
+    let calificacionProducto = 0;
+    let calificacionVendedor = 0;
+
+    try {
+      const feedbackBaseUrl =
+        process.env.FEEDBACK_API_URL ||
+        "https://proyecto-c-feedback2-perfume-libre.vercel.app/api/";
+
+      const [resProducto, resVendedor] = await Promise.allSettled([
+        fetch(`${feedbackBaseUrl}/resenas/producto/${id}/resumen`, {
+          cache: "no-store",
+        }),
+        fetch(`${feedbackBaseUrl}/resenas/vendedor/${vendedorId}/resumen`, {
+          cache: "no-store",
+        }),
+      ]);
+
+      if (resProducto.status === "fulfilled" && resProducto.value.ok) {
+        const dataProd = await resProducto.value.json();
+        calificacionProducto = Number(dataProd.promedio_producto) || 0;
+      }
+
+      if (resVendedor.status === "fulfilled" && resVendedor.value.ok) {
+        const dataVend = await resVendedor.value.json();
+        calificacionVendedor = Number(dataVend.promedio_vendedor) || 0;
+      }
+    } catch (errFeedback) {
+      console.warn(
+        "La API de Feedback falló, usando calificaciones en 0:",
+        errFeedback,
+      );
+    }
+
+    const perfumeMapeado = {
+      id: String(dataSeller.producto_id),
+      nombre: dataSeller.titulo,
+      marca: dataSeller.titulo.split(" ")[0] || "Marca Desconocida",
+      tamaño: 100,
+      precio: Number(dataSeller.precio),
+      imagenesUrl: [dataSeller.imagen || "/placeholder-perfume.jpg"],
+      descripcion: dataSeller.descripcion || "Sin descripción disponible.",
+      calificacionProducto: calificacionProducto,
+      calificacionVendedor: calificacionVendedor,
+      vendedor: vendedorId,
+      genero: "Unisex",
+    };
+
+    return validarTipo(perfumeMapeado, PerfumeSchema);
+  } catch (error) {
+    console.error(
+      "⚠️ Error fatal al obtener perfume real, usando Mock:",
+      error,
+    );
+    return obtenerDetallePerfumeMock(id);
+  }
 }
 
 export async function obtenerProductosFavoritos(
   ids: string[],
 ): Promise<PerfumeFavorito[]> {
-  // En etapa 3 cambiar por fetch a la API real.
+  if (!ids || ids.length === 0) return [];
+  const usarApiReal = process.env.USE_REAL_API === "true";
+
+  if (usarApiReal) {
+    return obtenerProductosFavoritosReal(ids);
+  } else {
+    return obtenerProductosFavoritosMock(ids);
+  }
+}
+
+async function obtenerProductosFavoritosMock(
+  ids: string[],
+): Promise<PerfumeFavorito[]> {
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
-  // En etapa 3 cambiar esta parte y usar el resultado del fetch
   const perfumesFiltrados = mockPerfumes.filter((perfume) =>
     ids.includes(perfume.id),
   );
@@ -124,13 +329,57 @@ export async function obtenerProductosFavoritos(
   return validarTipo(perfumesFiltrados, PerfumeFavoritosSchema);
 }
 
+async function obtenerProductosFavoritosReal(
+  ids: string[],
+): Promise<PerfumeFavorito[]> {
+  try {
+    const promesas = ids.map((id) =>
+      fetchProductoDesdeSeller(id).catch((err) => {
+        console.warn(`No se pudo cargar el favorito ${id}:`, err.message);
+        return null;
+      }),
+    );
+
+    const resultadosRaw = await Promise.all(promesas);
+
+    const productosValidos = resultadosRaw.filter((prod) => prod !== null);
+
+    const itemsMapeados = productosValidos.map((prod) => ({
+      id: String(prod.producto_id),
+      nombre: prod.titulo,
+      marca: prod.titulo.split(" ")[0] || "Marca Premium",
+      precio: Number(prod.precio),
+      imagenesUrl: [prod.imagen || "/placeholder-perfume.jpg"],
+    }));
+
+    return validarTipo(itemsMapeados, PerfumeFavoritosSchema);
+  } catch (error) {
+    console.error(
+      "Error general obteniendo favoritos reales, usando Mock:",
+      error,
+    );
+    return obtenerProductosFavoritosMock(ids);
+  }
+}
+
 export async function obtenerProductosCarrito(
   ids: string[],
 ): Promise<PerfumeCarrito[]> {
-  // En etapa 3 cambiar por fetch a la API real.
+  if (!ids || ids.length === 0) return [];
+  const usarApiReal = process.env.USE_REAL_API === "true";
+
+  if (usarApiReal) {
+    return obtenerProductosCarritoReal(ids);
+  } else {
+    return obtenerProductosCarritoMock(ids);
+  }
+}
+
+async function obtenerProductosCarritoMock(
+  ids: string[],
+): Promise<PerfumeCarrito[]> {
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
-  // En etapa 3 cambiar esta parte y usar el resultado del fetch
   const perfumesFiltrados = mockPerfumes.filter((perfume) =>
     ids.includes(perfume.id),
   );
@@ -138,13 +387,90 @@ export async function obtenerProductosCarrito(
   return validarTipo(perfumesFiltrados, PerfumeCarritosSchema);
 }
 
+async function obtenerProductosCarritoReal(
+  ids: string[],
+): Promise<PerfumeCarrito[]> {
+  try {
+    const promesas = ids.map((id) =>
+      fetchProductoDesdeSeller(id).catch((err) => {
+        console.warn(`No se pudo cargar el producto ${id}:`, err.message);
+        return null;
+      }),
+    );
+
+    const resultadosRaw = await Promise.all(promesas);
+
+    const productosValidos = resultadosRaw.filter((prod) => prod !== null);
+
+    const itemsMapeados = productosValidos.map((prod) => ({
+      id: String(prod.producto_id),
+      nombre: prod.titulo,
+      vendedor: String(prod.vendedor_id || "N/A"),
+      marca: prod.titulo.split(" ")[0] || "Marca Premium",
+      precio: Number(prod.precio),
+      imagenesUrl: [prod.imagen || "/placeholder-perfume.jpg"],
+    }));
+
+    return validarTipo(itemsMapeados, PerfumeCarritosSchema);
+  } catch (error) {
+    console.error(
+      "Error general obteniendo carrito reales, usando Mock:",
+      error,
+    );
+    return obtenerProductosCarritoMock(ids);
+  }
+}
+
 export async function obtenerProductosComprados(
+  ids: string[],
+): Promise<PerfumeComprado[]> {
+  if (!ids || ids.length === 0) return [];
+  const usarApiReal = process.env.USE_REAL_API === "true";
+
+  if (usarApiReal) {
+    return obtenerProductosCompradosReal(ids);
+  } else {
+    return obtenerProductosCompradosMock(ids);
+  }
+}
+
+async function obtenerProductosCompradosReal(
+  ids: string[],
+): Promise<PerfumeComprado[]> {
+  try {
+    const promesas = ids.map((id) =>
+      fetchProductoDesdeSeller(id).catch((err) => {
+        console.warn(`No se pudo cargar el producto ${id}:`, err.message);
+        return null;
+      }),
+    );
+
+    const resultadosRaw = await Promise.all(promesas);
+
+    const productosValidos = resultadosRaw.filter((prod) => prod !== null);
+
+    const itemsMapeados = productosValidos.map((prod) => ({
+      id: String(prod.producto_id),
+      nombre: prod.titulo,
+      vendedor: String(prod.vendedor_id || "N/A"),
+      imagenesUrl: [prod.imagen || "/placeholder-perfume.jpg"],
+    }));
+
+    return validarTipo(itemsMapeados, PerfumeCompradosSchema);
+  } catch (error) {
+    console.error(
+      "Error general obteniendo productos comprados reales, usando Mock:",
+      error,
+    );
+    return obtenerProductosCompradosMock(ids);
+  }
+}
+
+async function obtenerProductosCompradosMock(
   ids: String[],
 ): Promise<PerfumeComprado[]> {
-  // En etapa 3 cambiar por fetch a la API real.
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
-  // En etapa 3 cambiar esta parte y usar el resultado del fetch
   const perfumesFiltrados = mockPerfumes.filter((perfume) =>
     ids.includes(perfume.id),
   );
@@ -155,10 +481,46 @@ export async function obtenerProductosComprados(
 export async function obtenerDetallesProducto(
   ids: string[],
 ): Promise<Perfume[]> {
-  // En etapa 3 cambiar por fetch a la API real.
+  const usarApiReal = process.env.USE_REAL_API === "true";
+
+  if (usarApiReal) {
+    return obtenerDetallesProductoReal(ids);
+  } else {
+    return obtenerDetallesProductoMock(ids);
+  }
+}
+
+async function obtenerDetallesProductoReal(ids: string[]): Promise<Perfume[]> {
+  try {
+    const promesas = ids.map((id) =>
+      obtenerDetallePerfumeReal(id).catch((err) => {
+        console.warn(
+          `No se pudo cargar el detalle completo de ${id}:`,
+          err.message,
+        );
+        return null;
+      }),
+    );
+
+    const resultados = await Promise.all(promesas);
+
+    const productosValidos = resultados.filter(
+      (prod) => prod !== null,
+    ) as Perfume[];
+
+    return productosValidos;
+  } catch (error) {
+    console.error(
+      "⚠️ Error general obteniendo detalles reales, usando Mock:",
+      error,
+    );
+    return obtenerDetallesProductoMock(ids);
+  }
+}
+
+async function obtenerDetallesProductoMock(ids: string[]): Promise<Perfume[]> {
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
-  // En etapa 3 cambiar esta parte y usar el resultado del fetch
   const perfumesFiltrados = mockPerfumes.filter((perfume) =>
     ids.includes(perfume.id),
   );
@@ -168,44 +530,216 @@ export async function obtenerDetallesProducto(
 
 export async function enviarResenaProducto(
   productoId: string,
-  usuarioId: string,
+  ordenId: string,
+  rating: number,
+  comentario?: string,
+  imagenes?: string[],
+) {
+  const usarApiReal = process.env.USE_REAL_API === "true";
+
+  if (usarApiReal) {
+    return enviarResenaProductoReal(
+      productoId,
+      ordenId,
+      rating,
+      comentario,
+      imagenes,
+    );
+  } else {
+    return enviarResenaProductoMock(productoId, ordenId, rating, comentario);
+  }
+}
+
+async function enviarResenaProductoReal(
+  productoId: string,
+  ordenId: string,
+  rating: number,
+  comentario?: string,
+  imagenes?: string[],
+) {
+  const { getToken } = await auth();
+  const token = await getToken();
+
+  if (!token) {
+    throw new Error("Debes iniciar sesión para dejar una reseña.");
+  }
+
+  const feedbackBaseUrl =
+    process.env.FEEDBACK_API_URL ||
+    "https://proyecto-c-feedback2-perfume-libre.vercel.app/api";
+
+  const bodyData = {
+    id_producto: productoId,
+    id_orden: ordenId,
+    puntuacion: rating,
+    comentario: comentario || "",
+    imagenes: imagenes || [],
+  };
+
+  const response = await fetch(`${feedbackBaseUrl}/resenas/producto`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(bodyData),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    console.error("Error de Feedback App (Producto):", result);
+    throw new Error(
+      result.mensaje || "Ocurrió un error al enviar la reseña del producto.",
+    );
+  }
+
+  return result;
+}
+
+async function enviarResenaProductoMock(
+  productoId: string,
+  ordenId: string,
   rating: number,
   comentario?: string,
 ) {
-  console.log("POST a API Feedback (Producto):", {
-    productoId: productoId,
-    usuarioId: usuarioId,
+  console.log("POST a API Feedback MOCK (Producto):", {
+    productoId,
+    ordenId,
     rating,
     comentario,
   });
-
   await new Promise((resolve) => setTimeout(resolve, 1000));
+  return { estado: "success", mensaje: "Reseña simulada con éxito" };
 }
 
 export async function enviarResenaVendedor(
   vendedorId: string,
-  usuarioId: string,
+  ordenId: string,
   rating: number,
   comentario?: string,
 ) {
-  console.log("POST a API Feedback (Vendedor):", {
-    vendedorId: vendedorId,
-    usuarioId: usuarioId,
+  const usarApiReal = process.env.USE_REAL_API === "true";
+
+  if (usarApiReal) {
+    return enviarResenaVendedorReal(vendedorId, ordenId, rating, comentario);
+  } else {
+    return enviarResenaVendedorMock(vendedorId, ordenId, rating, comentario);
+  }
+}
+
+async function enviarResenaVendedorReal(
+  vendedorId: string,
+  ordenId: string,
+  rating: number,
+  comentario?: string,
+) {
+  const { getToken } = await auth();
+  const token = await getToken();
+
+  if (!token) {
+    throw new Error("Debes iniciar sesión para valorar a un vendedor.");
+  }
+
+  const feedbackBaseUrl =
+    process.env.FEEDBACK_API_URL ||
+    "https://proyecto-c-feedback2-perfume-libre.vercel.app/api";
+
+  const bodyData = {
+    id_vendedor: vendedorId,
+    id_orden: ordenId,
+    puntuacion: rating,
+    comentario: comentario || "",
+  };
+
+  const response = await fetch(`${feedbackBaseUrl}/resenas/vendedor`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(bodyData),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    console.error("Error de Feedback App (Vendedor):", result);
+    throw new Error(
+      result.mensaje || "Ocurrió un error al calificar al vendedor.",
+    );
+  }
+
+  return result;
+}
+
+async function enviarResenaVendedorMock(
+  vendedorId: string,
+  ordenId: string,
+  rating: number,
+  comentario?: string,
+) {
+  console.log("POST a API Feedback MOCK (Vendedor):", {
+    vendedorId,
+    ordenId,
     rating,
     comentario,
   });
 
   await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  return { estado: "success", mensaje: "Reseña simulada con éxito" };
 }
 
-export async function obtenerHistorialEnvio(estado: string) {
-  // En etapa 3 cambiar por fetch a la API real.
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+export async function obtenerHistorialEnvio(
+  trackingId: string,
+  estadoFallback: string,
+) {
+  const usarApiReal = process.env.USE_REAL_API === "true";
 
-  // En etapa 3 cambiar esta parte y usar el resultado del fetch
-  return obtenerHistorialSimulado(estado);
+  if (usarApiReal && trackingId) {
+    return obtenerHistorialEnvioReal(trackingId, estadoFallback);
+  } else {
+    return obtenerHistorialSimulado(estadoFallback);
+  }
 }
 
+async function obtenerHistorialEnvioReal(
+  trackingId: string,
+  estadoFallback: string,
+) {
+  try {
+    const shippingBaseUrl =
+      process.env.SHIPPING_API_URL ||
+      "https://proyecto-c-shipping2-perfume-libre.vercel.app/api";
+
+    const response = await fetch(`${shippingBaseUrl}/shipping/${trackingId}`, {
+      method: "GET",
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error API Shipping: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    const estadoReal = data.estado_actual;
+
+    return obtenerHistorialSimulado(estadoReal);
+  } catch (error) {
+    console.error(
+      `⚠️ Error al consultar Shipping App para ${trackingId}, usando fallback:`,
+      error,
+    );
+
+    return obtenerHistorialSimulado(estadoFallback);
+  }
+}
+
+// ====================================
+// ESTOY AQUI
+// ====================================
 export async function obtenerPreciosDeProductos(ids: string[]) {
   // En etapa 3 cambiar por fetch a la API real.
   await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -218,19 +752,6 @@ export async function obtenerPreciosDeProductos(ids: string[]) {
     }));
 
   return preciosFiltrados;
-}
-
-export function validarTipo<TSchema extends z.ZodTypeAny>(
-  data: unknown,
-  schema: TSchema,
-): z.infer<TSchema> {
-  const resultado = schema.safeParse(data);
-
-  if (!resultado.success) {
-    throw new Error(`Datos invalidos: ${resultado.error.message}`);
-  }
-
-  return resultado.data;
 }
 
 export function obtenerDetallesProductos(ids: string[]) {
@@ -259,4 +780,44 @@ export async function generarOrden(
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
   return `envio_mock_${Math.floor(Math.random() * 10000)}`;
+}
+
+async function fetchProductoDesdeSeller(id: string) {
+  const baseUrl =
+    process.env.SELLER_API_URL ||
+    "https://proyecto-c-seller-perfume-libre.vercel.app/api";
+  const urlExacta = `${baseUrl}/seller/productos/${id}`;
+
+  const headers = new Headers();
+  headers.append(
+    "seller_api_key",
+    process.env.SELLER_API_KEY || "perfumelibre2026",
+  );
+
+  const res = await fetch(urlExacta, {
+    method: "GET",
+    headers: headers,
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    throw new Error(
+      `Error API Seller al obtener producto ${id}: ${res.status}`,
+    );
+  }
+
+  return res.json();
+}
+
+export function validarTipo<TSchema extends z.ZodTypeAny>(
+  data: unknown,
+  schema: TSchema,
+): z.infer<TSchema> {
+  const resultado = schema.safeParse(data);
+
+  if (!resultado.success) {
+    throw new Error(`Datos invalidos: ${resultado.error.message}`);
+  }
+
+  return resultado.data;
 }
