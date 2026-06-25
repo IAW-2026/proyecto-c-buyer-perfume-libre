@@ -68,7 +68,7 @@ export default function DireccionesEnvioPanel({
     if (items) queryParams.set("items", items);
     if (directo) queryParams.set("directo", directo);
 
-    router.push(`/checkout/ ?${queryParams.toString()}`);
+    router.push(`/checkout/metodo-envio?${queryParams.toString()}`);
   };
 
   return (
