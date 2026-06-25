@@ -19,6 +19,10 @@ import {
   OpcionEnvio,
 } from "./mockEnvios";
 import { auth } from "@clerk/nextjs/server";
+import {
+  enviarResenaProductoReal,
+  enviarResenaVendedorReal,
+} from "@/actions/resenas";
 
 export interface FiltrosCatalogo {
   q?: string | string[];
@@ -66,7 +70,7 @@ async function obtenerCatalogoReal(
     headers.append("pagina", String(page || 1));
     headers.append("cantidad_pagina", String(limit || 12));
 
-    headers.append("seller_api_key", process.env.SELLER_API_KEY || "");
+    headers.append("api_key", process.env.SELLER_API_KEY || "");
 
     const baseUrl =
       process.env.SELLER_API_URL ||
@@ -82,11 +86,11 @@ async function obtenerCatalogoReal(
     }
 
     const data = await response.json();
-
+    console.log(data);
     let itemsMapeados: PerfumeCard[] = (data.items || []).map((prod: any) => ({
       id: String(prod.producto_id),
       nombre: prod.titulo,
-      precio: Number(prod.precio),
+      precio: Math.round(Number(prod.precio)),
       imagenUrl: prod.imagen || "/placeholder-perfume.jpg",
       marca: prod.titulo.split(" ")[0] || "Marca Desconocida",
       tamaño: 100,
@@ -233,7 +237,7 @@ async function obtenerDetallePerfumeReal(id: string): Promise<Perfume> {
       "https://proyecto-c-seller-perfume-libre.vercel.app/api";
     const headersSeller = new Headers();
     headersSeller.append(
-      "seller_api_key",
+      "api_key",
       process.env.SELLER_API_KEY || "perfumelibre2026",
     );
 
@@ -248,6 +252,7 @@ async function obtenerDetallePerfumeReal(id: string): Promise<Perfume> {
     }
 
     const dataSeller = await resSeller.json();
+    const dataProducto = dataSeller.producto;
     const vendedorId = String(dataSeller.vendedor_id || "Boutique Oficial");
 
     // OBTENER CALIFICACIONES EN PARALELO
@@ -285,16 +290,16 @@ async function obtenerDetallePerfumeReal(id: string): Promise<Perfume> {
     }
 
     const perfumeMapeado = {
-      id: String(dataSeller.producto_id),
-      nombre: dataSeller.titulo,
-      marca: dataSeller.titulo.split(" ")[0] || "Marca Desconocida",
+      id: String(dataProducto.producto_id),
+      nombre: dataProducto.titulo,
+      marca: dataProducto.titulo.split(" ")[0] || "Marca Desconocida",
       tamaño: 100,
-      precio: Number(dataSeller.precio),
-      imagenesUrl: [dataSeller.imagen || "/placeholder-perfume.jpg"],
-      descripcion: dataSeller.descripcion || "Sin descripción disponible.",
+      precio: Math.round(Number(dataProducto.precio)) || 0,
+      imagenesUrl: [dataProducto.imagen || "/placeholder-perfume.jpg"],
+      descripcion: dataProducto.descripcion || "Sin descripción disponible.",
       calificacionProducto: calificacionProducto,
       calificacionVendedor: calificacionVendedor,
-      vendedor: vendedorId,
+      vendedor: dataSeller.vendedor.nombre,
       genero: "Unisex",
     };
 
@@ -348,13 +353,21 @@ async function obtenerProductosFavoritosReal(
 
     const productosValidos = resultadosRaw.filter((prod) => prod !== null);
 
-    const itemsMapeados = productosValidos.map((prod) => ({
-      id: String(prod.producto_id),
-      nombre: prod.titulo,
-      marca: prod.titulo.split(" ")[0] || "Marca Premium",
-      precio: Number(prod.precio),
-      imagenesUrl: [prod.imagen || "/placeholder-perfume.jpg"],
-    }));
+    const itemsMapeados = productosValidos
+      .map((prod) => {
+        const item = prod.producto;
+
+        if (!item) return null;
+
+        return {
+          id: String(item.producto_id),
+          nombre: item.titulo,
+          marca: item.titulo.split(" ")[0] || "Marca Premium",
+          precio: Math.round(Number(item.precio)) || 0,
+          imagenesUrl: [item.imagen || "/placeholder-perfume.jpg"],
+        };
+      })
+      .filter((prod) => prod !== null);
 
     return validarTipo(itemsMapeados, PerfumeFavoritosSchema);
   } catch (error) {
@@ -405,15 +418,23 @@ async function obtenerProductosCarritoReal(
     const resultadosRaw = await Promise.all(promesas);
 
     const productosValidos = resultadosRaw.filter((prod) => prod !== null);
+    const itemsMapeados = productosValidos
+      .map((prod) => {
+        const item = prod.producto;
+        const vendedor = prod.vendedor;
 
-    const itemsMapeados = productosValidos.map((prod) => ({
-      id: String(prod.producto_id),
-      nombre: prod.titulo,
-      vendedor: String(prod.vendedor_id || "N/A"),
-      marca: prod.titulo.split(" ")[0] || "Marca Premium",
-      precio: Number(prod.precio),
-      imagenesUrl: [prod.imagen || "/placeholder-perfume.jpg"],
-    }));
+        if (!item) return null;
+
+        return {
+          id: String(item.producto_id),
+          nombre: item.titulo,
+          vendedor: String(vendedor.nombre || "N/A"),
+          marca: item.titulo.split(" ")[0] || "Marca Premium",
+          precio: Math.round(Number(item.precio)),
+          imagenesUrl: [item.imagen || "/placeholder-perfume.jpg"],
+        };
+      })
+      .filter((prod) => prod !== null);
 
     return validarTipo(itemsMapeados, PerfumeCarritosSchema);
   } catch (error) {
@@ -452,13 +473,21 @@ async function obtenerProductosCompradosReal(
     const resultadosRaw = await Promise.all(promesas);
 
     const productosValidos = resultadosRaw.filter((prod) => prod !== null);
+    const itemsMapeados = productosValidos
+      .map((prod) => {
+        const item = prod.producto;
+        const vendedor = prod.vendedor;
 
-    const itemsMapeados = productosValidos.map((prod) => ({
-      id: String(prod.producto_id),
-      nombre: prod.titulo,
-      vendedor: String(prod.vendedor_id || "N/A"),
-      imagenesUrl: [prod.imagen || "/placeholder-perfume.jpg"],
-    }));
+        if (!item) return null;
+
+        return {
+          id: String(item.producto_id),
+          nombre: item.titulo,
+          vendedor: vendedor.nombre || "N/A",
+          imagenesUrl: [item.imagen || "/placeholder-perfume.jpg"],
+        };
+      })
+      .filter((prod) => prod !== null);
 
     return validarTipo(itemsMapeados, PerfumeCompradosSchema);
   } catch (error) {
@@ -554,53 +583,6 @@ export async function enviarResenaProducto(
   }
 }
 
-async function enviarResenaProductoReal(
-  productoId: string,
-  ordenId: string,
-  rating: number,
-  comentario?: string,
-  imagenes?: string[],
-) {
-  const { getToken } = await auth();
-  const token = await getToken();
-
-  if (!token) {
-    throw new Error("Debes iniciar sesión para dejar una reseña.");
-  }
-
-  const feedbackBaseUrl =
-    process.env.FEEDBACK_API_URL ||
-    "https://proyecto-c-feedback2-perfume-libre.vercel.app/api";
-
-  const bodyData = {
-    id_producto: productoId,
-    id_orden: ordenId,
-    puntuacion: rating,
-    comentario: comentario || "",
-    imagenes: imagenes || [],
-  };
-
-  const response = await fetch(`${feedbackBaseUrl}/resenas/producto`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(bodyData),
-  });
-
-  const result = await response.json();
-
-  if (!response.ok) {
-    console.error("Error de Feedback App (Producto):", result);
-    throw new Error(
-      result.mensaje || "Ocurrió un error al enviar la reseña del producto.",
-    );
-  }
-
-  return result;
-}
-
 async function enviarResenaProductoMock(
   productoId: string,
   ordenId: string,
@@ -630,51 +612,6 @@ export async function enviarResenaVendedor(
   } else {
     return enviarResenaVendedorMock(vendedorId, ordenId, rating, comentario);
   }
-}
-
-async function enviarResenaVendedorReal(
-  vendedorId: string,
-  ordenId: string,
-  rating: number,
-  comentario?: string,
-) {
-  const { getToken } = await auth();
-  const token = await getToken();
-
-  if (!token) {
-    throw new Error("Debes iniciar sesión para valorar a un vendedor.");
-  }
-
-  const feedbackBaseUrl =
-    process.env.FEEDBACK_API_URL ||
-    "https://proyecto-c-feedback2-perfume-libre.vercel.app/api";
-
-  const bodyData = {
-    id_vendedor: vendedorId,
-    id_orden: ordenId,
-    puntuacion: rating,
-    comentario: comentario || "",
-  };
-
-  const response = await fetch(`${feedbackBaseUrl}/resenas/vendedor`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(bodyData),
-  });
-
-  const result = await response.json();
-
-  if (!response.ok) {
-    console.error("Error de Feedback App (Vendedor):", result);
-    throw new Error(
-      result.mensaje || "Ocurrió un error al calificar al vendedor.",
-    );
-  }
-
-  return result;
 }
 
 async function enviarResenaVendedorMock(
@@ -770,8 +707,8 @@ async function obtenerPreciosDeProductosReal(ids: string[]) {
     const preciosMapeados = resultadosRaw
       .filter((prod) => prod !== null)
       .map((prod) => ({
-        id: String(prod.producto_id),
-        precio: Number(prod.precio),
+        id: String(prod.producto.producto_id),
+        precio: Math.round(Number(prod.producto.precio)),
       }));
 
     return preciosMapeados;
@@ -825,10 +762,10 @@ async function obtenerDetallesProductosReal(ids: string[]) {
     const resumenMapeado = resultadosRaw
       .filter((prod) => prod !== null)
       .map((prod) => ({
-        id: String(prod.producto_id),
-        imagen: prod.imagen || "/placeholder-perfume.jpg",
-        nombre: prod.titulo,
-        vendedor: String(prod.vendedor_id || "Boutique Oficial"),
+        id: String(prod.producto.producto_id),
+        imagen: prod.producto.imagen || "/placeholder-perfume.jpg",
+        nombre: prod.producto.titulo,
+        vendedor: String(prod.vendedor.nombre || "Boutique Oficial"),
       }));
 
     return resumenMapeado;
@@ -890,9 +827,11 @@ async function generarOrdenEnvioReal(
     let id_vendedor = "vendedor_desconocido";
     if (items && items.length > 0) {
       try {
-        const prodData = await fetchProductoDesdeSeller(items[0].productoId);
-        if (prodData.vendedor_id) {
-          id_vendedor = String(prodData.vendedor_id);
+        const { producto, vendedor } = await fetchProductoDesdeSeller(
+          items[0].productoId,
+        );
+        if (vendedor.clerk_id) {
+          id_vendedor = String(vendedor.clerk_id);
         }
       } catch (err) {
         console.warn("No se pudo obtener el id_vendedor, usando genérico.");
@@ -980,6 +919,8 @@ async function obtenerCotizacionesEnvioReal(
       throw new Error(`Error API Shipping al cotizar: ${response.status}`);
     }
 
+    console.log(response);
+
     const data = await response.json();
 
     if (!data.opciones || !Array.isArray(data.opciones)) {
@@ -1003,10 +944,7 @@ export async function fetchProductoDesdeSeller(id: string) {
   const urlExacta = `${baseUrl}/seller/productos/${id}`;
 
   const headers = new Headers();
-  headers.append(
-    "seller_api_key",
-    process.env.SELLER_API_KEY || "perfumelibre2026",
-  );
+  headers.append("api_key", process.env.SELLER_API_KEY || "perfumelibre2026");
 
   const res = await fetch(urlExacta, {
     method: "GET",
@@ -1020,7 +958,8 @@ export async function fetchProductoDesdeSeller(id: string) {
     );
   }
 
-  return res.json();
+  const data = await res.json();
+  return { producto: data.producto, vendedor: data.vendedor };
 }
 
 export function validarTipo<TSchema extends z.ZodTypeAny>(

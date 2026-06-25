@@ -2,7 +2,7 @@ import { obtenerDireccionPorId } from "@/actions/direcciones";
 import PanelMetodosEnvio from "../../../../components/checkout/PanelMetodosEnvio";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MapPinned } from "lucide-react";
-import { obtenerCotizacionesEnvio } from "@/lib/mockEnvios";
+import { obtenerCotizacionesEnvio } from "@/lib/api";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import InfoOperacion from "@/components/checkout/envio/InfoOperacion";

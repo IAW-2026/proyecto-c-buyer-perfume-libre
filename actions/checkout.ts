@@ -61,8 +61,8 @@ export async function iniciarProcesamientoCompra(
         itemsAProcesar[0].productoId,
       );
 
-      if (productoData && productoData.vendedor_id) {
-        vendedorId = String(productoData.vendedor_id);
+      if (productoData && productoData.vendedor?.vendedor_id) {
+        vendedorId = String(productoData.vendedor.vendedor_id);
       }
     } catch (error) {
       console.warn(

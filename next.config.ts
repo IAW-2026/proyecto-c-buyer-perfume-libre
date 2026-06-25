@@ -18,6 +18,12 @@ const nextConfig: NextConfig = {
         hostname: "img.clerk.com",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "90ml1rgygkaxyco4.public.blob.vercel-storage.com",
+        port: "",
+        pathname: "/**",
+      },
     ],
   },
 };
