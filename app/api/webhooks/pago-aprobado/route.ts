@@ -26,9 +26,14 @@ export async function POST(req: Request) {
     const id_envio = await generarOrdenEnvio(
       id_orden,
       orden.usuarioId,
-      orden.direccionId,
+      orden.direccion?.calle!,
       orden.items,
-      orden.servicioEnvio,
+      {
+        operador: orden.operadorEnvio,
+        precio: orden.costoEnvio,
+        tipo_servicio: orden.servicioEnvio,
+        demora_dias: orden.demoraDias,
+      },
     );
 
     await actualizarOrden(id_orden, id_pago, id_envio, nuevoEstadoOrden);

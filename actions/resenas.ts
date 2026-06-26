@@ -9,7 +9,7 @@ export async function enviarResenaProductoReal(
   comentario?: string,
   imagenes?: string[],
 ) {
-  const { getToken } = await auth();
+  const { userId, getToken } = await auth();
   const token = await getToken();
 
   if (!token) {
@@ -28,17 +28,22 @@ export async function enviarResenaProductoReal(
     imagenes: imagenes || [],
   };
 
+  const finalBodyData = {
+    ...bodyData,
+    id_usuario: userId,
+  };
+
   const response = await fetch(`${feedbackBaseUrl}/resenas/producto`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
+      api_key: process.env.FEEDBACK_API_KEY as string,
     },
-    body: JSON.stringify(bodyData),
+    body: JSON.stringify(finalBodyData),
   });
 
   const result = await response.json();
-
   if (!response.ok) {
     console.error("Error de Feedback App (Producto):", result);
     throw new Error(
@@ -55,7 +60,7 @@ export async function enviarResenaVendedorReal(
   rating: number,
   comentario?: string,
 ) {
-  const { getToken } = await auth();
+  const { getToken, userId } = await auth();
   const token = await getToken();
 
   if (!token) {
@@ -73,13 +78,19 @@ export async function enviarResenaVendedorReal(
     comentario: comentario || "",
   };
 
+  const finalBodyData = {
+    ...bodyData,
+    id_usuario: userId,
+  };
+
   const response = await fetch(`${feedbackBaseUrl}/resenas/vendedor`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
+      api_key: process.env.FEEDBACK_API_KEY as string,
     },
-    body: JSON.stringify(bodyData),
+    body: JSON.stringify(finalBodyData),
   });
 
   const result = await response.json();

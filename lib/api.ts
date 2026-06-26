@@ -255,7 +255,6 @@ async function obtenerDetallePerfumeReal(id: string): Promise<Perfume> {
     const dataProducto = dataSeller.producto;
     const vendedorId = String(dataSeller.vendedor_id || "Boutique Oficial");
 
-    // OBTENER CALIFICACIONES EN PARALELO
     let calificacionProducto = 0;
     let calificacionVendedor = 0;
 
@@ -263,7 +262,7 @@ async function obtenerDetallePerfumeReal(id: string): Promise<Perfume> {
       const feedbackBaseUrl =
         process.env.FEEDBACK_API_URL ||
         "https://proyecto-c-feedback2-perfume-libre.vercel.app/api/";
-
+      console.warn("pidiendo calificacion");
       const [resProducto, resVendedor] = await Promise.allSettled([
         fetch(`${feedbackBaseUrl}/resenas/producto/${id}/resumen`, {
           cache: "no-store",
@@ -272,13 +271,15 @@ async function obtenerDetallePerfumeReal(id: string): Promise<Perfume> {
           cache: "no-store",
         }),
       ]);
-
+      console.warn("calificacion pedida");
       if (resProducto.status === "fulfilled" && resProducto.value.ok) {
+        console.warn("calificacion producto ok");
         const dataProd = await resProducto.value.json();
         calificacionProducto = Number(dataProd.promedio_producto) || 0;
       }
 
       if (resVendedor.status === "fulfilled" && resVendedor.value.ok) {
+        console.warn("calificacion vendedor ok");
         const dataVend = await resVendedor.value.json();
         calificacionVendedor = Number(dataVend.promedio_vendedor) || 0;
       }
@@ -568,9 +569,11 @@ export async function enviarResenaProducto(
   comentario?: string,
   imagenes?: string[],
 ) {
-  const usarApiReal = process.env.USE_REAL_API === "true";
+  const usarApiReal = true;
 
+  console.warn("Entrando a reseñar");
   if (usarApiReal) {
+    console.warn("Usando api real");
     return enviarResenaProductoReal(
       productoId,
       ordenId,
@@ -579,6 +582,7 @@ export async function enviarResenaProducto(
       imagenes,
     );
   } else {
+    console.warn("Usando mock");
     return enviarResenaProductoMock(productoId, ordenId, rating, comentario);
   }
 }
@@ -605,7 +609,7 @@ export async function enviarResenaVendedor(
   rating: number,
   comentario?: string,
 ) {
-  const usarApiReal = process.env.USE_REAL_API === "true";
+  const usarApiReal = true;
 
   if (usarApiReal) {
     return enviarResenaVendedorReal(vendedorId, ordenId, rating, comentario);
@@ -801,8 +805,7 @@ export async function generarOrdenEnvio(
   items: any[],
   servicio_elegido: any,
 ) {
-  const usarApiReal = process.env.USE_REAL_API === "true";
-
+  const usarApiReal = true;
   if (usarApiReal) {
     return generarOrdenEnvioReal(
       id_orden,
@@ -840,6 +843,7 @@ async function generarOrdenEnvioReal(
 
     const bodyData = {
       id_orden: id_orden,
+      id_pedido: id_orden,
       id_comprador: id_comprador,
       id_vendedor: id_vendedor,
       direccion_entrega: direccion_entrega,
@@ -851,6 +855,8 @@ async function generarOrdenEnvioReal(
     const shippingBaseUrl =
       process.env.SHIPPING_API_URL ||
       "https://proyecto-c-shipping2-perfume-libre.vercel.app/api";
+
+    console.warn(bodyData);
 
     const response = await fetch(`${shippingBaseUrl}/shipping/ordenes`, {
       method: "POST",

@@ -165,7 +165,11 @@ export async function obtenerOrden(idOrden: string) {
 
     if (!orden) throw new Error("Orden no encontrada");
 
-    return orden;
+    const direccion = await prisma.direccion.findUnique({
+      where: { id: orden.direccionId },
+    });
+
+    return { ...orden, direccion };
   } catch (error) {
     throw new Error(`Error al obtener la orden ${error}`);
   }
