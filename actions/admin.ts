@@ -148,6 +148,7 @@ async function obtenerGraficoVentas(x: number = 6) {
   }
 }
 
+/*
 export async function generarDatosPrueba(x: number = 6) {
   try {
     const CANTIDAD_USUARIOS = 15;
@@ -167,6 +168,7 @@ export async function generarDatosPrueba(x: number = 6) {
     throw new Error("Hubo un problema generando los datos de prueba." + error);
   }
 }
+*/
 
 function crearOrdenesFalsas(
   cantOrdenes: number,

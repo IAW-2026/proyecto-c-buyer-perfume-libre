@@ -281,6 +281,7 @@ async function obtenerDetallePerfumeReal(id: string): Promise<Perfume> {
       if (resVendedor.status === "fulfilled" && resVendedor.value.ok) {
         console.warn("calificacion vendedor ok");
         const dataVend = await resVendedor.value.json();
+        console.warn(dataVend);
         calificacionVendedor = Number(dataVend.promedio_vendedor) || 0;
       }
     } catch (errFeedback) {
