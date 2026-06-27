@@ -66,8 +66,9 @@ function DetalleCompra({ orden }: { orden: ItemDeOrdenDetallado }) {
           <ArrowLeft className="mr-2 h-3.5 w-3.5" />
           Volver al historial
         </Link>
-
-        <SimuladorEnvio ordenId={orden.ordenCompraId} itemId={orden.idItem} />
+        {process.env.USE_REAL_API !== "true" && (
+          <SimuladorEnvio ordenId={orden.ordenCompraId} itemId={orden.idItem} />
+        )}
       </div>
 
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
