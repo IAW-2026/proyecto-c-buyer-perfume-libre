@@ -11,11 +11,7 @@ import Image from "next/image";
 import CalificacionEstrellas from "@/components/calificacionEstrellas";
 import { cn, formatearPrecio, generarUrl } from "@/lib/utils";
 import { notFound, redirect } from "next/navigation";
-import {
-  obtenerDetallePerfume,
-  obtenerResenaProducto,
-  obtenerResenaVendedor,
-} from "@/lib/api";
+import { obtenerDetallePerfume } from "@/lib/api";
 import { Perfume } from "@/schema/perfume.schema";
 import { productoEstaEnFavoritos } from "@/actions/favoritos";
 import { BotonFavorito } from "@/components/favoritos/BotonFavorito";
@@ -163,13 +159,16 @@ function ProductInformation({ producto }: { producto: Perfume }) {
       <ProductEncabezado marca={producto.marca} nombre={producto.nombre} />
 
       <Suspense fallback={<Skeleton className="h-5 w-44 mt-3" />}>
-        <ProductCalificacion idProducto={producto.id} />
+        <ProductCalificacion calificacion={producto.calificacionProducto} />
       </Suspense>
 
       <ProductPrecio precio={producto.precio} />
 
       <Suspense fallback={<Skeleton className="h-4 w-36 my-4" />}>
-        <InfoVendedor vendedor={producto.vendedor} />
+        <InfoVendedor
+          vendedor={producto.vendedor}
+          calificacion={producto.calificacionVendedor}
+        />
       </Suspense>
 
       <div className="mt-6 border-y border-border/60 py-5">
@@ -214,19 +213,13 @@ function ProductEncabezado({
   );
 }
 
-async function ProductCalificacion({ idProducto }: { idProducto: string }) {
+async function ProductCalificacion({ calificacion }: { calificacion: number }) {
   try {
-    const { total, promedio } = await obtenerResenaProducto(idProducto);
-    if (!promedio || total === 0) return null;
-
     return (
       <div className="flex items-center gap-2 mt-4">
-        <CalificacionEstrellas rating={promedio} />
+        <CalificacionEstrellas rating={calificacion} />
         <span className="text-[13px] font-medium text-foreground ml-1">
-          {promedio.toFixed(1)}
-        </span>
-        <span className="text-[13px] text-muted-foreground/80">
-          · {total} reseñas
+          {calificacion.toFixed(1)}
         </span>
       </div>
     );
@@ -245,10 +238,14 @@ function ProductPrecio({ precio }: { precio: number }) {
   );
 }
 
-async function InfoVendedor({ vendedor }: { vendedor: string }) {
+async function InfoVendedor({
+  vendedor,
+  calificacion,
+}: {
+  vendedor: string;
+  calificacion: number;
+}) {
   try {
-    const { total, promedio } = await obtenerResenaVendedor(vendedor);
-
     return (
       <div className="flex flex-wrap items-center gap-2 mt-4">
         <p className="text-[13px] text-muted-foreground">
@@ -257,13 +254,10 @@ async function InfoVendedor({ vendedor }: { vendedor: string }) {
             {vendedor}
           </span>
         </p>
-        {total > 0 && (
-          <div className="flex items-center gap-1 opacity-80">
-            <span className="text-muted-foreground">|</span>
-            <CalificacionEstrellas rating={promedio} />
-            <span className="text-[11px] text-muted-foreground">({total})</span>
-          </div>
-        )}
+        <div className="flex items-center gap-1 opacity-80">
+          <span className="text-muted-foreground">|</span>
+          <CalificacionEstrellas rating={calificacion} />
+        </div>
       </div>
     );
   } catch (error) {
@@ -311,7 +305,7 @@ function ProductActions({ perfumeId }: { perfumeId: string }) {
   return (
     <div className="flex flex-col gap-3">
       <Link
-        href={`/checkout/envio?productoId=${perfumeId}`}
+        href={`/checkout/envio?items=${perfumeId}&directo=true`}
         className={cn(
           buttonVariants({ size: "lg" }),
           "w-full text-[13px] uppercase tracking-wider font-semibold h-14 bg-foreground text-background hover:bg-foreground/90 transition-all rounded-sm",

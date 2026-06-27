@@ -7,12 +7,14 @@ export function SeccionResenas({
   productoId,
   nombreProducto,
   vendedor,
-  usuarioId,
+  vendedorId,
+  ordenId,
 }: {
   productoId: string;
   nombreProducto: string;
   vendedor: string;
-  usuarioId: string;
+  vendedorId: string;
+  ordenId: string;
 }) {
   return (
     <div className="mt-12 pt-8 border-t border-border/60">
@@ -24,15 +26,15 @@ export function SeccionResenas({
           titulo="Calificá la fragancia"
           descripcion={`¿Qué te pareció ${nombreProducto}?`}
           id={productoId}
-          usuarioId={usuarioId}
+          ordenId={ordenId}
           onEnviar={enviarResenaProducto}
         />
 
         <CardResena
           titulo="Atención del vendedor"
           descripcion={`¿Cómo fue tu experiencia con ${vendedor}?`}
-          id={vendedor}
-          usuarioId={usuarioId}
+          id={vendedorId}
+          ordenId={ordenId}
           onEnviar={enviarResenaVendedor}
         />
       </div>

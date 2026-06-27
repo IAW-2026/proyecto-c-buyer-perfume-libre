@@ -66,6 +66,7 @@ model Direccion {
 model OrdenCompra {
   id         String            @id @default(cuid())
   usuarioId  String
+  vendedorId String           
   pagoId     String?            @unique
   envioId    String?           @unique
   estado     String

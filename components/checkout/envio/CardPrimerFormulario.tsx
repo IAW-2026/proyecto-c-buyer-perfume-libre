@@ -6,17 +6,22 @@ import FormularioDireccion from "./FormularioDireccion";
 import { useRouter } from "next/navigation";
 
 export default function CardFormulario({
-  productoId,
+  items,
+  directo,
 }: {
-  productoId?: string;
+  items?: string;
+  directo?: string;
 }) {
   const router = useRouter();
 
   const handleGuardadoExitoso = (idDireccion?: string) => {
     if (idDireccion) {
-      router.push(
-        `/checkout/metodo-envio?direccionId=${idDireccion}${productoId ? `&productoId=${productoId}` : ""}`,
-      );
+      const queryParams = new URLSearchParams();
+      queryParams.set("direccionId", idDireccion);
+      if (items) queryParams.set("items", items);
+      if (directo) queryParams.set("directo", directo);
+
+      router.push(`/checkout/metodo-envio?${queryParams.toString()}`);
     } else {
       router.push("/checkout/envio");
     }

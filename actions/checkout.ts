@@ -1,6 +1,6 @@
 "use server";
 
-import { obtenerPreciosDeProductos } from "@/lib/api";
+import { fetchProductoDesdeSeller, obtenerPreciosDeProductos } from "@/lib/api";
 import { OpcionEnvio } from "@/lib/mockEnvios";
 import { prisma } from "@/lib/prisma";
 import { EstadosOrden } from "@/schema/perfume.schema";
@@ -10,21 +10,31 @@ import { redirect } from "next/navigation";
 export async function iniciarProcesamientoCompra(
   direccionId: string,
   datosEnvio: OpcionEnvio,
-  productoId?: string,
+  productosIds: string[],
+  esCompraDirecta: boolean,
 ) {
   const { userId } = await auth();
   if (!userId) throw new Error("No autorizado");
 
+  if (!productosIds || productosIds.length === 0) {
+    throw new Error("No hay productos seleccionados para comprar");
+  }
+
   let itemsAProcesar: { productoId: string; cantidad: number }[] = [];
 
-  if (productoId) {
-    itemsAProcesar = [{ productoId, cantidad: 1 }];
+  if (esCompraDirecta) {
+    itemsAProcesar = [{ productoId: productosIds[0], cantidad: 1 }];
   } else {
     const itemsCarrito = await prisma.carrito.findMany({
-      where: { usuarioId: userId },
+      where: {
+        usuarioId: userId,
+        productoId: { in: productosIds },
+      },
     });
 
-    if (itemsCarrito.length === 0) throw new Error("El carrito está vacío");
+    if (itemsCarrito.length === 0) {
+      throw new Error("Los productos seleccionados ya no están en el carrito");
+    }
 
     itemsAProcesar = itemsCarrito.map((item) => ({
       productoId: item.productoId,
@@ -43,14 +53,32 @@ export async function iniciarProcesamientoCompra(
       return acc + obtenerPrecio(item.productoId) * item.cantidad;
     }, 0) + datosEnvio.precio;
 
+  let vendedorId = "vendedor_generico";
+  if (itemsAProcesar.length > 0) {
+    try {
+      const productoData = await fetchProductoDesdeSeller(
+        itemsAProcesar[0].productoId,
+      );
+      if (productoData && productoData.vendedor?.clerk_id) {
+        vendedorId = String(productoData.vendedor.clerk_id);
+      }
+    } catch (error) {
+      console.warn(
+        "No pudimos contactar a Seller App para obtener el vendedor, usando genérico:",
+        error,
+      );
+    }
+  }
+
   const nuevaOrden = await prisma.ordenCompra.create({
     data: {
       usuarioId: userId,
       estado: EstadosOrden.enum.Pendiente,
       costoEnvio: datosEnvio.precio,
+      vendedorId: vendedorId,
       operadorEnvio: datosEnvio.operador,
       servicioEnvio: datosEnvio.tipo_servicio,
-      demoraDias: datosEnvio.demora_en_dias,
+      demoraDias: datosEnvio.demora_dias,
       direccionId: direccionId,
       total: total,
       items: {
@@ -63,8 +91,13 @@ export async function iniciarProcesamientoCompra(
     },
   });
 
-  if (!productoId) {
-    await prisma.carrito.deleteMany({ where: { usuarioId: userId } });
+  if (!esCompraDirecta) {
+    await prisma.carrito.deleteMany({
+      where: {
+        usuarioId: userId,
+        productoId: { in: productosIds },
+      },
+    });
   }
 
   redirect(`/checkout/confirmacion?ordenId=${nuevaOrden.id}`);
@@ -130,7 +163,11 @@ export async function obtenerOrden(idOrden: string) {
 
     if (!orden) throw new Error("Orden no encontrada");
 
-    return orden;
+    const direccion = await prisma.direccion.findUnique({
+      where: { id: orden.direccionId },
+    });
+
+    return { ...orden, direccion };
   } catch (error) {
     throw new Error(`Error al obtener la orden ${error}`);
   }

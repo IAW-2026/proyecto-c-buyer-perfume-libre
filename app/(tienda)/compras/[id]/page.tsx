@@ -16,6 +16,7 @@ import { notFound } from "next/navigation";
 import { obtenerDetallePerfume, obtenerHistorialEnvio } from "@/lib/api";
 import { SeccionResenas } from "@/components/compras/SeccionResenas";
 import { SimuladorEnvio } from "@/components/compras/SelectorEnvio";
+import { auth } from "@clerk/nextjs/server";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -65,8 +66,9 @@ function DetalleCompra({ orden }: { orden: ItemDeOrdenDetallado }) {
           <ArrowLeft className="mr-2 h-3.5 w-3.5" />
           Volver al historial
         </Link>
-
-        <SimuladorEnvio ordenId={orden.ordenCompraId} itemId={orden.idItem} />
+        {process.env.USE_REAL_API !== "true" && (
+          <SimuladorEnvio ordenId={orden.ordenCompraId} itemId={orden.idItem} />
+        )}
       </div>
 
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -109,8 +111,9 @@ function PanelPrincipal({ orden }: { orden: ItemDeOrdenDetallado }) {
           <SeccionResenas
             productoId={orden.productoId}
             nombreProducto={orden.nombreProducto}
+            vendedorId={orden.ordenCompra.vendedorId}
             vendedor={orden.vendedor}
-            usuarioId={orden.ordenCompra.usuarioId}
+            ordenId={orden.ordenCompraId}
           />
         )}
       </div>
@@ -132,7 +135,7 @@ function CardSeguimiento({ orden }: { orden: ItemDeOrdenDetallado }) {
             </CardTitle>
           </div>
           <span className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">
-            TRK: {orden.ordenCompra.envioId}
+            {orden.ordenCompra.envioId}
           </span>
         </div>
       </CardHeader>
@@ -145,42 +148,8 @@ function CardSeguimiento({ orden }: { orden: ItemDeOrdenDetallado }) {
             {orden.ordenCompra.estado}
           </span>
         </div>
-
-        <HistorialEnvio historialEnvio={orden.historialEnvio} />
       </CardContent>
     </Card>
-  );
-}
-
-function HistorialEnvio({
-  historialEnvio,
-}: {
-  historialEnvio: { fecha: string; ubicacion: string }[];
-}) {
-  return (
-    <div className="border-l border-border/80 ml-2 pl-8 space-y-8 relative">
-      {historialEnvio.map((evento, idx) => (
-        <div key={idx} className="relative">
-          <span
-            className={`absolute -left-9.25 top-1 h-2.5 w-2.5 rounded-full ring-4 ring-card ${
-              idx === 0 ? "bg-accent" : "bg-border"
-            }`}
-          />
-          <p
-            className={`text-[14px] leading-none ${
-              idx === 0
-                ? "font-semibold text-foreground"
-                : "font-light text-muted-foreground"
-            }`}
-          >
-            {evento.ubicacion}
-          </p>
-          <p className="text-[11px] text-muted-foreground mt-2 uppercase tracking-wide">
-            {evento.fecha}
-          </p>
-        </div>
-      ))}
-    </div>
   );
 }
 
@@ -316,14 +285,14 @@ async function obtenerItemOrden(
 
   const [productoDetalle, datosEnvio] = await Promise.all([
     obtenerDetallePerfume(ordenDb.productoId),
-    obtenerHistorialEnvio(ordenDb.ordenCompra.estado),
+    obtenerHistorialEnvio(ordenDb.ordenCompra.envioId?.toString() || ""),
   ]);
 
   if (!productoDetalle) {
     return null;
   }
-
-  const estadoValidado = EstadosOrden.parse(datosEnvio.estadoActual);
+  console.log(datosEnvio);
+  const estadoValidado = EstadosOrden.parse(datosEnvio);
   const { id: idItem, ...restoDeOrdenDb } = ordenDb;
 
   return {
