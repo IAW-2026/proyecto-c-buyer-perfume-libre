@@ -13,16 +13,13 @@ import {
 } from "@/schema/perfume.schema";
 import { mockPerfumes } from "./mockPerfumes";
 import { z } from "zod";
-import {
-  obtenerCotizacionesEnvioMock,
-  obtenerHistorialSimulado,
-  OpcionEnvio,
-} from "./mockEnvios";
-import { auth } from "@clerk/nextjs/server";
+import { obtenerCotizacionesEnvioMock } from "./mockEnvios";
 import {
   enviarResenaProductoReal,
   enviarResenaVendedorReal,
 } from "@/actions/resenas";
+import { auth } from "@clerk/nextjs/server";
+import { obtenerHistorialEnvioReal } from "@/actions/tracking";
 
 export interface FiltrosCatalogo {
   q?: string | string[];
@@ -86,7 +83,7 @@ async function obtenerCatalogoReal(
     }
 
     const data = await response.json();
-    console.log(data);
+
     let itemsMapeados: PerfumeCard[] = (data.items || []).map((prod: any) => ({
       id: String(prod.producto_id),
       nombre: prod.titulo,
@@ -252,8 +249,11 @@ async function obtenerDetallePerfumeReal(id: string): Promise<Perfume> {
     }
 
     const dataSeller = await resSeller.json();
+
     const dataProducto = dataSeller.producto;
-    const vendedorId = String(dataSeller.vendedor_id || "Boutique Oficial");
+    const vendedorId = String(
+      dataSeller.producto?.vendedor_id || "Boutique Oficial",
+    );
 
     let calificacionProducto = 0;
     let calificacionVendedor = 0;
@@ -262,7 +262,6 @@ async function obtenerDetallePerfumeReal(id: string): Promise<Perfume> {
       const feedbackBaseUrl =
         process.env.FEEDBACK_API_URL ||
         "https://proyecto-c-feedback2-perfume-libre.vercel.app/api/";
-      console.warn("pidiendo calificacion");
       const [resProducto, resVendedor] = await Promise.allSettled([
         fetch(`${feedbackBaseUrl}/resenas/producto/${id}/resumen`, {
           cache: "no-store",
@@ -271,17 +270,14 @@ async function obtenerDetallePerfumeReal(id: string): Promise<Perfume> {
           cache: "no-store",
         }),
       ]);
-      console.warn("calificacion pedida");
+
       if (resProducto.status === "fulfilled" && resProducto.value.ok) {
-        console.warn("calificacion producto ok");
         const dataProd = await resProducto.value.json();
         calificacionProducto = Number(dataProd.promedio_producto) || 0;
       }
 
       if (resVendedor.status === "fulfilled" && resVendedor.value.ok) {
-        console.warn("calificacion vendedor ok");
         const dataVend = await resVendedor.value.json();
-        console.warn(dataVend);
         calificacionVendedor = Number(dataVend.promedio_vendedor) || 0;
       }
     } catch (errFeedback) {
@@ -637,49 +633,11 @@ async function enviarResenaVendedorMock(
   return { estado: "success", mensaje: "Reseña simulada con éxito" };
 }
 
-export async function obtenerHistorialEnvio(
-  trackingId: string,
-  estadoFallback: string,
-) {
+export async function obtenerHistorialEnvio(trackingId: string) {
   const usarApiReal = process.env.USE_REAL_API === "true";
 
   if (usarApiReal && trackingId) {
-    return obtenerHistorialEnvioReal(trackingId, estadoFallback);
-  } else {
-    return obtenerHistorialSimulado(estadoFallback);
-  }
-}
-
-async function obtenerHistorialEnvioReal(
-  trackingId: string,
-  estadoFallback: string,
-) {
-  try {
-    const shippingBaseUrl =
-      process.env.SHIPPING_API_URL ||
-      "https://proyecto-c-shipping2-perfume-libre.vercel.app/api";
-
-    const response = await fetch(`${shippingBaseUrl}/shipping/${trackingId}`, {
-      method: "GET",
-      cache: "no-store",
-    });
-
-    if (!response.ok) {
-      throw new Error(`Error API Shipping: ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    const estadoReal = data.estado_actual;
-
-    return obtenerHistorialSimulado(estadoReal);
-  } catch (error) {
-    console.error(
-      `⚠️ Error al consultar Shipping App para ${trackingId}, usando fallback:`,
-      error,
-    );
-
-    return obtenerHistorialSimulado(estadoFallback);
+    return obtenerHistorialEnvioReal(trackingId);
   }
 }
 
@@ -850,14 +808,12 @@ async function generarOrdenEnvioReal(
       direccion_entrega: direccion_entrega,
       items: items,
       servicio_elegido: servicio_elegido,
-      usuarioId: id_comprador,
+      usuarioId: "user_3EPf5YLDhCGrt6m1RgRzt6SCU8i",
     };
 
     const shippingBaseUrl =
       process.env.SHIPPING_API_URL ||
       "https://proyecto-c-shipping2-perfume-libre.vercel.app/api";
-
-    console.warn(bodyData);
 
     const response = await fetch(`${shippingBaseUrl}/shipping/ordenes`, {
       method: "POST",
@@ -925,8 +881,6 @@ async function obtenerCotizacionesEnvioReal(
     if (!response.ok) {
       throw new Error(`Error API Shipping al cotizar: ${response.status}`);
     }
-
-    console.log(response);
 
     const data = await response.json();
 

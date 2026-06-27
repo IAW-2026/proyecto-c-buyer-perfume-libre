@@ -11,6 +11,12 @@ export const EstadosOrden = z.enum([
   "Entregado",
   "Cancelado",
   "Rechazado",
+  "CREADO",
+  "PREPARAANDO",
+  "RETIRADO",
+  "ENTREGADO",
+  "NO_ENTREGADO",
+  "CANCELADO",
 ]);
 
 export type EstadoOrdenType = z.infer<typeof EstadosOrden>;
@@ -23,6 +29,12 @@ export const COLOR_ESTADOS: Record<EstadoOrdenType, string> = {
   Entregado: "bg-green-100 text-green-800 hover:bg-green-100",
   Cancelado: "bg-red-100 text-red-800 hover:bg-red-100",
   Rechazado: "bg-red-100 text-red-800 hover:bg-red-100",
+  CREADO: "bg-purple-100 text-purple-800 hover:bg-purple-100",
+  PREPARAANDO: "bg-orange-100 text-orange-800 hover:bg-orange-100",
+  RETIRADO: "bg-indigo-100 text-indigo-800 hover:bg-indigo-100",
+  ENTREGADO: "bg-green-100 text-green-800 hover:bg-green-100",
+  NO_ENTREGADO: "bg-red-100 text-red-800 hover:bg-red-100",
+  CANCELADO: "bg-gray-100 text-gray-800 hover:bg-gray-100",
 };
 
 // TODO: Fix rapido
@@ -195,6 +207,7 @@ export const ItemDeOrdenDetalladoSchema = z.object({
     total: z.number().int().positive(),
     itemsComprados: z.number().int().positive().min(1),
     createdAt: z.date(),
+    vendedorId: z.string(),
   }),
 });
 

@@ -54,15 +54,13 @@ export async function iniciarProcesamientoCompra(
     }, 0) + datosEnvio.precio;
 
   let vendedorId = "vendedor_generico";
-
   if (itemsAProcesar.length > 0) {
     try {
       const productoData = await fetchProductoDesdeSeller(
         itemsAProcesar[0].productoId,
       );
-
-      if (productoData && productoData.vendedor?.vendedor_id) {
-        vendedorId = String(productoData.vendedor.vendedor_id);
+      if (productoData && productoData.vendedor?.clerk_id) {
+        vendedorId = String(productoData.vendedor.clerk_id);
       }
     } catch (error) {
       console.warn(

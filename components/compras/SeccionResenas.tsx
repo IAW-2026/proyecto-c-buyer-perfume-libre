@@ -7,11 +7,13 @@ export function SeccionResenas({
   productoId,
   nombreProducto,
   vendedor,
+  vendedorId,
   ordenId,
 }: {
   productoId: string;
   nombreProducto: string;
   vendedor: string;
+  vendedorId: string;
   ordenId: string;
 }) {
   return (
@@ -31,7 +33,7 @@ export function SeccionResenas({
         <CardResena
           titulo="Atención del vendedor"
           descripcion={`¿Cómo fue tu experiencia con ${vendedor}?`}
-          id={vendedor}
+          id={vendedorId}
           ordenId={ordenId}
           onEnviar={enviarResenaVendedor}
         />
