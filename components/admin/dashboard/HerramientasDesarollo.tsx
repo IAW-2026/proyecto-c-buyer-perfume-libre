@@ -15,7 +15,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { generarDatosPrueba, limpiarDatosPrueba } from "@/actions/admin";
+import { limpiarDatosPrueba } from "@/actions/admin";
 
 export function HerramientasDesarrollo() {
   const [isPending, startTransition] = useTransition();
@@ -23,7 +23,7 @@ export function HerramientasDesarrollo() {
 
   const handleGenerar = () => {
     startTransition(async () => {
-      await generarDatosPrueba();
+      // await generarDatosPrueba();
     });
   };
 
