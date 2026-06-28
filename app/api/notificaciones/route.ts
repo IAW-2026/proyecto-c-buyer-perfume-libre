@@ -1,4 +1,5 @@
 import { actualizarEstadoEnvio } from "@/actions/checkout";
+import { validateApiKey } from "@/lib/api";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
@@ -6,7 +7,9 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { tracking_id, estado, fecha } = body;
 
-    // validarToken(headers); (en la def no estaba header asiq lo respetamos por ahora)
+    if (!validateApiKey(req)) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
 
     if (!tracking_id || !estado) {
       return NextResponse.json(

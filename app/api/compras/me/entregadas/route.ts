@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { fetchProductoDesdeSeller } from "@/lib/api";
+import { fetchProductoDesdeSeller, validateApiKey } from "@/lib/api";
 
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const id_comprador = searchParams.get("id_comprador");
+
+    if (!validateApiKey(req)) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
 
     if (!id_comprador) {
       return NextResponse.json(
