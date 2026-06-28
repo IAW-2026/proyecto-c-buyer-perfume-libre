@@ -935,3 +935,8 @@ export function validarTipo<TSchema extends z.ZodTypeAny>(
 
   return resultado.data;
 }
+
+export function validateApiKey(request: Request): boolean {
+  const apiKey = request.headers.get("api_key");
+  return apiKey === process.env.BUYER_API_KEY;
+}
