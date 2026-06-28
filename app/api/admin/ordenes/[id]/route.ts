@@ -4,14 +4,15 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   if (!validateApiKey(req)) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
 
+  const { id } = await params;
+
   try {
-    const { id } = params;
     const orden = await prisma.ordenCompra.findUnique({
       where: { id },
       include: {
