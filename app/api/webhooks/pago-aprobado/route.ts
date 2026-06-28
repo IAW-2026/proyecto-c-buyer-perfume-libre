@@ -3,7 +3,7 @@ import {
   obtenerOrden,
   vaciarCarrito,
 } from "@/actions/checkout";
-import { generarOrdenEnvio } from "@/lib/api";
+import { generarOrdenEnvio, validateApiKey } from "@/lib/api";
 import { EstadosOrden } from "@/schema/perfume.schema";
 import { NextResponse } from "next/server";
 
@@ -13,6 +13,10 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
+    if (!validateApiKey(req)) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
     const body = await req.json();
     const { id_orden, id_pago, estado } = body;
 
@@ -45,9 +49,4 @@ export async function POST(req: Request) {
       { status: 500 },
     );
   }
-}
-
-function validarToken(headers: Headers) {
-  //TODO: Implementar la lógica para validar el token secreto que esperamos
-  // recibir en los headers de la request. (Aun no lo discutimos)
 }

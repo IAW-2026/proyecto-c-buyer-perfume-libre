@@ -36,7 +36,10 @@ function SimuladorPagosContenido() {
   const simularTransaccion = async (resultado: "aprobado" | "rechazado") => {
     await fetch("/api/webhooks/pago-aprobado", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        api_key: process.env.NEXT_PUBLIC_BUYER_API_KEY as string,
+      },
       body: JSON.stringify({
         id_orden: ordenId,
         id_pago: `pago_mock_${Math.floor(Math.random() * 10000)}`,
