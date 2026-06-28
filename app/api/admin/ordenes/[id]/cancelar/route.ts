@@ -4,15 +4,16 @@ import { NextResponse } from "next/server";
 
 export async function POST(
   req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const { id } = await params;
+  const ordenId = id;
+
   if (!validateApiKey(req)) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
 
   try {
-    const ordenId = params.id;
-
     const orden = await prisma.ordenCompra.findUnique({
       where: { id: ordenId },
     });
