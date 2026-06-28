@@ -4,14 +4,14 @@ import { NextResponse } from "next/server";
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   if (!validateApiKey(req)) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
 
   try {
-    const { id } = params;
+    const { id } = await params;
     const usuario = await prisma.usuario.findUnique({
       where: { id },
       include: {
