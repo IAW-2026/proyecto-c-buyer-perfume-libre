@@ -141,6 +141,7 @@ export async function obtenerItemDeOrden(ordenId: string, itemId: string) {
           createdAt: true,
           costoEnvio: true,
           total: true,
+          vendedorId: true,
         },
       },
     },

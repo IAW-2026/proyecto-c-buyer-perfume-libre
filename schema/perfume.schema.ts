@@ -11,11 +11,34 @@ export const EstadosOrden = z.enum([
   "Entregado",
   "Cancelado",
   "Rechazado",
+  "CREADO",
+  "PREPARAANDO",
+  "RETIRADO",
+  "ENTREGADO",
+  "NO_ENTREGADO",
+  "CANCELADO",
 ]);
 
 export type EstadoOrdenType = z.infer<typeof EstadosOrden>;
 
 export const COLOR_ESTADOS: Record<EstadoOrdenType, string> = {
+  Pendiente: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100",
+  Pagado: "bg-gray-100 text-gray-800 hover:bg-gray-100",
+  "En proceso": "bg-amber-100 text-amber-800 hover:bg-amber-100",
+  Enviado: "bg-blue-100 text-blue-800 hover:bg-blue-100",
+  Entregado: "bg-green-100 text-green-800 hover:bg-green-100",
+  Cancelado: "bg-red-100 text-red-800 hover:bg-red-100",
+  Rechazado: "bg-red-100 text-red-800 hover:bg-red-100",
+  CREADO: "bg-purple-100 text-purple-800 hover:bg-purple-100",
+  PREPARAANDO: "bg-orange-100 text-orange-800 hover:bg-orange-100",
+  RETIRADO: "bg-indigo-100 text-indigo-800 hover:bg-indigo-100",
+  ENTREGADO: "bg-green-100 text-green-800 hover:bg-green-100",
+  NO_ENTREGADO: "bg-red-100 text-red-800 hover:bg-red-100",
+  CANCELADO: "bg-gray-100 text-gray-800 hover:bg-gray-100",
+};
+
+// TODO: Fix rapido
+export const COLOR_ESTADOS_STRING: Record<string, string> = {
   Pendiente: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100",
   Pagado: "bg-gray-100 text-gray-800 hover:bg-gray-100",
   "En proceso": "bg-amber-100 text-amber-800 hover:bg-amber-100",
@@ -39,7 +62,11 @@ export const PerfumeSchema = z.object({
     .array(z.string().url("Debe ser una URL válida"))
     .min(1, "El perfume debe tener al menos una imagen"),
   descripcion: z.string().optional(),
-  calificacion: z // TODO: Esto se deberia eliminar y remplazar por fetch a api de calificaciones
+  calificacionProducto: z
+    .number()
+    .min(0, "La calificación no puede ser menor a 0")
+    .max(5, "La calificación no puede ser mayor a 5"),
+  calificacionVendedor: z
     .number()
     .min(0, "La calificación no puede ser menor a 0")
     .max(5, "La calificación no puede ser mayor a 5"),
@@ -55,6 +82,7 @@ export const PerfumeCardSchema = PerfumeSchema.pick({
   tamaño: true,
   precio: true,
   imagenesUrl: true,
+  calificacionProducto: true,
 }).transform((datos) => ({
   id: datos.id,
   nombre: datos.nombre,
@@ -62,6 +90,7 @@ export const PerfumeCardSchema = PerfumeSchema.pick({
   tamaño: datos.tamaño,
   precio: datos.precio,
   imagenUrl: datos.imagenesUrl[0],
+  calificacion: datos.calificacionProducto,
 }));
 
 // Esquema usado en /favoritos para mostrar los perfumes que el usuario marcó como favoritos
@@ -178,6 +207,7 @@ export const ItemDeOrdenDetalladoSchema = z.object({
     total: z.number().int().positive(),
     itemsComprados: z.number().int().positive().min(1),
     createdAt: z.date(),
+    vendedorId: z.string(),
   }),
 });
 

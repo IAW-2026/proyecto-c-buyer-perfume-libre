@@ -17,13 +17,16 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import FormularioDireccion from "./FormularioDireccion";
+import { cn } from "@/lib/utils";
 
 export default function DireccionesEnvioPanel({
   direcciones,
-  productoId,
+  items,
+  directo,
 }: {
   direcciones: DireccionDb[];
-  productoId?: string;
+  items?: string;
+  directo?: string;
 }) {
   const router = useRouter();
   const [modalAbierto, setModalAbierto] = useState(false);
@@ -60,20 +63,23 @@ export default function DireccionesEnvioPanel({
   const handleContinuarCompra = () => {
     if (!seleccionada) return;
 
-    router.push(
-      `/checkout/metodo-envio?direccionId=${seleccionada}${productoId ? `&productoId=${productoId}` : ""}`,
-    );
+    const queryParams = new URLSearchParams();
+    queryParams.set("direccionId", seleccionada);
+    if (items) queryParams.set("items", items);
+    if (directo) queryParams.set("directo", directo);
+
+    router.push(`/checkout/metodo-envio?${queryParams.toString()}`);
   };
 
   return (
-    <section className="space-y-6">
+    <section className="space-y-6 max-w-4xl mx-auto">
       <InfoOperacion
         pasoActual="Paso 1 de 2"
-        accion="Elegí una dirección de envío"
-        informacion="Seleccioná una dirección guardada o creá una nueva para seguir con el checkout."
+        accion="Dirección de entrega"
+        informacion="Selecciona un domicilio registrado o agrega una nueva ubicación para continuar con el proceso de compra."
       />
 
-      <div className="flex justify-end">
+      <div className="flex justify-end pt-2">
         <ModalDireccionEnvio
           open={modalAbierto}
           onOpenChange={setModalAbierto}
@@ -86,7 +92,7 @@ export default function DireccionesEnvioPanel({
       <RadioGroup
         value={seleccionadoValido}
         onValueChange={setSeleccionada}
-        className="space-y-3"
+        className="space-y-4"
       >
         {direcciones.map((dir) => (
           <DireccionEnvioCard
@@ -100,13 +106,13 @@ export default function DireccionesEnvioPanel({
         ))}
       </RadioGroup>
 
-      <div className="border-t pt-4">
+      <div className="border-t border-border/40 pt-6 mt-8">
         <Button
-          className="h-12 w-full text-lg"
           disabled={!seleccionadoValido || isPending}
           onClick={handleContinuarCompra}
+          className="w-full h-14 text-[13px] uppercase tracking-wider font-bold bg-foreground text-background hover:bg-foreground/90 rounded-sm shadow-md transition-all flex items-center justify-center gap-2"
         >
-          <CheckCircle2 className="mr-2 h-4 w-4" />
+          <CheckCircle2 className="h-4 w-4" />
           Continuar compra
         </Button>
       </div>
@@ -131,19 +137,18 @@ function ModalDireccionEnvio({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <Button
         variant="outline"
-        size="lg"
         onClick={onAbrirCrear}
-        className="rounded-full border-primary/20 bg-primary/5 text-primary hover:bg-primary/10"
+        className="rounded-sm border-border/60 text-[11px] uppercase tracking-[0.08em] font-bold text-foreground hover:bg-secondary h-11 px-5 shadow-2xs transition-all cursor-pointer"
       >
-        <Plus className="mr-2 h-4 w-4" /> Nueva dirección
+        <Plus className="mr-1.5 h-3.5 w-3.5" /> Nueva dirección
       </Button>
 
-      <DialogContent className="max-w-4xl rounded-3xl">
-        <DialogHeader>
-          <DialogTitle>
+      <DialogContent className="w-full max-w-xl! rounded-sm border-border/60 bg-card p-6 md:p-8">
+        <DialogHeader className="mb-4">
+          <DialogTitle className="font-serif text-[24px] font-normal text-foreground">
             {direccionEditando
-              ? "Editar dirección"
-              : "Agregar dirección de envío"}
+              ? "Modificar Dirección"
+              : "Nueva Dirección de Envío"}
           </DialogTitle>
         </DialogHeader>
         <FormularioDireccion
@@ -170,49 +175,59 @@ function DireccionEnvioCard({
 }) {
   return (
     <Card
-      className={
+      className={cn(
+        "rounded-sm transition-all duration-300 shadow-2xs overflow-hidden border",
         seleccionado
-          ? "border-primary/60 bg-primary/5 shadow-sm shadow-primary/10"
-          : "border-border/70 hover:border-primary/30 hover:bg-muted/20"
-      }
+          ? "border-accent bg-accent/5 shadow-xs" // Tono dorado arena ultra sutil cuando está marcado
+          : "border-border/60 hover:border-accent/40 bg-card hover:bg-secondary/10",
+      )}
     >
-      <CardContent className="flex items-center gap-4 p-4 md:p-5">
+      <CardContent className="flex items-center gap-4 p-5 md:px-6">
         <label className="flex min-w-0 grow cursor-pointer items-start gap-4">
-          <RadioGroupItem value={dir.id} id={dir.id} className="mt-1" />
-          <div className="min-w-0 space-y-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="truncate font-semibold text-foreground">
+          <RadioGroupItem
+            value={dir.id}
+            id={dir.id}
+            className="mt-1 border-border/80 focus-visible:ring-accent data-[state=checked]:border-accent data-[state=checked]:text-accent"
+          />
+
+          <div className="min-w-0 space-y-2 flex-1 text-left">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <span className="font-serif text-[17px] font-normal text-foreground leading-none">
                 {dir.nombreDestinatario}
               </span>
               {seleccionado && (
-                <Badge className="rounded-full bg-primary text-primary-foreground">
+                <Badge className="rounded-sm bg-accent text-accent-foreground text-[9px] font-bold uppercase tracking-[0.08em] border-none px-2 py-0.5">
                   Seleccionada
                 </Badge>
               )}
             </div>
 
-            <div className="space-y-1 text-sm text-muted-foreground">
-              <p className="flex items-center gap-2 text-foreground/90">
-                <MapPin className="h-4 w-4 shrink-0 text-primary" />
+            <div className="space-y-1 text-[13px] font-light text-muted-foreground leading-relaxed">
+              <p className="flex items-center gap-2 text-foreground/90 font-medium">
+                <MapPin className="h-3.5 w-3.5 shrink-0 text-accent" />
                 <span className="truncate">
                   {dir.calle} {dir.altura}
                   {dir.pisoDepto && ` · ${dir.pisoDepto}`}
                 </span>
               </p>
               <p>
-                {dir.localidad}, {dir.provincia} · CP {dir.codigoPostal}
+                {dir.localidad}, {dir.provincia}{" "}
+                <span className="mx-1 text-border/60">·</span> CP{" "}
+                {dir.codigoPostal}
               </p>
-              <p>Teléfono: {dir.telefono}</p>
+              <p className="text-[12px] opacity-90 mt-1">
+                Teléfono: {dir.telefono}
+              </p>
             </div>
           </div>
         </label>
 
-        <div className="flex shrink-0 gap-1">
+        <div className="flex shrink-0 gap-1 border-l border-border/40 pl-2 sm:pl-4">
           <Button
             type="button"
             variant="ghost"
             size="icon"
-            className="text-muted-foreground hover:text-primary"
+            className="text-muted-foreground/60 hover:text-foreground hover:bg-transparent h-8 w-8 transition-colors"
             onClick={() => onEdit(dir)}
           >
             <PencilLine className="h-4 w-4" />
@@ -222,7 +237,7 @@ function DireccionEnvioCard({
             type="button"
             variant="ghost"
             size="icon"
-            className="text-muted-foreground hover:text-destructive"
+            className="text-muted-foreground/60 hover:text-destructive hover:bg-transparent h-8 w-8 transition-colors"
             disabled={estaPendiente}
             onClick={() => onDelete(dir.id)}
           >

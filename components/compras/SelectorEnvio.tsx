@@ -2,7 +2,7 @@
 
 import { useTransition } from "react";
 import { Settings2, CheckCircle2 } from "lucide-react";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { simularCambioEstado } from "@/actions/compras";
+import { cn } from "@/lib/utils";
 
 export function SimuladorEnvio({
   ordenId,
@@ -33,40 +34,52 @@ export function SimuladorEnvio({
     <DropdownMenu>
       <DropdownMenuTrigger
         disabled={isPending}
-        className={buttonVariants({
-          variant: "outline",
-          size: "sm",
-          className:
-            "border-slate-300 hover:bg-slate-100 focus:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50",
-        })}
+        className={cn(
+          buttonVariants({ variant: "outline", size: "sm" }),
+          "rounded-sm border-border/60 text-[10px] uppercase tracking-[0.08em] font-bold text-foreground hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-50",
+        )}
       >
-        <Settings2 className="w-4 h-4 mr-2" />
-        {isPending ? "Simulando..." : "Simular Envio"}
+        <Settings2 className="w-3.5 h-3.5 mr-2" />
+        {isPending ? "Simulando..." : "Simular Envío"}
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" className="w-48">
+      <DropdownMenuContent
+        align="end"
+        className="w-48 rounded-sm border-border/60 shadow-md"
+      >
         <DropdownMenuGroup>
-          {" "}
-          <DropdownMenuLabel className="text-xs text-slate-500 uppercase">
+          <DropdownMenuLabel className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold py-2">
             Forzar estado
           </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => handleCambio("Pagado")}>
+          <DropdownMenuSeparator className="bg-border/60" />
+
+          <DropdownMenuItem
+            onClick={() => handleCambio("Pagado")}
+            className="text-[12px] focus:bg-secondary focus:text-accent cursor-pointer"
+          >
             Simular: Pagado
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleCambio("En proceso")}>
+          <DropdownMenuItem
+            onClick={() => handleCambio("En proceso")}
+            className="text-[12px] focus:bg-secondary focus:text-accent cursor-pointer"
+          >
             Simular: En proceso
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleCambio("Enviado")}>
+          <DropdownMenuItem
+            onClick={() => handleCambio("Enviado")}
+            className="text-[12px] focus:bg-secondary focus:text-accent cursor-pointer"
+          >
             Simular: Enviado
           </DropdownMenuItem>
-        </DropdownMenuGroup>{" "}
-        <DropdownMenuSeparator />
+        </DropdownMenuGroup>
+
+        <DropdownMenuSeparator className="bg-border/60" />
+
         <DropdownMenuItem
           onClick={() => handleCambio("Entregado")}
-          className="text-green-600 focus:text-green-700 focus:bg-green-50"
+          className="text-[12px] text-foreground font-medium focus:text-accent focus:bg-secondary cursor-pointer"
         >
-          <CheckCircle2 className="w-4 h-4 mr-2" />
+          <CheckCircle2 className="w-3.5 h-3.5 mr-2 text-accent" />
           Simular: Entregado
         </DropdownMenuItem>
       </DropdownMenuContent>

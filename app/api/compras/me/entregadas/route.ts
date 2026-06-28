@@ -42,8 +42,10 @@ export async function GET(req: Request) {
                 );
                 return {
                   id_producto: item.productoId,
-                  nombre_producto: prodSeller.titulo || "Perfume Premium",
-                  imagen: prodSeller.imagen || "/placeholder-perfume.jpg",
+                  nombre_producto:
+                    prodSeller.producto.titulo || "Perfume Premium",
+                  imagen:
+                    prodSeller.producto.imagen || "/placeholder-perfume.jpg",
                 };
               } catch (errSeller) {
                 console.warn(

@@ -1,38 +1,40 @@
 "use client";
 
-import { CardResena } from "./CardResena";
 import { enviarResenaProducto, enviarResenaVendedor } from "@/lib/api";
+import CardResena from "./CardResena";
 
 export function SeccionResenas({
   productoId,
   nombreProducto,
   vendedor,
-  usuarioId,
+  vendedorId,
+  ordenId,
 }: {
   productoId: string;
   nombreProducto: string;
   vendedor: string;
-  usuarioId: string;
+  vendedorId: string;
+  ordenId: string;
 }) {
   return (
-    <div className="mt-8">
-      <h3 className="text-lg font-bold text-slate-900 mb-4">Dejá tu opinión</h3>
-      <div className="grid grid-rows-1 md:grid-rows-2 gap-6">
+    <div className="mt-12 pt-8 border-t border-border/60">
+      <h3 className="font-serif text-[26px] text-foreground mb-6">
+        Dejá tu opinión
+      </h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <CardResena
-          titulo="Calificá el producto"
-          descripcion={`¿Qué te pareció la fragancia de ${nombreProducto}?`}
-          colorEstrellas="fill-amber-400 text-amber-400"
+          titulo="Calificá la fragancia"
+          descripcion={`¿Qué te pareció ${nombreProducto}?`}
           id={productoId}
-          usuarioId={usuarioId}
+          ordenId={ordenId}
           onEnviar={enviarResenaProducto}
         />
 
         <CardResena
           titulo="Atención del vendedor"
-          descripcion={`¿Cómo fue tu experiencia comprándole a ${vendedor}?`}
-          colorEstrellas="fill-blue-500 text-blue-500"
-          id={vendedor}
-          usuarioId={usuarioId}
+          descripcion={`¿Cómo fue tu experiencia con ${vendedor}?`}
+          id={vendedorId}
+          ordenId={ordenId}
           onEnviar={enviarResenaVendedor}
         />
       </div>

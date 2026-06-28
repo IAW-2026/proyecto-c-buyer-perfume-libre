@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatearPrecio, generarUrl } from "@/lib/utils";
 import { PerfumeCard } from "@/schema/perfume.schema";
-import { BotonAgregarCarrito } from "../carrito/botonAgregarCarrito";
+import CalificacionEstrellas from "../calificacionEstrellas";
 
 export default function ProductCard({
   id,
@@ -12,13 +12,14 @@ export default function ProductCard({
   precio,
   tamaño,
   imagenUrl,
+  calificacion,
 }: PerfumeCard) {
   const slug = generarUrl(nombre, id);
   const urlDetalle = `/producto/${slug}`;
 
   return (
-    <Link href={urlDetalle} className="block h-full">
-      <Card className="group flex h-full w-full flex-col overflow-hidden border border-border/70 bg-card p-0 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md">
+    <Link href={urlDetalle} className="block h-full outline-none">
+      <Card className="group flex h-full w-full flex-col overflow-hidden border border-border bg-card p-0 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(28,21,16,0.13)]">
         <ProductCardImagen imagenUrl={imagenUrl} nombre={nombre} />
 
         <ProductCardContenido
@@ -27,6 +28,7 @@ export default function ProductCard({
           nombre={nombre}
           tamaño={tamaño}
           precio={precio}
+          calificacion={calificacion}
         />
       </Card>
     </Link>
@@ -41,7 +43,7 @@ function ProductCardImagen({
   nombre: string;
 }) {
   return (
-    <div className="relative aspect-square overflow-hidden bg-muted/5">
+    <div className="relative aspect-3/4 overflow-hidden bg-secondary">
       <Image
         src={imagenUrl}
         alt={`Perfume ${nombre}`}
@@ -54,35 +56,33 @@ function ProductCardImagen({
 }
 
 function ProductCardContenido({
-  id,
   marca,
   nombre,
-  tamaño,
   precio,
-}: Pick<PerfumeCard, "id" | "marca" | "nombre" | "tamaño" | "precio">) {
+  calificacion,
+}: Pick<
+  PerfumeCard,
+  "id" | "marca" | "nombre" | "tamaño" | "precio" | "calificacion"
+>) {
   return (
-    <CardContent className="flex flex-1 flex-col gap-0.5 p-4 pt-3">
-      <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80">
+    <CardContent className="flex flex-1 flex-col p-4.5">
+      <span className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
         {marca}
       </span>
-      <h3 className="line-clamp-2 text-sm font-medium leading-snug text-foreground/90 transition-colors group-hover:text-primary">
+
+      <h3 className="mb-2 text-[16px] font-medium leading-[1.3] tracking-[-0.01em] text-foreground">
         {nombre}
       </h3>
-      <span className="text-xs text-muted-foreground">{`${tamaño} ml`}</span>
 
-      <div className="mt-auto pt-4">
-        <div className="flex flex-col gap-3">
-          <div className="flex flex-col">
-            <span className="text-2xl font-bold tracking-tight text-foreground">
-              {formatearPrecio(precio)}
-            </span>
-          </div>
+      <div className="mb-2.5 flex items-center gap-1.5">
+        <CalificacionEstrellas rating={calificacion} />
+      </div>
 
-          <BotonAgregarCarrito
-            perfumeId={id}
-            className="w-full font-semibold shadow-sm"
-            size="sm"
-          />
+      <div className="mt-auto pt-1">
+        <div className="flex flex-col">
+          <span className="text-[19px] font-semibold tracking-[-0.02em] text-foreground">
+            {formatearPrecio(precio)}
+          </span>
         </div>
       </div>
     </CardContent>

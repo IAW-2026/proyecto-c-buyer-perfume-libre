@@ -2,45 +2,52 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function ProductCardSkeleton() {
   return (
-    <Skeleton className="flex h-full w-full flex-col overflow-hidden rounded-lg border shadow-sm">
-      {/* Area de imagen */}
-      <div className="aspect-square w-full border-b bg-transparent" />
-
-      {/* Area del contenido */}
-      <div className="flex flex-1 flex-col gap-0.5 p-4 pt-3">
-        {/* Placeholder de Marca */}
-        <div className="h-3 w-1/4 rounded bg-black/5" />
-
-        {/* Placeholder de Nombre */}
-        <div className="mt-1 flex flex-col gap-1.5">
-          <div className="h-4 w-full rounded bg-black/5" />
+    <div className="block h-full w-full">
+      <div className="flex h-full w-full flex-col overflow-hidden border border-border bg-card p-0 shadow-xs">
+        {/* 1. ÁREA DE IMAGEN */}
+        <div className="relative aspect-3/4 w-full overflow-hidden bg-secondary/20 shrink-0">
+          <Skeleton className="h-full w-full rounded-none bg-secondary/40" />
         </div>
+        <div className="flex flex-1 flex-col p-4">
+          {/* Placeholder de la Marca */}
+          <div className="mb-2 shrink-0">
+            <Skeleton className="h-3 w-1/3 bg-secondary/50 rounded-sm" />
+          </div>
 
-        {/* Placeholder de Tamaño */}
-        <div className="mt-1 h-3 w-1/3 rounded bg-black/5" />
+          {/* Placeholder del Nombre del Perfume */}
+          <div className="mb-3 flex-1">
+            <Skeleton className="h-4 w-5/6 bg-secondary/60 rounded-sm" />
+            <Skeleton className="mt-1.5 h-4 w-1/2 bg-secondary/30 rounded-sm" />
+          </div>
 
-        {/* PRECIO Y BOTÓN*/}
-        <div className="mt-auto pt-4">
-          <div className="flex flex-col gap-3">
-            <div className="flex flex-col gap-1.5">
-              {/* Placeholder de Precio */}
-              <div className="h-8 w-1/2 rounded bg-black/5" />
+          <div className="mt-auto space-y-2 pt-2 shrink-0">
+            {/* Tamaño */}
+            <Skeleton className="h-3 w-1/4 bg-secondary/40 rounded-sm" />
+
+            {/* Precio */}
+            <div className="pt-1">
+              <Skeleton className="h-5 w-5/12 bg-secondary/70 rounded-sm" />
             </div>
-            {/* Placeholder de botón */}
-            <div className="h-9 w-full rounded bg-black/5" />
           </div>
         </div>
       </div>
-    </Skeleton>
+    </div>
   );
 }
 
 export default function ProductGridSkeleton() {
   return (
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-      {Array.from({ length: 9 }).map((_, i) => (
-        <ProductCardSkeleton key={i} />
-      ))}
+    <div className="w-full min-w-0 space-y-10">
+      <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 lg:gap-x-6">
+        {Array.from({ length: 15 }).map((_, i) => (
+          <ProductCardSkeleton key={i} />
+        ))}
+      </div>
+
+      {/* Placeholder del Paginador */}
+      <div className="flex justify-center border-t border-border pt-8">
+        <Skeleton className="h-10 w-64 rounded-sm bg-secondary/40" />
+      </div>
     </div>
   );
 }
