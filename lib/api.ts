@@ -87,7 +87,7 @@ async function obtenerCatalogoReal(
     let itemsMapeados: PerfumeCard[] = (data.items || []).map((prod: any) => ({
       id: String(prod.producto_id),
       nombre: prod.titulo,
-      precio: Math.round(Number(prod.precio)),
+      precio: Math.round(Number(prod.precio)) * 100,
       imagenUrl: prod.imagen || "/placeholder-perfume.jpg",
       marca: prod.titulo.split(" ")[0] || "Marca Desconocida",
       tamaño: 100,
@@ -361,7 +361,7 @@ async function obtenerProductosFavoritosReal(
           id: String(item.producto_id),
           nombre: item.titulo,
           marca: item.titulo.split(" ")[0] || "Marca Premium",
-          precio: Math.round(Number(item.precio)) || 0,
+          precio: Math.round(Number(item.precio)) * 100 || 0,
           imagenesUrl: [item.imagen || "/placeholder-perfume.jpg"],
         };
       })
@@ -428,7 +428,7 @@ async function obtenerProductosCarritoReal(
           nombre: item.titulo,
           vendedor: String(vendedor.nombre || "N/A"),
           marca: item.titulo.split(" ")[0] || "Marca Premium",
-          precio: Math.round(Number(item.precio)),
+          precio: Math.round(Number(item.precio)) * 100 || 0,
           imagenesUrl: [item.imagen || "/placeholder-perfume.jpg"],
         };
       })
@@ -671,7 +671,7 @@ async function obtenerPreciosDeProductosReal(ids: string[]) {
       .filter((prod) => prod !== null)
       .map((prod) => ({
         id: String(prod.producto.producto_id),
-        precio: Math.round(Number(prod.producto.precio)),
+        precio: Math.round(Number(prod.producto.precio)) * 100,
       }));
 
     return preciosMapeados;
@@ -754,9 +754,6 @@ async function obtenerDetallesProductosMock(ids: string[]) {
     }));
 }
 
-// ====================================
-// ESTOY AQUI
-// ====================================
 export async function generarOrdenEnvio(
   id_orden: string,
   id_comprador: string,

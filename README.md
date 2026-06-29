@@ -32,6 +32,11 @@ Para la evaluación del sistema, se crearon las siguientes cuentas de prueba de 
 4. **Modificación de Roles Dinámica (Backdoor):** Si ya inició sesión con cualquier cuenta y desea alterar su rol manualmente, visite:
    - Hacerse Administrador: `/api/roles/actualizar?secret=IAW&rol=ADMIN`
    - Volver a ser Usuario Normal: `/api/roles/actualizar?secret=IAW&rol=USER`
+5. **Sembrado de datos**
+   para simular datos de pruebas se utiliza el siguiente script:
+   `npx prisma db seed`
+   si se quiere especificar la cantidad de usuarios y/o ordenes a crear utilizar el siguiente comando:
+   `npx prisma db seed -- --usuarios=x --ordenes=y`
 
 ---
 
