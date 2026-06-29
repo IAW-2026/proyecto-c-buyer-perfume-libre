@@ -154,7 +154,6 @@ async function obtenerCatalogoMock(
   const { q, marca, genero, tamano, precioMin, precioMax, page, limit } =
     filtros;
 
-  // Filtrado simulado, en etapa 3 esto lo hará la API.
   let resultado = [...mockPerfumes];
 
   if (q && typeof q === "string") {
@@ -292,7 +291,7 @@ async function obtenerDetallePerfumeReal(id: string): Promise<Perfume> {
       nombre: dataProducto.titulo,
       marca: dataProducto.titulo.split(" ")[0] || "Marca Desconocida",
       tamaño: 100,
-      precio: Math.round(Number(dataProducto.precio)) || 0,
+      precio: Math.round(Number(dataProducto.precio) * 100) || 0,
       imagenesUrl: [dataProducto.imagen || "/placeholder-perfume.jpg"],
       descripcion: dataProducto.descripcion || "Sin descripción disponible.",
       calificacionProducto: calificacionProducto,
