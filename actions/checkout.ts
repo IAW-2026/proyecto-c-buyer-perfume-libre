@@ -51,7 +51,8 @@ export async function iniciarProcesamientoCompra(
   const total =
     itemsAProcesar.reduce((acc, item) => {
       return acc + obtenerPrecio(item.productoId) * item.cantidad;
-    }, 0) + datosEnvio.precio;
+    }, 0) +
+    datosEnvio.precio * 100;
 
   let vendedorId = "vendedor_generico";
   if (itemsAProcesar.length > 0) {
@@ -74,7 +75,7 @@ export async function iniciarProcesamientoCompra(
     data: {
       usuarioId: userId,
       estado: EstadosOrden.enum.Pendiente,
-      costoEnvio: datosEnvio.precio,
+      costoEnvio: datosEnvio.precio * 100,
       vendedorId: vendedorId,
       operadorEnvio: datosEnvio.operador,
       servicioEnvio: datosEnvio.tipo_servicio,

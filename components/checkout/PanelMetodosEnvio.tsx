@@ -91,7 +91,7 @@ export default function PanelMetodosEnvio({
 
               <div className="text-right">
                 <span className="text-[18px] font-semibold tracking-[-0.02em] text-foreground">
-                  {formatearPrecio(opcion.precio)}
+                  {formatearPrecio(opcion.precio * 100)}
                 </span>
               </div>
             </label>

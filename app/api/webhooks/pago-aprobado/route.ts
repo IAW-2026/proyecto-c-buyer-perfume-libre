@@ -34,7 +34,7 @@ export async function POST(req: Request) {
       orden.items,
       {
         operador: orden.operadorEnvio,
-        precio: orden.costoEnvio,
+        precio: orden.costoEnvio / 100,
         tipo_servicio: orden.servicioEnvio,
         demora_dias: orden.demoraDias,
       },
