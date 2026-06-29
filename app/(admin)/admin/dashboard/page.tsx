@@ -21,6 +21,8 @@ export const metadata = {
 export default async function AdminDashboardPage() {
   const datos = await obtenerAdminPageData();
 
+  const produccion = process.env.USE_REAL_API === "true";
+
   if (!datos) {
     redirect("/");
   }
@@ -38,8 +40,7 @@ export default async function AdminDashboardPage() {
             Monitoreo global de transacciones, estados de envío e integraciones.
           </p>
         </div>
-
-        <HerramientasDesarrollo />
+        {!produccion && <HerramientasDesarrollo />}
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
