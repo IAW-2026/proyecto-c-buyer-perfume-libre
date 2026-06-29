@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 
 export async function GET(request: Request) {
   try {
@@ -7,7 +7,7 @@ export async function GET(request: Request) {
     const daysParam = searchParams.get("days") || "90";
     const days = parseInt(daysParam, 10);
     
-    let dateFilter = {};
+    let dateFilter: any = {};
     if (days > 0) {
       const pastDate = new Date();
       pastDate.setDate(pastDate.getDate() - days);
