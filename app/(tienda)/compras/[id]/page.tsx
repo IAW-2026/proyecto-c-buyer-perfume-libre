@@ -107,7 +107,8 @@ function PanelPrincipal({ orden }: { orden: ItemDeOrdenDetallado }) {
 
         <ResumenProductoComprado orden={orden} />
 
-        {orden.ordenCompra.estado === "Entregado" && (
+        {(orden.ordenCompra.estado === "Entregado" ||
+          orden.ordenCompra.estado === "ENTREGADO") && (
           <SeccionResenas
             productoId={orden.productoId}
             nombreProducto={orden.nombreProducto}
