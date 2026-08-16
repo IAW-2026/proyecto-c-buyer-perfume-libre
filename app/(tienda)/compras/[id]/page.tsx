@@ -5,7 +5,7 @@ import {
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { cn, formatearPrecio } from "@/lib/utils";
+import { cn, formatearPrecio, obtenerLabelEstado } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -350,13 +350,4 @@ async function obtenerItemOrden(
     marca: productoDetalle.marca,
     tamaño: productoDetalle.tamaño,
   };
-}
-
-function obtenerLabelEstado(estado: EstadoOrdenType) {
-  if (estado === EstadosOrden.enum.PENDIENTE) return "Pendiente de Pago";
-  if (estado === EstadosOrden.enum.PAGADO) return "Pagado";
-  if (estado === EstadosOrden.enum.PREPARANDO) return "En Preparación";
-  if (estado === EstadosOrden.enum.EN_TRANSITO) return "En Camino";
-  if (estado === EstadosOrden.enum.ENTREGADO) return "Entregado";
-  if (estado === EstadosOrden.enum.CANCELADO) return "Cancelado / Reembolsado";
 }
