@@ -22,8 +22,8 @@ export async function POST(req: Request) {
 
     const nuevoEstadoOrden =
       estado === "aprobado"
-        ? EstadosOrden.enum.Pagado
-        : EstadosOrden.enum.Rechazado;
+        ? EstadosOrden.enum.PAGADO
+        : EstadosOrden.enum.CANCELADO;
 
     const orden = await obtenerOrden(id_orden);
 

@@ -2,45 +2,30 @@ import { z } from "zod";
 
 // TODO: Separar en varios esquemas según el uso que se le de.
 
-// TODO: Ajustar estados segun lo que se maneje en shipping app
 export const EstadosOrden = z.enum([
-  "Pendiente",
-  "Pagado",
-  "En proceso",
-  "Enviado",
-  "Entregado",
-  "Cancelado",
-  "Rechazado",
-  "CREADO",
-  "PREPARAANDO",
-  "RETIRADO",
+  "PENDIENTE",
+  "PAGADO",
+  "PREPARANDO",
+  "EN_TRANSITO",
   "ENTREGADO",
-  "NO_ENTREGADO",
   "CANCELADO",
 ]);
 
 export type EstadoOrdenType = z.infer<typeof EstadosOrden>;
 
 export const COLOR_ESTADOS: Record<EstadoOrdenType, string> = {
-  Pendiente: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100",
-  Pagado: "bg-gray-100 text-gray-800 hover:bg-gray-100",
-  "En proceso": "bg-amber-100 text-amber-800 hover:bg-amber-100",
-  Enviado: "bg-blue-100 text-blue-800 hover:bg-blue-100",
-  Entregado: "bg-green-100 text-green-800 hover:bg-green-100",
-  Cancelado: "bg-red-100 text-red-800 hover:bg-red-100",
-  Rechazado: "bg-red-100 text-red-800 hover:bg-red-100",
-  CREADO: "bg-purple-100 text-purple-800 hover:bg-purple-100",
-  PREPARAANDO: "bg-orange-100 text-orange-800 hover:bg-orange-100",
-  RETIRADO: "bg-indigo-100 text-indigo-800 hover:bg-indigo-100",
+  PENDIENTE: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100",
+  PAGADO: "bg-gray-100 text-gray-800 hover:bg-gray-100",
+  PREPARANDO: "bg-amber-100 text-amber-800 hover:bg-amber-100",
+  EN_TRANSITO: "bg-blue-100 text-blue-800 hover:bg-blue-100",
   ENTREGADO: "bg-green-100 text-green-800 hover:bg-green-100",
-  NO_ENTREGADO: "bg-red-100 text-red-800 hover:bg-red-100",
-  CANCELADO: "bg-gray-100 text-gray-800 hover:bg-gray-100",
+  CANCELADO: "bg-red-100 text-red-800 hover:bg-red-100",
 };
 
 // TODO: Fix rapido
 export const COLOR_ESTADOS_STRING: Record<string, string> = {
-  Pendiente: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100",
-  Pagado: "bg-gray-100 text-gray-800 hover:bg-gray-100",
+  PENDIENTE: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100",
+  PAGADO: "bg-gray-100 text-gray-800 hover:bg-gray-100",
   "En proceso": "bg-amber-100 text-amber-800 hover:bg-amber-100",
   Enviado: "bg-blue-100 text-blue-800 hover:bg-blue-100",
   Entregado: "bg-green-100 text-green-800 hover:bg-green-100",

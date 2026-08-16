@@ -12,6 +12,16 @@ enum RolUsuario {
   ADMIN
 }
 
+enum EstadoOrden {
+  PENDIENTE
+  PAGADO
+  PREPARANDO
+  EN_TRANSITO
+  ENTREGADO
+  CANCELADO
+}
+
+
 /// * Tanto el id de los productos, direcciones, pagos y envíos se obtienen de las APIs 
 /// * correspondientes por lo que no es necesario crear modelos adicionales para ellos.
 model Usuario {
@@ -69,7 +79,7 @@ model OrdenCompra {
   vendedorId String           
   pagoId     String?            @unique
   envioId    String?           @unique
-  estado     String
+  estado     EstadoOrden
   total      Int
   createdAt  DateTime          @default(now())
   updatedAt  DateTime          @updatedAt

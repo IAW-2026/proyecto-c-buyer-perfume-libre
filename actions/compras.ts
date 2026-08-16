@@ -19,7 +19,7 @@ export async function obtenerComprasDelUsuario() {
         usuarioId: userId,
         estado: {
           not: {
-            in: [EstadosOrden.enum.Pendiente, EstadosOrden.enum.Rechazado],
+            in: [EstadosOrden.enum.PENDIENTE, EstadosOrden.enum.CANCELADO],
           },
         },
       },
@@ -174,14 +174,6 @@ export async function simularCambioEstado(
   itemId: string,
   nuevoEstado: string,
 ) {
-  console.log(
-    "Se entro a simular cambio con: " +
-      ordenId +
-      " - " +
-      itemId +
-      " - " +
-      nuevoEstado,
-  );
   await prisma.ordenCompra.update({
     where: { id: ordenId },
     data: { estado: nuevoEstado },

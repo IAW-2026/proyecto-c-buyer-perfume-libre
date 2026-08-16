@@ -74,7 +74,7 @@ export async function iniciarProcesamientoCompra(
   const nuevaOrden = await prisma.ordenCompra.create({
     data: {
       usuarioId: userId,
-      estado: EstadosOrden.enum.Pendiente,
+      estado: EstadosOrden.enum.PENDIENTE,
       costoEnvio: datosEnvio.precio * 100,
       vendedorId: vendedorId,
       operadorEnvio: datosEnvio.operador,
