@@ -23,6 +23,8 @@ import {
 } from "@/actions/resenas";
 import { obtenerHistorialEnvioReal } from "@/actions/tracking";
 
+// TODO: Refactorizar este archivo
+
 export interface FiltrosCatalogo {
   q?: string | string[];
   marca?: string | string[];
