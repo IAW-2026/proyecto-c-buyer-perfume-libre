@@ -38,11 +38,11 @@ export async function generateMetadata({
 
   try {
     const orden = await obtenerOrdenDeUsuario(ordenId, [
-      EstadosOrden.enum.Pagado,
-      EstadosOrden.enum.Rechazado,
+      EstadosOrden.enum.PAGADO,
+      EstadosOrden.enum.CANCELADO,
     ]);
 
-    const esExitoso = status === "success" && orden.estado === "Pagado";
+    const esExitoso = status === "success" && orden.estado === "PAGADO";
 
     return {
       title: esExitoso
@@ -70,14 +70,14 @@ export default async function CheckoutResultadoPage({ searchParams }: Props) {
   let orden;
   try {
     orden = await obtenerOrdenDeUsuario(ordenId, [
-      EstadosOrden.enum.Pagado,
-      EstadosOrden.enum.Rechazado,
+      EstadosOrden.enum.PENDIENTE,
+      EstadosOrden.enum.CANCELADO,
     ]);
   } catch {
     redirect("/carrito");
   }
 
-  const esExitoso = status === "success" && orden.estado === "Pagado";
+  const esExitoso = status === "success" && orden.estado === "PAGADO";
 
   return (
     <div className="w-full bg-background flex flex-1 items-center justify-center p-4">

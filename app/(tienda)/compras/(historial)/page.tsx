@@ -16,7 +16,7 @@ import {
 import z from "zod";
 import { obtenerComprasDelUsuario } from "@/actions/compras";
 import { es } from "date-fns/locale";
-import { cn } from "@/lib/utils";
+import { cn, obtenerLabelEstado } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -147,7 +147,7 @@ function HeaderCompra({
             )}
             variant="secondary"
           >
-            {estado}
+            {obtenerLabelEstado(estado)}
           </Badge>
         </div>
       </div>

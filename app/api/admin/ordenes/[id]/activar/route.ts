@@ -27,7 +27,7 @@ export async function POST(
 
     await prisma.ordenCompra.update({
       where: { id: ordenId },
-      data: { estado: "Pagado" },
+      data: { estado: "PAGADO" },
     });
 
     return NextResponse.json([

@@ -54,19 +54,19 @@ export function SimuladorEnvio({
           <DropdownMenuSeparator className="bg-border/60" />
 
           <DropdownMenuItem
-            onClick={() => handleCambio("Pagado")}
+            onClick={() => handleCambio("PAGADO")}
             className="text-[12px] focus:bg-secondary focus:text-accent cursor-pointer"
           >
             Simular: Pagado
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => handleCambio("En proceso")}
+            onClick={() => handleCambio("PREPARANDO")}
             className="text-[12px] focus:bg-secondary focus:text-accent cursor-pointer"
           >
             Simular: En proceso
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => handleCambio("Enviado")}
+            onClick={() => handleCambio("EN_TRANSITO")}
             className="text-[12px] focus:bg-secondary focus:text-accent cursor-pointer"
           >
             Simular: Enviado
@@ -76,7 +76,7 @@ export function SimuladorEnvio({
         <DropdownMenuSeparator className="bg-border/60" />
 
         <DropdownMenuItem
-          onClick={() => handleCambio("Entregado")}
+          onClick={() => handleCambio("ENTREGADO")}
           className="text-[12px] text-foreground font-medium focus:text-accent focus:bg-secondary cursor-pointer"
         >
           <CheckCircle2 className="w-3.5 h-3.5 mr-2 text-accent" />

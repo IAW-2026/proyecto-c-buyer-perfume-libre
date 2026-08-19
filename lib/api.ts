@@ -13,13 +13,17 @@ import {
 } from "@/schema/perfume.schema";
 import { mockPerfumes } from "./mockPerfumes";
 import { z } from "zod";
-import { obtenerCotizacionesEnvioMock } from "./mockEnvios";
+import {
+  obtenerCotizacionesEnvioMock,
+  obtenerHistorialSimulado,
+} from "./mockEnvios";
 import {
   enviarResenaProductoReal,
   enviarResenaVendedorReal,
 } from "@/actions/resenas";
-import { auth } from "@clerk/nextjs/server";
 import { obtenerHistorialEnvioReal } from "@/actions/tracking";
+
+// TODO: Refactorizar este archivo
 
 export interface FiltrosCatalogo {
   q?: string | string[];
@@ -632,11 +636,16 @@ async function enviarResenaVendedorMock(
   return { estado: "success", mensaje: "Reseña simulada con éxito" };
 }
 
-export async function obtenerHistorialEnvio(trackingId: string) {
+export async function obtenerHistorialEnvio(
+  trackingId: string,
+  estado?: string,
+) {
   const usarApiReal = process.env.USE_REAL_API === "true";
 
   if (usarApiReal && trackingId) {
     return obtenerHistorialEnvioReal(trackingId);
+  } else {
+    return obtenerHistorialSimulado(estado || "PAGADO");
   }
 }
 
@@ -760,7 +769,8 @@ export async function generarOrdenEnvio(
   items: any[],
   servicio_elegido: any,
 ) {
-  const usarApiReal = true;
+  const usarApiReal = process.env.USE_REAL_API === "true";
+
   if (usarApiReal) {
     return generarOrdenEnvioReal(
       id_orden,

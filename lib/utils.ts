@@ -1,4 +1,8 @@
-import { itemsDeOrdenDb } from "@/schema/perfume.schema";
+import {
+  EstadoOrdenType,
+  EstadosOrden,
+  itemsDeOrdenDb,
+} from "@/schema/perfume.schema";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -43,4 +47,13 @@ export function pesosACentavos(valorPesos: string | number): number {
 
 export function centavosAPesos(centavos: number): number {
   return centavos / 100;
+}
+
+export function obtenerLabelEstado(estado: EstadoOrdenType) {
+  if (estado === EstadosOrden.enum.PENDIENTE) return "Pendiente de Pago";
+  if (estado === EstadosOrden.enum.PAGADO) return "Pagado";
+  if (estado === EstadosOrden.enum.PREPARANDO) return "En Preparación";
+  if (estado === EstadosOrden.enum.EN_TRANSITO) return "En Camino";
+  if (estado === EstadosOrden.enum.ENTREGADO) return "Entregado";
+  if (estado === EstadosOrden.enum.CANCELADO) return "Cancelado / Reembolsado";
 }

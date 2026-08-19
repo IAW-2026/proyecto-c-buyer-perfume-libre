@@ -18,7 +18,7 @@ export async function GET(req: Request) {
       vendedorId: orden.vendedorId,
       fecha: orden.createdAt.toISOString(),
       total: orden.total,
-      estadoPago: orden.pagoId ? "Pagado" : "Pendiente",
+      estadoPago: orden.pagoId ? "PAGADO" : "PENDIENTE",
       estadoEnvio: orden.estado,
     }));
 

@@ -9,9 +9,8 @@ import { EstadoOrdenType, EstadosOrden } from "@/schema/perfume.schema";
 import { revalidatePath } from "next/cache";
 
 const EstadosOrdenInactivas: EstadoOrdenType[] = [
-  EstadosOrden.enum.Pendiente,
-  EstadosOrden.enum.Cancelado,
-  EstadosOrden.enum.Rechazado,
+  EstadosOrden.enum.PENDIENTE,
+  EstadosOrden.enum.CANCELADO,
 ];
 
 // Simulación de comisión del 10%
@@ -195,7 +194,7 @@ function crearOrdenesFalsas(
       id: `mock_ord_${Math.random().toString(36).substring(7)}`,
       usuarioId: usuarioRandom.id,
       total: totalRandom,
-      estado: EstadosOrden.enum.Entregado,
+      estado: EstadosOrden.enum.ENTREGADO,
       createdAt: fechaRandom,
       direccionId: `mock_dir_${Math.random().toString(36).substring(7)}`,
       costoEnvio: Math.floor(Math.random() * (1500 - 500 + 1) + 500),
@@ -333,7 +332,6 @@ export async function actualizarEstadoOrdenAdmin(
   nuevoEstado: string,
 ) {
   try {
-    // Validamos que el estado enviado pertenezca a los enums permitidos
     const estadoValido = EstadosOrden.safeParse(nuevoEstado);
     if (!estadoValido.success) {
       throw new Error("Estado de orden no válido");
@@ -344,7 +342,6 @@ export async function actualizarEstadoOrdenAdmin(
       data: { estado: nuevoEstado as any },
     });
 
-    // Revalidamos la ruta para que la UI muestre el cambio de inmediato
     revalidatePath(`/admin/ordenes/${ordenId}`);
     revalidatePath("/admin/ordenes");
 
