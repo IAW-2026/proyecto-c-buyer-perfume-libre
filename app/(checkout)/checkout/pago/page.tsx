@@ -18,7 +18,10 @@ export default async function PagoRealPage({
 
   let orden;
   try {
-    orden = await obtenerOrdenDeUsuario(ordenId, [EstadosOrden.enum.PENDIENTE]);
+    orden = await obtenerOrdenDeUsuario(ordenId, [
+      EstadosOrden.enum.PENDIENTE,
+      EstadosOrden.enum.CANCELADO,
+    ]);
   } catch {
     redirect("/carrito");
   }
