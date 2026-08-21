@@ -266,7 +266,7 @@ function TicketCompra({
 
           <div className="pt-4 space-y-4">
             <Link
-              href={`/simulador-pagos?ordenId=${ordenId}`}
+              href={`/checkout/pago?ordenId=${ordenId}`}
               className={cn(
                 buttonVariants({ size: "lg" }),
                 "w-full h-14 text-[13px] uppercase tracking-wider font-bold bg-foreground text-background hover:bg-foreground/90 transition-all rounded-sm shadow-md hover:shadow-lg flex items-center justify-center gap-2",
