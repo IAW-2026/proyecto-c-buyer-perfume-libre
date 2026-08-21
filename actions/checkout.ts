@@ -1,6 +1,10 @@
 "use server";
 
-import { fetchProductoDesdeSeller, obtenerPreciosDeProductos } from "@/lib/api";
+import {
+  fetchProductoDesdeSeller,
+  generarOrdenEnvio,
+  obtenerPreciosDeProductos,
+} from "@/lib/api";
 import { OpcionEnvio } from "@/lib/mockEnvios";
 import { prisma } from "@/lib/prisma";
 import { EstadosOrden } from "@/schema/perfume.schema";
@@ -133,9 +137,9 @@ export async function obtenerOrdenDeUsuario(
 
 export async function actualizarOrden(
   idOrden: string,
-  idPago: string,
-  idEnvio: string,
   estado: string,
+  idPago?: string,
+  idEnvio?: string,
 ) {
   try {
     await prisma.ordenCompra.update({
@@ -172,6 +176,50 @@ export async function obtenerOrden(idOrden: string) {
   } catch (error) {
     throw new Error(`Error al obtener la orden ${error}`);
   }
+}
+
+export async function verDetallesOrden(idOrden: string) {
+  try {
+    const orden = await prisma.ordenCompra.findFirst({
+      where: { id: idOrden },
+      select: {
+        id: true,
+        total: true,
+      },
+    });
+
+    return orden;
+  } catch (error) {
+    throw new Error(`Error al obtener la orden ${error}`);
+  }
+}
+
+export async function aprobarOrden(idOrden: string, idPago: string) {
+  const orden = await obtenerOrden(idOrden);
+
+  const id_envio = await generarOrdenEnvio(
+    idOrden,
+    orden.usuarioId,
+    orden.direccion?.calle!,
+    orden.items,
+    {
+      operador: orden.operadorEnvio,
+      precio: orden.costoEnvio / 100,
+      tipo_servicio: orden.servicioEnvio,
+      demora_dias: orden.demoraDias,
+    },
+  );
+
+  await actualizarOrden(idOrden, EstadosOrden.enum.PAGADO, idPago, id_envio);
+}
+
+export async function rechazarOrden(idOrden: string, idPago: string) {
+  await actualizarOrden(
+    idOrden,
+    EstadosOrden.enum.CANCELADO,
+    idPago,
+    undefined,
+  );
 }
 
 export async function vaciarCarrito(usuarioId: string) {

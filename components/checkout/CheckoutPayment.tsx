@@ -1,35 +1,38 @@
 "use client";
 import { useEffect, useState } from "react";
 import { initMercadoPago, Payment } from "@mercadopago/sdk-react";
+import { useRouter } from "next/navigation";
 
-export default function CheckoutPayment() {
+export default function CheckoutPayment({
+  total,
+  ordenId,
+}: {
+  total: number;
+  ordenId: string;
+}) {
   const [preferenceId, setPreferenceId] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
-    // 1. Inicializamos Mercado Pago con tu llave pública
-    if (!process.env.NEXT_PUBLIC_MP_PUBLIC_KEY) {
-      console.error(
-        "La variable de entorno NEXT_PUBLIC_MP_PUBLIC_KEY no está definida",
-      );
-      return;
-    }
+    initMercadoPago(process.env.NEXT_PUBLIC_MP_PUBLIC_KEY!, {
+      locale: "es-AR",
+    });
 
-    initMercadoPago(process.env.NEXT_PUBLIC_MP_PUBLIC_KEY, { locale: "es-AR" });
-
-    // 2. Le pedimos la preferencia a nuestra propia API que hicimos en el paso anterior
-    fetch("/api/mercadopago/create-preference", { method: "POST" })
+    fetch("/api/mercadopago/create-preference", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ total, ordenId }),
+    })
       .then((res) => res.json())
       .then((data) => setPreferenceId(data.preferenceId));
-  }, []);
+  }, [total, ordenId]);
 
-  // Si todavía no hay preferencia, mostramos un loading
-  if (!preferenceId) return <p>Cargando pasarela de pago...</p>;
+  if (!preferenceId) return <p>Conectando de forma segura...</p>;
 
-  // 3. Renderizamos el Brick
   return (
     <Payment
       initialization={{
-        amount: 100, // Debe coincidir con el unit_price de tu backend
+        amount: total,
         preferenceId: preferenceId,
       }}
       customization={{
@@ -42,31 +45,25 @@ export default function CheckoutPayment() {
       }}
       onSubmit={async ({ selectedPaymentMethod, formData }) => {
         try {
+          // Le inyectamos el ordenId al formData para que el backend sepa a qué orden corresponde
+          const payload = { ...formData, ordenId };
+
           const response = await fetch("/api/mercadopago/process-payment", {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            // formData ya viene armado perfecto por el Brick
-            body: JSON.stringify(formData),
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
           });
 
           const data = await response.json();
-          console.log("Respuesta del pago:", data);
 
-          // Acá manejas qué pasa según el resultado
-          if (data.status === "approved") {
-            alert("¡Pago aprobado con éxito!");
-            // Redirigir a página de éxito
-          } else if (data.status === "pending") {
-            alert("El pago está pendiente (ideal para Rapipago/Pago Fácil).");
-            // Redirigir a página de instrucciones
-          } else {
-            alert(`El pago fue rechazado. Motivo: ${data.status_detail}`);
+          if (data.id) {
+            // Mandamos a tu página de resultados híbrida
+            router.push(
+              `/checkout/resultado?payment_id=${data.id}&ordenId=${ordenId}`,
+            );
           }
         } catch (error) {
           console.error("Error enviando el pago:", error);
-          alert("Hubo un error de conexión.");
         }
       }}
       onError={async (error) => {

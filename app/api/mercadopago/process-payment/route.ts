@@ -1,3 +1,9 @@
+import {
+  aprobarOrden,
+  rechazarOrden,
+  verDetallesOrden,
+} from "@/actions/checkout";
+import { centavosAPesos } from "@/lib/utils";
 import { MercadoPagoConfig, Payment } from "mercadopago";
 import { NextResponse } from "next/server";
 
@@ -5,7 +11,16 @@ export async function POST(request: Request) {
   try {
     // Recibimos el formData que manda el Brick desde el frontend
     const body = await request.json();
+    const orden = await verDetallesOrden(body.ordenId);
 
+    if (!orden) {
+      return NextResponse.json(
+        { error: "Orden no encontrada" },
+        { status: 404 },
+      );
+    }
+
+    const montoEnPesos = centavosAPesos(orden.total);
     // Inicializamos el SDK con tu Access Token
     const client = new MercadoPagoConfig({
       accessToken: process.env.MP_ACCESS_TOKEN!,
@@ -15,22 +30,32 @@ export async function POST(request: Request) {
     // Creamos el pago
     const response = await payment.create({
       body: {
-        transaction_amount: body.transaction_amount,
+        transaction_amount: montoEnPesos,
         token: body.token,
         description: body.description || "Compra en marketplace C2C",
         installments: body.installments,
         payment_method_id: body.payment_method_id,
         issuer_id: body.issuer_id,
+        external_reference: body.ordenId,
         payer: {
           email: body.payer.email,
           identification: body.payer.identification,
         },
       },
       requestOptions: {
-        // Generamos un ID único por cada intento de pago (Idempotency Key)
         idempotencyKey: crypto.randomUUID(),
       },
     });
+
+    if (!response || !response.id) {
+      throw new Error("Error al crear el pago en Mercado Pago");
+    }
+
+    if (response.status === "approved") {
+      aprobarOrden(body.ordenId, response.id?.toString());
+    } else if (response.status === "rejected") {
+      rechazarOrden(body.ordenId, response.id?.toString());
+    }
 
     // Devolvemos la respuesta de Mercado Pago al frontend
     return NextResponse.json({
