@@ -17,11 +17,6 @@ export async function obtenerComprasDelUsuario() {
     const ordenes = await prisma.ordenCompra.findMany({
       where: {
         usuarioId: userId,
-        estado: {
-          not: {
-            in: [EstadosOrden.enum.PENDIENTE, EstadosOrden.enum.CANCELADO],
-          },
-        },
       },
       select: {
         id: true,
