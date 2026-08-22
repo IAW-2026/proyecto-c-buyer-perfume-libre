@@ -58,7 +58,41 @@ Asimismo, el sistema incluye módulos dedicados a la experiencia posventa, permi
 - **Implementación de Componentes Optimistas (Optimistic Updates):** Con el objetivo de maximizar la fluidez de la experiencia de usuario (UX), se implementó el hook `useOptimistic` de React en interacciones clave de la interfaz, como la gestión del carrito y la selección de favoritos. El sistema asume que la operación en el servidor será exitosa para actualizar la interfaz en microsegundos, revirtiendo el estado de forma automática únicamente si la Server Action llega a fallar.
 - **Seguridad en Server Components:** El panel de administración y las Server Actions críticas comprueban la identidad y rol del usuario de forma directa en el servidor usando Clerk `auth()`. Si un usuario común intenta acceder a las vistas administrativas, el flujo intercepta la petición y lo redirige de inmediato.
 
----
+## 5. Pasarela de pagos
+
+El sistema integra la pasarela de pagos **Mercado Pago Checkout Bricks** operando estrictamente en Modo Sandbox / Pruebas.
+
+Para probar los distintos escenarios del flujo de pago (aprobación, rechazo, saldo en cuenta), utilice exclusivamente los siguientes datos provistos por Mercado Pago:
+
+### 💳 Simular Pago con Tarjeta de Crédito/Débito
+
+En el formulario del Checkout Brick, complete los campos con la siguiente información. El estado del pago (Aprobado o Rechazado) dependerá exclusivamente del Nombre del Titular que ingrese.
+
+- **Número de Tarjeta:** `5031 7557 3453 0604` (Crédito) / `5287 3383 1025 3304` (Débito)
+- **Vencimiento:** `11/30`
+- **CVV:** `123`
+- **DNI:** `12345678`
+
+Para probar diferentes resultados de pago, complete el estado deseado en el nombre del titular de la tarjeta:
+
+- ✅ Para simular un pago **APROBADO**: Ingrese `APRO`
+- ❌ Para simular un pago **RECHAZADO**: Ingrese `OTHE` o `CALL`
+
+> **Nota importante:** Para el campo de email del formulario, no utilizar el correo `test@testuser.com` porque la plataforma suele rebotarlo. Se recomienda usar el correo por defecto del template (ej. `ejemplo@gmail.com`) que procesa sin problemas.
+
+### 📱 Simular Pago con Cuenta de Mercado Pago (Wallet)
+
+Si desea probar la redirección y el pago utilizando saldo en cuenta, debe iniciar sesión en el popup de Mercado Pago utilizando esta cuenta de Comprador de prueba (Test User):
+
+- **Usuario:** `TESTUSER8636519672451605384`
+- **Contraseña:** `loFequAoQA`
+- **Código de verificación (email):** `564498`
+
+> **Nota:** El popup de login pide DNI, Email o Nro telefónico, pero ingresando el **Usuario** provisto arriba permite iniciar sesión. Se recomienda realizar esta prueba en **Modo Incógnito** para evitar conflictos de sesión con tu cuenta personal real de Mercado Pago.
+
+### 🎫 Pagos en Efectivo (Rapipago / Pago Fácil)
+
+Si se selecciona Rapipago o Pago Fácil, el sistema generará correctamente el ticket de pago y la orden quedará en estado `PENDIENTE`. Esta funcionalidad está en fase experimental; la orden quedará pendiente por 2 días y, de no detectarse el pago simulado, el Cron Job la eliminará automáticamente de la base de datos para liberar stock.
 
 ### 📚 Documentación Técnica Adicional
 
