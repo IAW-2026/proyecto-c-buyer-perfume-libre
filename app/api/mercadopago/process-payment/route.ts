@@ -3,6 +3,7 @@ import {
   rechazarOrden,
   verDetallesOrden,
 } from "@/actions/checkout";
+import { obtenerAccessTokenVendedor } from "@/lib/api";
 import { centavosAPesos } from "@/lib/utils";
 import { MercadoPagoConfig, Payment } from "mercadopago";
 import { NextResponse } from "next/server";
@@ -21,9 +22,12 @@ export async function POST(request: Request) {
     }
 
     const montoEnPesos = centavosAPesos(orden.total);
-    // Inicializamos el SDK con tu Access Token
+    const accessTokenVendedor = await obtenerAccessTokenVendedor(
+      orden.vendedorId,
+    );
+
     const client = new MercadoPagoConfig({
-      accessToken: process.env.MP_ACCESS_TOKEN!,
+      accessToken: accessTokenVendedor,
     });
     const payment = new Payment(client);
 

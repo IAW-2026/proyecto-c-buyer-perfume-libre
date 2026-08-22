@@ -184,6 +184,7 @@ export async function verDetallesOrden(idOrden: string) {
       where: { id: idOrden },
       select: {
         id: true,
+        vendedorId: true,
         total: true,
       },
     });

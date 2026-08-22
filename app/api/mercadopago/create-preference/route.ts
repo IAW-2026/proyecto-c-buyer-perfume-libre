@@ -1,5 +1,6 @@
 import { verDetallesOrden } from "@/actions/checkout";
-import { centavosAPesos } from "@/lib/utils";
+import { obtenerAccessTokenVendedor } from "@/lib/api";
+import { centavosAPesos, obtenerComision } from "@/lib/utils";
 import { MercadoPagoConfig, Preference } from "mercadopago";
 import { NextResponse } from "next/server";
 
@@ -20,8 +21,14 @@ export async function POST(request: Request) {
 
   const montoEnPesos = centavosAPesos(orden.total);
 
+  const comision = obtenerComision(montoEnPesos);
+
+  const accessTokenVendedor = await obtenerAccessTokenVendedor(
+    orden.vendedorId,
+  );
+
   const client = new MercadoPagoConfig({
-    accessToken: process.env.MP_ACCESS_TOKEN,
+    accessToken: accessTokenVendedor,
   });
   const preference = new Preference(client);
 
@@ -38,6 +45,7 @@ export async function POST(request: Request) {
           },
         ],
         purpose: "wallet_purchase",
+        marketplace_fee: comision,
       },
     });
 

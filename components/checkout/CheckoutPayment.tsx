@@ -34,6 +34,7 @@ export default function CheckoutPayment({
       initialization={{
         amount: total,
         preferenceId: preferenceId,
+        marketplace: true,
       }}
       customization={{
         paymentMethods: {

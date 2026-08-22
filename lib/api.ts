@@ -929,6 +929,44 @@ export async function fetchProductoDesdeSeller(id: string) {
   return { producto: data.producto, vendedor: data.vendedor };
 }
 
+export async function obtenerAccessTokenVendedor(idVendedor: string) {
+  const usarApiReal = process.env.USE_REAL_API === "true";
+  console.log("Obteniendo access token para vendedor:", idVendedor);
+  if (usarApiReal) {
+    return obtenerAccessTokenVendedorReal(idVendedor);
+  } else {
+    return obtenerAccessTokenVendedorMock();
+  }
+}
+
+async function obtenerAccessTokenVendedorReal(idVendedor: string) {
+  const headers = new Headers();
+  headers.append("api_key", process.env.SELLER_API_KEY || "");
+
+  const url = `${process.env.SELLER_API_URL}/seller/vendedores/${idVendedor}/access_token`;
+
+  const res = await fetch(url, {
+    method: "GET",
+    headers: headers,
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    throw new Error(
+      `Error API Seller al obtener access token del vendedor ${idVendedor}: ${res.status}`,
+    );
+  }
+
+  const data = await res.json();
+
+  return data.access_token;
+}
+
+async function obtenerAccessTokenVendedorMock() {
+  console.log("Usando access token mock para vendedor");
+  return process.env.MP_ACCESS_TOKEN!;
+}
+
 export function validarTipo<TSchema extends z.ZodTypeAny>(
   data: unknown,
   schema: TSchema,
