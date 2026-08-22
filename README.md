@@ -58,7 +58,9 @@ Asimismo, el sistema incluye módulos dedicados a la experiencia posventa, permi
 - **Implementación de Componentes Optimistas (Optimistic Updates):** Con el objetivo de maximizar la fluidez de la experiencia de usuario (UX), se implementó el hook `useOptimistic` de React en interacciones clave de la interfaz, como la gestión del carrito y la selección de favoritos. El sistema asume que la operación en el servidor será exitosa para actualizar la interfaz en microsegundos, revirtiendo el estado de forma automática únicamente si la Server Action llega a fallar.
 - **Seguridad en Server Components:** El panel de administración y las Server Actions críticas comprueban la identidad y rol del usuario de forma directa en el servidor usando Clerk `auth()`. Si un usuario común intenta acceder a las vistas administrativas, el flujo intercepta la petición y lo redirige de inmediato.
 
-## 5. Pasarela de pagos
+---
+
+## 6. Pasarela de pagos
 
 El sistema integra la pasarela de pagos **Mercado Pago Checkout Bricks** operando estrictamente en Modo Sandbox / Pruebas.
 
@@ -93,6 +95,8 @@ Si desea probar la redirección y el pago utilizando saldo en cuenta, debe inici
 ### 🎫 Pagos en Efectivo (Rapipago / Pago Fácil)
 
 Si se selecciona Rapipago o Pago Fácil, el sistema generará correctamente el ticket de pago y la orden quedará en estado `PENDIENTE`. Esta funcionalidad está en fase experimental; la orden quedará pendiente por 2 días y, de no detectarse el pago simulado, el Cron Job la eliminará automáticamente de la base de datos para liberar stock.
+
+---
 
 ### 📚 Documentación Técnica Adicional
 
