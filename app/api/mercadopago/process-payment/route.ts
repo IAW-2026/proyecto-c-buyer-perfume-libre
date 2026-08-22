@@ -35,6 +35,7 @@ export async function POST(request: Request) {
     const response = await payment.create({
       body: {
         transaction_amount: montoEnPesos,
+        notification_url: `${process.env.APP_URL}/api/webhooks/mercadopago`,
         token: body.token,
         description: body.description || "Compra en marketplace C2C",
         installments: body.installments,
