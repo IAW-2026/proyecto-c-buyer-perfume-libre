@@ -55,5 +55,5 @@ export function obtenerLabelEstado(estado: EstadoOrdenType) {
   if (estado === EstadosOrden.enum.PREPARANDO) return "En Preparación";
   if (estado === EstadosOrden.enum.EN_TRANSITO) return "En Camino";
   if (estado === EstadosOrden.enum.ENTREGADO) return "Entregado";
-  if (estado === EstadosOrden.enum.CANCELADO) return "Cancelado / Reembolsado";
+  if (estado === EstadosOrden.enum.CANCELADO) return "Cancelado";
 }
