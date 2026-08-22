@@ -5,6 +5,8 @@ import StatusScreenPayment from "@/components/checkout/StatusScreenPayment";
 import { obtenerEstadoOrden } from "@/actions/checkout";
 import { EstadosOrden } from "@/schema/perfume.schema";
 
+export const dynamic = "force-dynamic";
+
 type Props = {
   searchParams: Promise<{ payment_id?: string; ordenId?: string }>;
 };

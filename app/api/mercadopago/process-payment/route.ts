@@ -52,9 +52,9 @@ export async function POST(request: Request) {
     }
 
     if (response.status === "approved") {
-      aprobarOrden(body.ordenId, response.id?.toString());
+      await aprobarOrden(body.ordenId, response.id?.toString());
     } else if (response.status === "rejected") {
-      rechazarOrden(body.ordenId, response.id?.toString());
+      await rechazarOrden(body.ordenId, response.id?.toString());
     }
 
     // Devolvemos la respuesta de Mercado Pago al frontend
