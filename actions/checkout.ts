@@ -273,3 +273,20 @@ export async function obtenerItemsOrdenParaSeller(ordenId: string) {
     throw new Error(`Error al obtener los items de la orden ${error}`);
   }
 }
+
+export async function obtenerEstadoOrden(paymentId: string) {
+  try {
+    const orden = await prisma.ordenCompra.findFirst({
+      where: {
+        id: paymentId,
+      },
+      select: {
+        estado: true,
+      },
+    });
+
+    return orden;
+  } catch (error) {
+    throw new Error(`Error al obtener el estado de la orden ${error}`);
+  }
+}

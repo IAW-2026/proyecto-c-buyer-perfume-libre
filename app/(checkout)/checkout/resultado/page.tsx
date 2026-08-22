@@ -2,7 +2,8 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { Metadata } from "next";
 import StatusScreenPayment from "@/components/checkout/StatusScreenPayment";
-// El componente que creamos antes
+import { obtenerEstadoOrden } from "@/actions/checkout";
+import { EstadosOrden } from "@/schema/perfume.schema";
 
 type Props = {
   searchParams: Promise<{ payment_id?: string; ordenId?: string }>;
@@ -19,7 +20,11 @@ export default async function CheckoutResultadoPage({ searchParams }: Props) {
   const { payment_id, ordenId } = await searchParams;
 
   // Si no hay ID de pago de Mercado Pago, lo mandamos al carrito
-  if (!payment_id) redirect("/carrito");
+  if (!payment_id || !ordenId) redirect("/carrito");
+
+  const estadoOrden = await obtenerEstadoOrden(ordenId);
+  const estadoValidado = EstadosOrden.parse(estadoOrden?.estado);
+  const ordenCancelada = estadoValidado === EstadosOrden.enum.CANCELADO;
 
   return (
     <div className="w-full bg-background flex flex-1 items-center justify-center p-4 min-h-screen">
@@ -41,6 +46,17 @@ export default async function CheckoutResultadoPage({ searchParams }: Props) {
 
         {/* Podés agregar tus botones personalizados acá abajo si querés */}
         <div className="mt-6 flex flex-col gap-3">
+          {/* Botón de reintento */}
+          {ordenCancelada && (
+            <a
+              href={`/checkout/pago?ordenId=${ordenId}`}
+              className="w-full h-12 flex items-center justify-center text-[11px] uppercase font-bold rounded-sm bg-foreground text-background hover:bg-foreground/90 transition-all"
+            >
+              Volver a intentar el pago
+            </a>
+          )}
+
+          {/* Tu botón original de ver pedidos */}
           <a
             href="/compras"
             className="w-full h-12 flex items-center justify-center text-[11px] uppercase tracking-[0.08em] font-bold rounded-sm border border-border/60 text-foreground hover:bg-secondary transition-all"
