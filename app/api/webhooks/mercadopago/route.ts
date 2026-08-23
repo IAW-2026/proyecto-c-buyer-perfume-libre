@@ -21,6 +21,13 @@ export async function POST(request: Request) {
       const estadoMP = paymentInfo.status;
       const ordenId = paymentInfo.external_reference;
 
+      console.log(
+        "🔔 WEBHOOK RECIBIDO -> Estado:",
+        estadoMP,
+        "| Orden ID:",
+        ordenId,
+      );
+
       if (!ordenId) {
         return NextResponse.json(
           { error: "Pago sin orden asociada" },
