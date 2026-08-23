@@ -68,9 +68,7 @@ async function AccionesUsuario() {
   let rolUsuario;
   try {
     rolUsuario = await obtenerRolUsuario();
-  } catch (error) {
-    console.error("Error al obtener el rol del usuario:", error);
-  }
+  } catch (error) {}
 
   return (
     <Show when="signed-in">
@@ -139,9 +137,7 @@ async function MenuMovil() {
   let rolUsuario;
   try {
     rolUsuario = await obtenerRolUsuario();
-  } catch (error) {
-    console.error("Error al obtener el rol del usuario:", error);
-  }
+  } catch (error) {}
 
   return (
     <Sheet>

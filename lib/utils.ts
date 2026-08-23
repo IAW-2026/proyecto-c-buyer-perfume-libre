@@ -55,5 +55,11 @@ export function obtenerLabelEstado(estado: EstadoOrdenType) {
   if (estado === EstadosOrden.enum.PREPARANDO) return "En Preparación";
   if (estado === EstadosOrden.enum.EN_TRANSITO) return "En Camino";
   if (estado === EstadosOrden.enum.ENTREGADO) return "Entregado";
-  if (estado === EstadosOrden.enum.CANCELADO) return "Cancelado / Reembolsado";
+  if (estado === EstadosOrden.enum.CANCELADO) return "Cancelado";
+}
+
+// Calculamos la comisión de Mercado Pago (10% del monto)
+export function obtenerComision(montoEnPesos: number): number {
+  const comision = montoEnPesos * 0.1;
+  return Math.round(comision);
 }

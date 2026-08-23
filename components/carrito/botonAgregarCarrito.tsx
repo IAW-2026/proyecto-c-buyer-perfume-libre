@@ -33,7 +33,6 @@ export function BotonAgregarCarrito({
         agregarAlCarrito(perfumeId)
           .then(() => toast.success("¡Agregado al carrito!"))
           .catch((err) => {
-            console.error("Error al procesar la intención", err);
             toast.error("Hubo un problema al guardar tu producto.");
           });
       }
@@ -55,7 +54,6 @@ export function BotonAgregarCarrito({
         await agregarAlCarrito(perfumeId);
         toast.success("¡Agregado al carrito!");
       } catch (error) {
-        console.error(error);
         toast.error("No se pudo agregar al carrito", {
           description: "Por favor, intentá nuevamente en unos minutos.",
         });

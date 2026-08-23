@@ -40,12 +40,9 @@ export default function CardResena({
     if (rating === 0) return;
     setEstado("enviando");
     try {
-      console.warn("Enviando reseña");
       const response = await onEnviar(id, ordenId, rating, comentario);
-      console.warn("Reseña enviada, response:", response);
       setEstado("enviado");
     } catch (e) {
-      console.error(e);
       setEstado("error");
     }
   };

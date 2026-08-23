@@ -74,9 +74,7 @@ export function CarritoWrapper({
       });
       try {
         await actualizarCantidadEnCarrito(id, nuevaCantidad);
-      } catch (error) {
-        console.error("Fallo al actualizar", error);
-      }
+      } catch (error) {}
     });
   };
 
@@ -85,9 +83,7 @@ export function CarritoWrapper({
       dispatchOptimistic({ tipo: "ELIMINAR", id });
       try {
         await eliminarDelCarrito(id);
-      } catch (error) {
-        console.error("Fallo al eliminar", error);
-      }
+      } catch (error) {}
     });
   };
 

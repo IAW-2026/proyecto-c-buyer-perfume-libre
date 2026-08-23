@@ -28,7 +28,6 @@ export function BotonFavorito({
         if (!esFav) {
           setEsFav(true);
           toggleFavorito(perfumeId).catch((err) => {
-            console.error("Error al procesar la intención guardada", err);
             setEsFav(false);
           });
         }
@@ -50,7 +49,6 @@ export function BotonFavorito({
     try {
       await toggleFavorito(perfumeId);
     } catch (error) {
-      console.error("Error al guardar favorito", error);
       setEsFav(esFav);
     }
   };
