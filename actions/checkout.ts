@@ -5,6 +5,7 @@ import {
   generarOrdenEnvio,
   obtenerPreciosDeProductos,
 } from "@/lib/api";
+import { EstadoOrden } from "@/lib/generated/prisma/enums";
 import { OpcionEnvio } from "@/lib/mockEnvios";
 import { prisma } from "@/lib/prisma";
 import { EstadosOrden } from "@/schema/perfume.schema";
@@ -110,7 +111,7 @@ export async function iniciarProcesamientoCompra(
 
 export async function obtenerOrdenDeUsuario(
   idOrden: string,
-  estado: string | string[],
+  estado: EstadoOrden | EstadoOrden[],
 ) {
   try {
     const { userId } = await auth();
@@ -137,7 +138,7 @@ export async function obtenerOrdenDeUsuario(
 
 export async function actualizarOrden(
   idOrden: string,
-  estado: string,
+  estado: EstadoOrden,
   idPago?: string,
   idEnvio?: string,
 ) {
@@ -235,7 +236,7 @@ export async function vaciarCarrito(usuarioId: string) {
 
 export async function actualizarEstadoEnvio(
   trackingId: string,
-  nuevoEstado: string,
+  nuevoEstado: EstadoOrden,
   fecha: string,
 ) {
   try {
