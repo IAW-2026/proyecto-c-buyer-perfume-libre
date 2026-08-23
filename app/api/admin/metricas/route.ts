@@ -1,5 +1,6 @@
 import { validateApiKey } from "@/lib/api";
 import { prisma } from "@/lib/prisma";
+import { EstadosOrden } from "@/schema/perfume.schema";
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
@@ -33,7 +34,7 @@ export async function GET(req: Request) {
           gte: inicioMes,
         },
         estado: {
-          not: "Cancelado",
+          not: EstadosOrden.enum.CANCELADO,
         },
       },
       _sum: {
