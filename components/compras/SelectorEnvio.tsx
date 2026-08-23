@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { simularCambioEstado } from "@/actions/compras";
 import { cn } from "@/lib/utils";
+import { EstadoOrden } from "@/lib/generated/prisma/enums";
 
 export function SimuladorEnvio({
   ordenId,
@@ -24,7 +25,7 @@ export function SimuladorEnvio({
 }) {
   const [isPending, startTransition] = useTransition();
 
-  const handleCambio = (nuevoEstado: string) => {
+  const handleCambio = (nuevoEstado: EstadoOrden) => {
     startTransition(async () => {
       await simularCambioEstado(ordenId, itemId, nuevoEstado);
     });
@@ -54,19 +55,19 @@ export function SimuladorEnvio({
           <DropdownMenuSeparator className="bg-border/60" />
 
           <DropdownMenuItem
-            onClick={() => handleCambio("PAGADO")}
+            onClick={() => handleCambio(EstadoOrden.PAGADO)}
             className="text-[12px] focus:bg-secondary focus:text-accent cursor-pointer"
           >
             Simular: Pagado
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => handleCambio("PREPARANDO")}
+            onClick={() => handleCambio(EstadoOrden.PREPARANDO)}
             className="text-[12px] focus:bg-secondary focus:text-accent cursor-pointer"
           >
             Simular: En proceso
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => handleCambio("EN_TRANSITO")}
+            onClick={() => handleCambio(EstadoOrden.EN_TRANSITO)}
             className="text-[12px] focus:bg-secondary focus:text-accent cursor-pointer"
           >
             Simular: Enviado
@@ -76,7 +77,7 @@ export function SimuladorEnvio({
         <DropdownMenuSeparator className="bg-border/60" />
 
         <DropdownMenuItem
-          onClick={() => handleCambio("ENTREGADO")}
+          onClick={() => handleCambio(EstadoOrden.ENTREGADO)}
           className="text-[12px] text-foreground font-medium focus:text-accent focus:bg-secondary cursor-pointer"
         >
           <CheckCircle2 className="w-3.5 h-3.5 mr-2 text-accent" />
