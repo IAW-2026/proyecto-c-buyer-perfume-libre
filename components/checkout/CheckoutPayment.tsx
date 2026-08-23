@@ -98,6 +98,14 @@ export default function CheckoutPayment({
                 console.error("Error enviando el pago:", error);
               }
             }}
+            onError={async (error) => {
+              if (error.type === "non_critical") {
+                // console.warn("Aviso de validación del Brick:", error.message);
+                return;
+              }
+              // Si es un errror crítico, podriamos ingresar el comportamiento aqui
+              // console.error("Error crítico en la pasarela:", error);
+            }}
           />
         )}
       </div>
