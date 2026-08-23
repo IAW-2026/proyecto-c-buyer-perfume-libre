@@ -95,7 +95,7 @@ export default function CheckoutPayment({
                   );
                 }
               } catch (error) {
-                console.error("Error enviando el pago:", error);
+                // console.error("Error enviando el pago:", error);
               }
             }}
             onError={async (error) => {

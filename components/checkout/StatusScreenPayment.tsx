@@ -18,10 +18,10 @@ export default function StatusScreenPayment({
     <StatusScreen
       initialization={{ paymentId: paymentId }}
       onReady={() => {
-        console.log("Status Screen cargado");
+        // console.log("Status Screen cargado");
       }}
       onError={(error) => {
-        console.error("Error en Status Screen:", error);
+        // console.error("Error en Status Screen:", error);
       }}
     />
   );

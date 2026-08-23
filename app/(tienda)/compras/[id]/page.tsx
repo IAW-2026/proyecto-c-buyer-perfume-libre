@@ -331,7 +331,6 @@ async function obtenerItemOrden(
   if (!productoDetalle) {
     return null;
   }
-  console.log("Datos de envío obtenidos:", datosEnvio);
   const estadoValidado = EstadosOrden.parse(datosEnvio.estadoActual);
   const { id: idItem, ...restoDeOrdenDb } = ordenDb;
 
