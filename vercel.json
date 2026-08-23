@@ -2,7 +2,8 @@
   "crons": [
     {
       "path": "/api/cron/limpiar-ordenes",
-      "schedule": "0 * * * *"
+      "schedule": "0 1 * * *",
+      "scheduleTimezone": "America/Argentina/Buenos_Aires"
     }
   ]
 }
