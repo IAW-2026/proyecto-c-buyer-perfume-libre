@@ -31,11 +31,15 @@ export async function POST(request: Request) {
     });
     const payment = new Payment(client);
 
+    const notification_url = process.env.APP_URL
+      ? process.env.APP_URL
+      : `https://${process.env.VERCEL_URL}`;
+
     // Creamos el pago
     const response = await payment.create({
       body: {
         transaction_amount: montoEnPesos,
-        notification_url: `${process.env.APP_URL}/api/webhooks/mercadopago`,
+        notification_url: `${notification_url}/api/webhooks/mercadopago`,
         token: body.token,
         description: body.description || "Compra en marketplace C2C",
         installments: body.installments,
