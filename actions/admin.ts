@@ -3,7 +3,7 @@
 import { createClerkClient, currentUser } from "@clerk/nextjs/server";
 import { clerkClient } from "@clerk/nextjs/server";
 import { obtenerRolUsuario } from "./usuario";
-import { RolUsuario } from "@/lib/generated/prisma/client";
+import { EstadoOrden, RolUsuario } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { EstadoOrdenType, EstadosOrden } from "@/schema/perfume.schema";
 import { revalidatePath } from "next/cache";
@@ -329,17 +329,12 @@ export async function obtenerDatosUsuario(usuarioId: string) {
 
 export async function actualizarEstadoOrdenAdmin(
   ordenId: string,
-  nuevoEstado: string,
+  nuevoEstado: EstadoOrden,
 ) {
   try {
-    const estadoValido = EstadosOrden.safeParse(nuevoEstado);
-    if (!estadoValido.success) {
-      throw new Error("Estado de orden no válido");
-    }
-
     await prisma.ordenCompra.update({
       where: { id: ordenId },
-      data: { estado: nuevoEstado as any },
+      data: { estado: nuevoEstado },
     });
 
     revalidatePath(`/admin/ordenes/${ordenId}`);

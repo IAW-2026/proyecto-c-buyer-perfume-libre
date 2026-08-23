@@ -5,6 +5,7 @@ import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { obtenerDetallePerfume } from "@/lib/api";
 import { EstadosOrden } from "@/schema/perfume.schema";
+import { EstadoOrden } from "@/lib/generated/prisma/enums";
 
 export async function obtenerComprasDelUsuario() {
   try {
@@ -167,7 +168,7 @@ export async function obtenerCantidadDeProductosComprados(ordenId: string) {
 export async function simularCambioEstado(
   ordenId: string,
   itemId: string,
-  nuevoEstado: string,
+  nuevoEstado: EstadoOrden,
 ) {
   await prisma.ordenCompra.update({
     where: { id: ordenId },
