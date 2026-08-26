@@ -15,9 +15,8 @@ export default function LoadingCompras() {
           </div>
 
           <div className="flex flex-col gap-6">
-            {/* Tarjeta de compra simulada 1 */}
+            {/* Tarjetas de compra simuladas */}
             <SkeletonOrden />
-            {/* Tarjeta de compra simulada 2 */}
             <SkeletonOrden />
           </div>
         </div>
@@ -30,37 +29,39 @@ function SkeletonOrden() {
   return (
     <div className="overflow-hidden rounded-sm border border-border/60 bg-card shadow-sm">
       {/* Header de la orden */}
-      <div className="border-b border-border/60 bg-secondary/30 px-5 py-4">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-3">
-            <Skeleton className="h-4 w-48 bg-secondary/80 rounded-sm" />{" "}
-            {/* Fecha e items */}
+      <div className="border-b border-border/60 bg-secondary/30 px-4 sm:px-5 py-3 sm:py-4">
+        <div className="flex flex-row items-center justify-between gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3">
+            <Skeleton className="h-3 sm:h-3.5 w-24 sm:w-32 bg-secondary/80 rounded-sm" />{" "}
+            {/* Fecha */}
+            <Skeleton className="h-2.5 sm:h-3 w-16 sm:w-20 bg-secondary/50 rounded-sm" />{" "}
+            {/* Artículos */}
           </div>
           {/* Badge de estado */}
-          <Skeleton className="h-5 w-20 rounded-sm bg-secondary/80" />
+          <Skeleton className="h-5 sm:h-6 w-16 sm:w-20 rounded-sm bg-secondary/80 shrink-0" />
         </div>
       </div>
 
       {/* Detalle del Producto */}
-      <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center">
-        {/* Imagen */}
-        <Skeleton className="relative w-20 shrink-0 aspect-3/4 rounded-sm bg-secondary/80 border border-border/30" />
+      <div className="flex flex-col sm:flex-row sm:items-center p-4 sm:p-5 gap-4 sm:gap-5">
+        <div className="flex flex-row flex-1 items-stretch gap-4 min-w-0">
+          {/* Imagen */}
+          <Skeleton className="relative w-20 shrink-0 min-h-26.5 rounded-sm bg-secondary/80 border border-border/30" />
 
-        {/* Info del producto */}
-        <div className="flex min-w-0 flex-1 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-col gap-2.5 w-full grow">
+          {/* Info del producto */}
+          <div className="flex min-w-0 flex-col justify-center grow gap-2 sm:gap-2.5">
             {/* Nombre del perfume */}
-            <Skeleton className="h-5 w-3/4 md:w-64 bg-secondary/80 rounded-sm" />
+            <Skeleton className="h-4 sm:h-5 w-full sm:w-3/4 md:w-64 bg-secondary/80 rounded-sm" />
             {/* Vendedor */}
-            <Skeleton className="h-3 w-32 bg-secondary/50 rounded-sm" />
+            <Skeleton className="h-2.5 sm:h-3 w-24 sm:w-32 bg-secondary/50 rounded-sm" />
             {/* Unidades */}
-            <Skeleton className="h-3 w-20 bg-secondary/50 rounded-sm" />
+            <Skeleton className="h-2.5 sm:h-3 w-16 sm:w-20 bg-secondary/50 rounded-sm" />
           </div>
+        </div>
 
-          {/* Botón ver detalle */}
-          <div className="shrink-0 w-full sm:w-auto mt-2 sm:mt-0">
-            <Skeleton className="h-9 w-full sm:w-28 rounded-sm bg-secondary/80" />
-          </div>
+        {/* Botón ver detalle*/}
+        <div className="shrink-0 pt-3 sm:pt-0 border-t border-border/40 sm:border-transparent mt-1 sm:mt-0">
+          <Skeleton className="h-10 w-full sm:w-28 rounded-sm bg-secondary/80" />
         </div>
       </div>
     </div>

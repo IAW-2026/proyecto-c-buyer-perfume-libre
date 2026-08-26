@@ -126,14 +126,14 @@ function HeaderCompra({
   cantidadProductos: number;
 }) {
   return (
-    <div className="border-b border-border/60 bg-secondary/30 px-5 py-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-3">
-          <p className="text-[12px] font-bold uppercase tracking-[0.08em] text-foreground">
+    <div className="border-b border-border/60 bg-secondary/30 px-4 sm:px-5 py-3 sm:py-4">
+      <div className="flex flex-row items-center justify-between gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:gap-3">
+          <p className="text-[11px] sm:text-[12px] font-bold uppercase tracking-[0.08em] text-foreground">
             {format(fecha, "d 'de' MMMM, yyyy", { locale: es })}
           </p>
           <span className="hidden sm:inline text-border/60">|</span>
-          <p className="text-[12px] font-light text-muted-foreground">
+          <p className="text-[10px] sm:text-[12px] font-light text-muted-foreground mt-0.5 sm:mt-0">
             {cantidadProductos}{" "}
             {cantidadProductos === 1 ? "artículo" : "artículos"}
           </p>
@@ -143,7 +143,7 @@ function HeaderCompra({
           <Badge
             className={cn(
               COLOR_ESTADOS[estado],
-              "uppercase tracking-widest font-bold text-[9px] rounded-sm px-2.5 py-1",
+              "uppercase tracking-widest font-bold text-[9px] rounded-sm px-2 py-1 sm:px-2.5",
             )}
             variant="secondary"
           >
@@ -163,35 +163,35 @@ function ProductoCompra({
   ordenId: string;
 }) {
   return (
-    <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center">
-      <div className="relative w-20 shrink-0 aspect-3/4 overflow-hidden rounded-sm bg-secondary border border-border/40">
-        <Image
-          src={item.imagenUrl}
-          alt={item.nombre}
-          fill
-          sizes="80px"
-          className="object-cover mix-blend-multiply"
-        />
-      </div>
+    <div className="flex flex-col sm:flex-row sm:items-center p-4 sm:p-5 gap-4 sm:gap-5">
+      <div className="flex flex-row flex-1 items-stretch gap-4 min-w-0">
+        <div className="relative w-20 shrink-0 min-h-26.5 overflow-hidden rounded-sm bg-secondary border border-border/40">
+          <Image
+            src={item.imagenUrl}
+            alt={item.nombre}
+            fill
+            sizes="80px"
+            className="object-cover mix-blend-multiply"
+          />
+        </div>
 
-      <div className="flex min-w-0 flex-1 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <DetallesProducto
           nombre={item.nombre}
           vendedor={item.vendedor}
           cantidad={item.cantidad}
         />
+      </div>
 
-        <div className="shrink-0">
-          <Link
-            href={`/compras/${ordenId}?itemId=${item.itemId}`}
-            className={cn(
-              buttonVariants({ variant: "outline", size: "sm" }),
-              "h-10 px-5 text-[10px] uppercase tracking-widest font-bold border border-border/60 bg-transparent text-foreground hover:bg-secondary/20 hover:text-accent hover:border-accent/40 transition-all rounded-sm w-full sm:w-auto",
-            )}
-          >
-            Ver detalle
-          </Link>
-        </div>
+      <div className="shrink-0 pt-3 sm:pt-0 border-t border-border/40 sm:border-transparent mt-1 sm:mt-0">
+        <Link
+          href={`/compras/${ordenId}?itemId=${item.itemId}`}
+          className={cn(
+            buttonVariants({ variant: "outline", size: "sm" }),
+            "h-10 px-5 text-[10px] uppercase tracking-widest font-bold border border-border/60 bg-transparent text-foreground hover:bg-secondary/20 hover:text-accent hover:border-accent/40 transition-all rounded-sm w-full sm:w-auto flex items-center justify-center",
+          )}
+        >
+          Ver detalle
+        </Link>
       </div>
     </div>
   );
@@ -207,15 +207,17 @@ function DetallesProducto({
   cantidad: number;
 }) {
   return (
-    <div className="flex min-w-0 flex-col grow">
-      <h4 className="font-serif text-[20px] font-normal text-foreground line-clamp-1 leading-none">
+    <div className="flex min-w-0 flex-col justify-center grow">
+      <h4 className="font-serif text-[16px] sm:text-[20px] font-normal text-foreground line-clamp-2 sm:line-clamp-1 leading-tight">
         {nombre}
       </h4>
-      <p className="mt-2 text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
+      <p className="mt-1.5 sm:mt-2 text-[10px] sm:text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
         Vendedor:{" "}
-        <span className="font-semibold text-foreground/80">{vendedor}</span>
+        <span className="font-semibold text-foreground/80 truncate block sm:inline">
+          {vendedor}
+        </span>
       </p>
-      <p className="mt-1 text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
+      <p className="mt-1 text-[10px] sm:text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
         {cantidad > 1 ? `Unidades: ${cantidad}` : `Unidad: ${cantidad}`}
       </p>
     </div>
