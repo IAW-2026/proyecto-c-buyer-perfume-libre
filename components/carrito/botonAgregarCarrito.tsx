@@ -70,11 +70,14 @@ export function BotonAgregarCarrito({
       disabled={isPending}
     >
       {isPending ? (
-        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+        <Loader2 className="h-4 w-4 animate-spin sm:mr-2" />
       ) : (
-        <ShoppingCart className="h-4 w-4 mr-2" />
+        <ShoppingCart className="h-4 w-4 sm:mr-2" />
       )}
-      {isPending ? "Agregando..." : "Agregar al carrito"}
+
+      <span className="hidden sm:inline">
+        {isPending ? "Agregando..." : "Agregar al carrito"}
+      </span>
     </Button>
   );
 }
