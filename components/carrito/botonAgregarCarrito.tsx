@@ -10,6 +10,7 @@ import { toast } from "sonner";
 
 type BotonAgregarCarritoProps = {
   perfumeId: string;
+  soloIconoMobile?: boolean;
 } & Pick<ComponentProps<typeof Button>, "className" | "variant" | "size">;
 
 export function BotonAgregarCarrito({
@@ -17,6 +18,7 @@ export function BotonAgregarCarrito({
   className,
   variant,
   size,
+  soloIconoMobile = false,
 }: BotonAgregarCarritoProps) {
   const { userId, isLoaded } = useAuth();
   const clerk = useClerk();
@@ -70,12 +72,18 @@ export function BotonAgregarCarrito({
       disabled={isPending}
     >
       {isPending ? (
-        <Loader2 className="h-4 w-4 animate-spin sm:mr-2" />
+        // El margen mr-2 cambia de forma condicional si se activa soloIconoMobile
+        <Loader2
+          className={`h-4 w-4 animate-spin ${soloIconoMobile ? "sm:mr-2" : "mr-2"}`}
+        />
       ) : (
-        <ShoppingCart className="h-4 w-4 sm:mr-2" />
+        <ShoppingCart
+          className={`h-4 w-4 ${soloIconoMobile ? "sm:mr-2" : "mr-2"}`}
+        />
       )}
 
-      <span className="hidden sm:inline">
+      {/* Si soloIconoMobile es true, aplicamos la clase hidden sm:inline */}
+      <span className={soloIconoMobile ? "hidden sm:inline" : ""}>
         {isPending ? "Agregando..." : "Agregar al carrito"}
       </span>
     </Button>

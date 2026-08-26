@@ -112,6 +112,7 @@ function ProductActions({
       <div className="sm:hidden">
         <BotonAgregarCarrito
           perfumeId={perfumeId}
+          soloIconoMobile={true}
           className="h-8 px-3 text-[10px] uppercase font-bold rounded-sm bg-foreground text-background shadow-sm"
         />
       </div>
