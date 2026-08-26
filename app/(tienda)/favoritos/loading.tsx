@@ -26,35 +26,48 @@ export default function LoadingFavoritos() {
 
 function SkeletonCardFavorito() {
   return (
-    <div className="overflow-hidden rounded-sm border border-border/60 bg-card shadow-sm flex flex-col sm:flex-row items-center sm:items-stretch p-0">
-      {/* 1. Área de Imagen */}
-      <Skeleton className="relative w-full sm:w-40 shrink-0 aspect-3/4 sm:aspect-auto sm:min-h-45 bg-secondary/80 rounded-none border-b sm:border-b-0 sm:border-r border-border/40" />
+    <div className="overflow-hidden rounded-sm border border-border/60 bg-card shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-stretch p-0">
+        <div className="flex flex-row flex-1 items-stretch">
+          {/* Área de Imagen */}
+          <Skeleton className="relative w-28 sm:w-40 shrink-0 min-h-35 sm:min-h-45 bg-secondary/80 rounded-none border-r border-border/40" />
 
-      {/* 2. Área de Información */}
-      <div className="flex flex-col flex-1 p-5 sm:p-6 justify-between w-full text-center sm:text-left">
-        <div className="flex flex-col gap-2.5 items-center sm:items-start">
-          {/* Marca */}
-          <Skeleton className="h-2.5 w-16 bg-secondary/80 rounded-sm" />
-          {/* Nombre de la fragancia  */}
-          <Skeleton className="h-6 w-3/4 sm:w-1/2 bg-secondary/80 rounded-sm" />
-          {/* Precio */}
-          <div className="mt-1">
-            <Skeleton className="h-5 w-24 bg-secondary/80 rounded-sm" />
+          {/* Área de Información */}
+          <div className="flex flex-col flex-1 p-4 sm:p-6 justify-between text-left min-w-0">
+            <div className="flex flex-col gap-1">
+              {/* Marca */}
+              <Skeleton className="h-2.5 w-12 sm:w-16 bg-secondary/80 rounded-sm" />
+              {/* Nombre de la fragancia */}
+              <Skeleton className="h-4 sm:h-6 w-full sm:w-3/4 bg-secondary/80 rounded-sm mt-1" />
+              {/* Precio */}
+              <div className="mt-1 sm:mt-2">
+                <Skeleton className="h-4 sm:h-5 w-16 sm:w-24 bg-secondary/80 rounded-sm" />
+              </div>
+            </div>
+
+            {/* Acciones */}
+            <div className="flex flex-wrap items-center justify-start gap-3 mt-4 sm:mt-0">
+              {/* Skeleton del botón miniatura del carrito (SOLO CELULAR) */}
+              <div className="sm:hidden">
+                <Skeleton className="h-8 w-10 bg-secondary/80 rounded-sm shadow-sm" />
+              </div>
+
+              {/* Skeleton Botón Eliminar */}
+              <Skeleton className="h-3 w-14 sm:w-16 bg-secondary/80 rounded-sm" />
+
+              {/* Separador vertical */}
+              <div className="w-px h-3 bg-border hidden sm:block" />
+
+              {/* Skeleton Comprar ahora (SOLO PC) */}
+              <Skeleton className="h-3 w-24 bg-secondary/80 rounded-sm hidden sm:block" />
+            </div>
           </div>
         </div>
 
-        {/* Acciones (Eliminar / Comprar ahora) */}
-        <div className="flex items-center justify-center sm:justify-start gap-4 mt-6 sm:mt-0">
-          <Skeleton className="h-3 w-16 bg-secondary/80 rounded-sm" />
-          {/* Separador vertical que usamos en el diseño real */}
-          <div className="w-px h-3 bg-border hidden sm:block" />
-          <Skeleton className="h-3 w-24 bg-secondary/80 rounded-sm hidden sm:block" />
+        {/* 2. Área del Botón Gigante (SOLO PC) */}
+        <div className="hidden sm:flex p-6 items-center justify-center border-l border-border/40 shrink-0 w-auto bg-transparent">
+          <Skeleton className="w-45 h-12 rounded-sm bg-foreground/10" />
         </div>
-      </div>
-
-      {/* 3. Área del Botón */}
-      <div className="p-5 sm:p-6 flex items-center justify-center border-t sm:border-t-0 sm:border-l border-border/40 shrink-0 w-full sm:w-auto">
-        <Skeleton className="w-full sm:w-46.5 h-12 rounded-sm bg-foreground/10" />
       </div>
     </div>
   );
