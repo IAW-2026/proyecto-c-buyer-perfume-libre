@@ -22,6 +22,7 @@ import { RolUsuario } from "@/lib/generated/prisma/browser";
 
 import {
   Sheet,
+  SheetClose,
   SheetContent,
   SheetHeader,
   SheetTitle,
@@ -214,12 +215,17 @@ function MobileMenuLink({
   label: string;
 }) {
   return (
-    <Link
-      href={href}
-      className="flex items-center gap-4 p-3.5 rounded-sm hover:bg-secondary/10 transition-colors text-foreground"
-    >
-      <Icon className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} />
-      <span className="font-medium text-[14px]">{label}</span>
-    </Link>
+    <SheetClose
+      render={
+        <Link
+          href={href}
+          className="flex items-center gap-4 p-3.5 rounded-sm hover:bg-secondary/10 transition-colors text-foreground"
+        >
+          <Icon className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} />
+          <span className="font-medium text-[14px]">{label}</span>
+        </Link>
+      }
+      nativeButton={false}
+    ></SheetClose>
   );
 }
