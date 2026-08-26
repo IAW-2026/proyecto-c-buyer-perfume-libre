@@ -183,40 +183,32 @@ const MARCAS_MOCK = [
 const TAMANOS_MOCK = ["30", "50", "75", "100", "200"];
 const GENEROS_MOCK = ["Hombre", "Mujer", "Unisex"];
 
-export default function SidebarFiltros({ isOpen }: { isOpen: boolean }) {
+export function ContenidoFiltros() {
   return (
-    <div
-      className={`shrink-0 overflow-y-auto overflow-x-hidden transition-all duration-300 ease-in-out [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-thumb]:rounded-full ${
-        isOpen
-          ? "w-68 mr-4 max-h-[calc(100vh-160px)] opacity-100"
-          : "w-0 max-h-0 opacity-0"
-      }`}
-    >
-      <div className="w-64 pb-16 pr-2">
-        <Accordion
-          multiple
-          defaultValue={["Marca", "Género", "Precio", "Tamaño"]}
-          className="w-full space-y-1"
-        >
-          <AcordionCheckList
-            title="Marca"
-            paramName="marca"
-            items={MARCAS_MOCK}
-          />
-          <AcordionCheckList
-            title="Género"
-            paramName="genero"
-            items={GENEROS_MOCK}
-          />
-          <FiltroPrecio />
-          <AcordionCheckList
-            title="Tamaño"
-            paramName="tamano"
-            items={TAMANOS_MOCK}
-            suffix="ml"
-          />
-        </Accordion>
-      </div>
+    <div className="w-full pb-8 pr-4 pl-4 md:pl-0 md:pr-2">
+      <Accordion
+        multiple
+        defaultValue={["Marca", "Género", "Precio", "Tamaño"]}
+        className="w-full space-y-1"
+      >
+        <AcordionCheckList
+          title="Marca"
+          paramName="marca"
+          items={MARCAS_MOCK}
+        />
+        <AcordionCheckList
+          title="Género"
+          paramName="genero"
+          items={GENEROS_MOCK}
+        />
+        <FiltroPrecio />
+        <AcordionCheckList
+          title="Tamaño"
+          paramName="tamano"
+          items={TAMANOS_MOCK}
+          suffix="ml"
+        />
+      </Accordion>
     </div>
   );
 }
