@@ -72,7 +72,6 @@ export function BotonAgregarCarrito({
       disabled={isPending}
     >
       {isPending ? (
-        // El margen mr-2 cambia de forma condicional si se activa soloIconoMobile
         <Loader2
           className={`h-4 w-4 animate-spin ${soloIconoMobile ? "sm:mr-2" : "mr-2"}`}
         />
@@ -82,7 +81,6 @@ export function BotonAgregarCarrito({
         />
       )}
 
-      {/* Si soloIconoMobile es true, aplicamos la clase hidden sm:inline */}
       <span className={soloIconoMobile ? "hidden sm:inline" : ""}>
         {isPending ? "Agregando..." : "Agregar al carrito"}
       </span>
