@@ -31,29 +31,28 @@ export default function LoadingCarrito() {
 function SkeletonCartItem() {
   return (
     <div className="overflow-hidden rounded-sm border border-border/60 bg-card shadow-sm">
-      <div className="p-0 flex flex-col sm:flex-row items-center sm:items-stretch">
-        {/* Skeleton de la Imagen */}
-        <Skeleton className="relative w-full sm:w-32 shrink-0 aspect-3/4 sm:aspect-auto sm:min-h-40 bg-secondary/80 rounded-none border-b sm:border-b-0 sm:border-r border-border/40" />
+      <div className="p-0 flex flex-row items-stretch">
+        {/* 2. Skeleton de la Imagen: */}
+        <Skeleton className="relative w-24 sm:w-32 shrink-0 min-h-30 sm:min-h-40 bg-secondary/80 rounded-none border-r border-border/40" />
 
-        <div className="flex flex-col flex-1 justify-between p-5 sm:p-6 w-full">
-          <div className="flex justify-between items-start gap-4">
-            <div className="text-left w-full space-y-2.5">
+        <div className="flex flex-col flex-1 justify-between p-3 sm:p-6 w-full min-w-0">
+          <div className="flex justify-between items-start gap-2 sm:gap-4">
+            <div className="text-left w-full space-y-2 sm:space-y-2.5">
               {/* Nombre del perfume */}
-              <Skeleton className="h-6 w-3/4 sm:w-1/2 bg-secondary/80 rounded-sm" />
+              <Skeleton className="h-4 sm:h-6 w-full sm:w-3/4 bg-secondary/80 rounded-sm" />
               {/* Vendido por */}
-              <Skeleton className="h-3 w-32 bg-secondary/50 rounded-sm" />
+              <Skeleton className="h-2.5 sm:h-3 w-20 sm:w-32 bg-secondary/50 rounded-sm" />
             </div>
 
             {/* Botón Eliminar */}
-            <Skeleton className="h-8 w-8 shrink-0 bg-secondary/80 rounded-sm" />
+            <Skeleton className="h-8 w-8 shrink-0 bg-secondary/80 rounded-sm -mr-2 -mt-1 sm:-mt-2" />
           </div>
 
-          {/* Controles Inferiores */}
-          <div className="flex justify-between items-end mt-6">
+          <div className="flex justify-between items-end mt-4 sm:mt-6 gap-2">
             {/* Selector de cantidad */}
-            <Skeleton className="h-9 w-24 bg-secondary/80 rounded-sm" />
+            <Skeleton className="h-8 sm:h-9 w-20 sm:w-24 bg-secondary/80 rounded-sm" />
             {/* Precio */}
-            <Skeleton className="h-6 w-24 bg-secondary/80 rounded-sm" />
+            <Skeleton className="h-5 sm:h-6 w-16 sm:w-24 bg-secondary/80 rounded-sm" />
           </div>
         </div>
       </div>
