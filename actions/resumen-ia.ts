@@ -1,6 +1,6 @@
 "use server";
 
-import { generateObject } from "ai";
+import { generateText, Output } from "ai";
 import { groq } from "@ai-sdk/groq";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
@@ -31,16 +31,18 @@ export async function generarYGuardarResumenIA(productoId: string) {
       ${textoResenas}
     `;
 
-    const { object } = await generateObject({
+    const { output } = await generateText({
       model: groq("openai/gpt-oss-120b"),
-      schema: z.object({
-        sentimientoGeneral: z.enum(["Excelente", "Bueno", "Regular", "Malo"]),
-        resumenProducto: z
-          .string()
-          .describe("Resumen de calidad, aroma y duración."),
-        resumenVendedor: z
-          .string()
-          .describe("Resumen sobre el envío, empaque y trato."),
+      output: Output.object({
+        schema: z.object({
+          sentimientoGeneral: z.enum(["Excelente", "Bueno", "Regular", "Malo"]),
+          resumenProducto: z
+            .string()
+            .describe("Resumen de calidad, aroma y duración."),
+          resumenVendedor: z
+            .string()
+            .describe("Resumen sobre el envío, empaque y trato."),
+        }),
       }),
       prompt: prompt,
     });
@@ -50,14 +52,14 @@ export async function generarYGuardarResumenIA(productoId: string) {
         productoId: productoId,
       },
       update: {
-        resumenProducto: object.resumenProducto,
-        resumenVendedor: object.resumenVendedor,
+        resumenProducto: output.resumenProducto,
+        resumenVendedor: output.resumenVendedor,
         resenasProcesadas: resenas.length,
       },
       create: {
         productoId: productoId,
-        resumenProducto: object.resumenProducto,
-        resumenVendedor: object.resumenVendedor,
+        resumenProducto: output.resumenProducto,
+        resumenVendedor: output.resumenVendedor,
         resenasProcesadas: resenas.length,
       },
     });
