@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "seed": "npx tsx prisma/seed.ts",
+    "seed:clean": "npx tsx prisma/clean.ts"
   },
   "dependencies": {
     "@ai-sdk/groq": "^4.0.35",
