@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/limpiar-ordenes",
       "schedule": "0 4 * * *"
+    },
+    {
+      "path": "/api/cron/resumenes",
+      "schedule": "0 4 * * *"
     }
   ]
 }

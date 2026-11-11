@@ -20,6 +20,9 @@ import { BotonAgregarCarrito } from "@/components/carrito/botonAgregarCarrito";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
+import { obtenerResumenYResenas } from "@/actions/resumen-ia";
+import SeccionResenas from "@/components/producto/SeccionResenas";
+import { SeccionResenasSkeleton } from "@/components/producto/SeccionResenasSkeleton";
 
 export async function generateMetadata({
   params,
@@ -102,6 +105,10 @@ export default async function ProductoDetalle({
           />
           <ProductInformation producto={producto} />
         </div>
+
+        <Suspense fallback={<SeccionResenasSkeleton />}>
+          <SeccionResenas productoId={producto.id} />
+        </Suspense>
       </main>
     </div>
   );
