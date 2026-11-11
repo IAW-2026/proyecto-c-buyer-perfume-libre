@@ -1,0 +1,43 @@
+import type { Metadata } from "next";
+import { ClerkProvider } from "@clerk/nextjs";
+import { Geist, Geist_Mono } from "next/font/google";
+import { UsuarioSync } from "@/components/auth/UsuarioSync";
+import { Toaster } from "@/components/ui/sonner";
+import "./globals.css";
+import { ScrollToTop } from "@/components/layout/ScrollToTop";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: "Buyer Perfume Libre",
+  description: "Tienda online de perfumes con checkout, compras y favoritos",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="es">
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} min-h-screen antialiased overflow-x-hidden`}
+      >
+        <ClerkProvider>
+          <ScrollToTop />
+          <UsuarioSync />
+          {children}
+          <Toaster position="bottom-right" />
+        </ClerkProvider>
+      </body>
+    </html>
+  );
+}

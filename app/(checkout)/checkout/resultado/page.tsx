@@ -1,0 +1,72 @@
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
+import { Metadata } from "next";
+import StatusScreenPayment from "@/components/checkout/StatusScreenPayment";
+import { obtenerEstadoOrden } from "@/actions/checkout";
+import { EstadosOrden } from "@/schema/perfume.schema";
+
+export const dynamic = "force-dynamic";
+
+type Props = {
+  searchParams: Promise<{ payment_id?: string; ordenId?: string }>;
+};
+
+export const metadata: Metadata = {
+  title: "Estado del Pago - Perfume Libre",
+};
+
+export default async function CheckoutResultadoPage({ searchParams }: Props) {
+  const { userId } = await auth();
+  if (!userId) redirect("/sign-in");
+
+  const { payment_id, ordenId } = await searchParams;
+
+  // Si no hay ID de pago de Mercado Pago, lo mandamos al carrito
+  if (!payment_id || !ordenId) redirect("/carrito");
+
+  const estadoOrden = await obtenerEstadoOrden(ordenId);
+  const estadoValidado = EstadosOrden.parse(estadoOrden?.estado);
+  const ordenCancelada = estadoValidado === EstadosOrden.enum.CANCELADO;
+
+  return (
+    <div className="w-full bg-background flex flex-1 items-center justify-center p-4 min-h-screen">
+      {/* Mantenemos tu Card, pero le sacamos el overflow-hidden por si el Brick necesita expandirse */}
+      <div className="w-full max-w-md shadow-lg border border-border/60 rounded-sm bg-card p-6">
+        <div className="mb-4 text-center">
+          <h1 className="font-serif text-[24px] font-normal text-foreground tracking-tight">
+            Resumen de tu transacción
+          </h1>
+          {ordenId && (
+            <p className="text-[12px] text-muted-foreground mt-1">
+              Orden: <span className="font-mono">{ordenId}</span>
+            </p>
+          )}
+        </div>
+
+        {/* Acá le pasamos la pelota a Mercado Pago para que dibuje el estado, el ticket o el error */}
+        <StatusScreenPayment paymentId={payment_id} />
+
+        {/* Podés agregar tus botones personalizados acá abajo si querés */}
+        <div className="mt-6 flex flex-col gap-3">
+          {/* Botón de reintento */}
+          {ordenCancelada && (
+            <a
+              href={`/checkout/pago?ordenId=${ordenId}`}
+              className="w-full h-12 flex items-center justify-center text-[11px] uppercase font-bold rounded-sm bg-foreground text-background hover:bg-foreground/90 transition-all"
+            >
+              Volver a intentar el pago
+            </a>
+          )}
+
+          {/* Tu botón original de ver pedidos */}
+          <a
+            href="/compras"
+            className="w-full h-12 flex items-center justify-center text-[11px] uppercase tracking-[0.08em] font-bold rounded-sm border border-border/60 text-foreground hover:bg-secondary transition-all"
+          >
+            Ver mis pedidos
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
