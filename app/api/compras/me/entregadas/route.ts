@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { fetchProductoDesdeSeller, validateApiKey } from "@/lib/api";
+import { EstadoOrden } from "@/lib/generated/prisma/enums";
 
 export async function GET(req: Request) {
   try {
@@ -21,9 +22,7 @@ export async function GET(req: Request) {
     const ordenesEntregadas = await prisma.ordenCompra.findMany({
       where: {
         usuarioId: id_comprador,
-        estado: {
-          in: ["Entregado", "ENTREGADO"],
-        },
+        estado: EstadoOrden.ENTREGADO,
       },
       include: {
         items: true,

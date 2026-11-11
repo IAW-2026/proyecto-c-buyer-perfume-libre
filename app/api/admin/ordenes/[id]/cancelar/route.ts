@@ -1,4 +1,5 @@
 import { validateApiKey } from "@/lib/api";
+import { EstadoOrden } from "@/lib/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
@@ -27,7 +28,7 @@ export async function POST(
 
     await prisma.ordenCompra.update({
       where: { id: ordenId },
-      data: { estado: "Cancelado" },
+      data: { estado: EstadoOrden.CANCELADO },
     });
 
     return NextResponse.json([

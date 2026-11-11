@@ -53,13 +53,13 @@ export default function PanelMetodosEnvio({
           return (
             <label
               key={idVirtual}
-              className={`flex flex-col sm:flex-row sm:items-center justify-between p-6 cursor-pointer transition-colors hover:bg-secondary/20 ${
+              className={`flex flex-row items-center justify-between p-4 sm:p-6 cursor-pointer transition-colors hover:bg-secondary/20 ${
                 isSelected ? "bg-secondary/30" : ""
               }`}
               onClick={() => setSeleccionadoId(idVirtual)}
             >
-              <div className="flex items-start sm:items-center gap-4 mb-4 sm:mb-0">
-                <div className="mt-1 sm:mt-0 shrink-0">
+              <div className="flex flex-row items-center flex-1 min-w-0 gap-3 sm:gap-4">
+                <div className="shrink-0">
                   <div
                     className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
                       isSelected
@@ -73,24 +73,24 @@ export default function PanelMetodosEnvio({
                   </div>
                 </div>
 
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-2">
-                    <Truck className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-[14px] font-bold text-foreground">
+                <div className="flex flex-col min-w-0">
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <Truck className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground shrink-0" />
+                    <span className="text-[13px] sm:text-[14px] font-bold text-foreground truncate">
                       {opcion.operador}
                     </span>
                   </div>
-                  <span className="text-[12px] font-light text-muted-foreground uppercase tracking-wide mt-1">
+                  <span className="text-[10px] sm:text-[12px] font-light text-muted-foreground uppercase tracking-wide mt-1 truncate">
                     {opcion.tipo_servicio}{" "}
-                    <span className="mx-1.5 opacity-50">|</span> Llega en{" "}
+                    <span className="mx-1 opacity-50">|</span> Llega en{" "}
                     {opcion.demora_dias}{" "}
                     {opcion.demora_dias === 1 ? "día" : "días"}
                   </span>
                 </div>
               </div>
 
-              <div className="text-right">
-                <span className="text-[18px] font-semibold tracking-[-0.02em] text-foreground">
+              <div className="text-right shrink-0 pl-3">
+                <span className="text-[15px] sm:text-[18px] font-semibold tracking-[-0.02em] text-foreground">
                   {formatearPrecio(opcion.precio * 100)}
                 </span>
               </div>
@@ -99,7 +99,7 @@ export default function PanelMetodosEnvio({
         })}
       </div>
 
-      <div className="p-6 bg-transparent flex justify-end">
+      <div className="p-4 sm:p-6 bg-transparent flex justify-end">
         <Button
           className="h-12 w-full md:w-auto md:min-w-60 text-[11px] uppercase tracking-widest font-bold rounded-sm bg-foreground text-background hover:bg-foreground/90 transition-all shadow-md"
           disabled={

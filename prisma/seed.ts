@@ -1,3 +1,4 @@
+import { EstadoOrden } from "@/lib/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
 import { faker } from "@faker-js/faker/locale/es";
 
@@ -160,7 +161,7 @@ async function main() {
         usuarioId: usuario.id,
         vendedorId: productoElegido.vendedor_id || "vendedor_mock",
         pagoId: `pago_mock_${faker.string.alphanumeric(10)}`,
-        estado: "ENTREGADA",
+        estado: EstadoOrden.ENTREGADO,
         total: totalCentavos,
         createdAt: fechaCompra,
         updatedAt: fechaCompra,

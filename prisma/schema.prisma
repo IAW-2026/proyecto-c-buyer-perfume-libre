@@ -12,6 +12,16 @@ enum RolUsuario {
   ADMIN
 }
 
+enum EstadoOrden {
+  PENDIENTE
+  PAGADO
+  PREPARANDO
+  EN_TRANSITO
+  ENTREGADO
+  CANCELADO
+}
+
+
 /// * Tanto el id de los productos, direcciones, pagos y envíos se obtienen de las APIs 
 /// * correspondientes por lo que no es necesario crear modelos adicionales para ellos.
 model Usuario {
@@ -69,7 +79,7 @@ model OrdenCompra {
   vendedorId String           
   pagoId     String?            @unique
   envioId    String?           @unique
-  estado     String
+  estado     EstadoOrden
   total      Int
   createdAt  DateTime          @default(now())
   updatedAt  DateTime          @updatedAt
@@ -90,4 +100,18 @@ model ItemOrdenCompra {
   precio        Int
   cantidad      Int
   ordenCompra   OrdenCompra @relation(fields: [ordenCompraId], references: [id])
+}
+/*
+* Feedback app es dueña de la información de las reseñas pero
+* desde el punto de vista de cache y de la generación de resúmenes, 
+* es más eficiente tener un modelo que guarde el resumen de cada producto y la cantidad de reseñas procesadas
+* en lugar de tener que consultar la API de feedback app cada vez que se necesite un resumen.
+*/
+model ResumenProductoIA {
+  id                String   @id @default(cuid())
+  productoId        String   @unique 
+  resumenProducto   String?  @db.Text
+  resumenVendedor   String?  @db.Text
+  resenasProcesadas Int      @default(0)
+  actualizadoEn     DateTime @updatedAt
 }

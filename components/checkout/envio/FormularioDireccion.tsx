@@ -53,9 +53,7 @@ export default function FormularioDireccion({
       }
       onSuccess(idGuardado);
       form.reset();
-    } catch (error) {
-      console.error("Error al guardar", error);
-    }
+    } catch (error) {}
   };
 
   return (

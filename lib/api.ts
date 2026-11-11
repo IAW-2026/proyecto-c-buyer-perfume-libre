@@ -13,13 +13,17 @@ import {
 } from "@/schema/perfume.schema";
 import { mockPerfumes } from "./mockPerfumes";
 import { z } from "zod";
-import { obtenerCotizacionesEnvioMock } from "./mockEnvios";
+import {
+  obtenerCotizacionesEnvioMock,
+  obtenerHistorialSimulado,
+} from "./mockEnvios";
 import {
   enviarResenaProductoReal,
   enviarResenaVendedorReal,
 } from "@/actions/resenas";
-import { auth } from "@clerk/nextjs/server";
 import { obtenerHistorialEnvioReal } from "@/actions/tracking";
+
+// TODO: Refactorizar este archivo
 
 export interface FiltrosCatalogo {
   q?: string | string[];
@@ -632,11 +636,16 @@ async function enviarResenaVendedorMock(
   return { estado: "success", mensaje: "Reseña simulada con éxito" };
 }
 
-export async function obtenerHistorialEnvio(trackingId: string) {
+export async function obtenerHistorialEnvio(
+  trackingId: string,
+  estado?: string,
+) {
   const usarApiReal = process.env.USE_REAL_API === "true";
 
   if (usarApiReal && trackingId) {
     return obtenerHistorialEnvioReal(trackingId);
+  } else {
+    return obtenerHistorialSimulado(estado || "PAGADO");
   }
 }
 
@@ -760,7 +769,8 @@ export async function generarOrdenEnvio(
   items: any[],
   servicio_elegido: any,
 ) {
-  const usarApiReal = true;
+  const usarApiReal = process.env.USE_REAL_API === "true";
+
   if (usarApiReal) {
     return generarOrdenEnvioReal(
       id_orden,
@@ -917,6 +927,44 @@ export async function fetchProductoDesdeSeller(id: string) {
 
   const data = await res.json();
   return { producto: data.producto, vendedor: data.vendedor };
+}
+
+export async function obtenerAccessTokenVendedor(idVendedor: string) {
+  const usarApiReal = process.env.USE_REAL_API === "true";
+  console.log("Obteniendo access token para vendedor:", idVendedor);
+  if (usarApiReal) {
+    return obtenerAccessTokenVendedorReal(idVendedor);
+  } else {
+    return obtenerAccessTokenVendedorMock();
+  }
+}
+
+async function obtenerAccessTokenVendedorReal(idVendedor: string) {
+  const headers = new Headers();
+  headers.append("api_key", process.env.SELLER_API_KEY || "");
+
+  const url = `${process.env.SELLER_API_URL}/seller/vendedores/${idVendedor}/access_token`;
+
+  const res = await fetch(url, {
+    method: "GET",
+    headers: headers,
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    throw new Error(
+      `Error API Seller al obtener access token del vendedor ${idVendedor}: ${res.status}`,
+    );
+  }
+
+  const data = await res.json();
+
+  return data.access_token;
+}
+
+async function obtenerAccessTokenVendedorMock() {
+  console.log("Usando access token mock para vendedor");
+  return process.env.MP_ACCESS_TOKEN!;
 }
 
 export function validarTipo<TSchema extends z.ZodTypeAny>(

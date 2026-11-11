@@ -27,9 +27,7 @@ export default function ListaFavoritos({
 
       try {
         await eliminarFavorito(id);
-      } catch (error) {
-        console.error("Fallo al eliminar de la DB", error);
-      }
+      } catch (error) {}
     });
   };
 
