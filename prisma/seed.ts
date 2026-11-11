@@ -4,6 +4,47 @@ import { mockPerfumes } from "@/lib/mockPerfumes";
 import { obtenerCotizacionesEnvioMock } from "@/lib/mockEnvios";
 import { faker } from "@faker-js/faker/locale/es";
 
+function generarFechaCompraEscalonada(): Date {
+  const ahora = new Date();
+
+  // Offset en meses (0 = mes actual, 5 = hace 5 meses)
+  const mesOffset = faker.helpers.weightedArrayElement([
+    { weight: 6, value: 5 },
+    { weight: 10, value: 4 },
+    { weight: 15, value: 3 },
+    { weight: 22, value: 2 },
+    { weight: 32, value: 1 },
+    { weight: 15, value: 0 },
+  ]);
+
+  if (mesOffset === 0) {
+    // Mes actual: desde el día 1 hasta la fecha/hora actual
+    const inicioMes = new Date(
+      ahora.getFullYear(),
+      ahora.getMonth(),
+      1,
+      0,
+      0,
+      0,
+    );
+    return faker.date.between({ from: inicioMes, to: ahora });
+  }
+
+  // Meses anteriores: fecha aleatoria entre el día 1 y el último día de ese mes específico
+  const fechaReferencia = new Date(
+    ahora.getFullYear(),
+    ahora.getMonth() - mesOffset,
+    1,
+  );
+  const anio = fechaReferencia.getFullYear();
+  const mes = fechaReferencia.getMonth();
+
+  const inicioMes = new Date(anio, mes, 1, 0, 0, 0);
+  const finMes = new Date(anio, mes + 1, 0, 23, 59, 59);
+
+  return faker.date.between({ from: inicioMes, to: finMes });
+}
+
 async function main() {
   let cantidadUsuarios = 5;
   let cantidadOrdenes = 20;
@@ -32,10 +73,14 @@ async function main() {
   console.log(`2. Creando ${cantidadUsuarios} usuarios de prueba...`);
   const usuarios = [];
   for (let i = 0; i < cantidadUsuarios; i++) {
+    // Los usuarios se crean con una fecha anterior al rango de compras para garantizar coherencia
     const usuario = await prisma.usuario.create({
       data: {
         id: `mock_user_${faker.string.alphanumeric(10)}`,
-        createdAt: faker.date.recent({ days: 180 }),
+        createdAt: faker.date.between({
+          from: new Date(Date.now() - 220 * 86400000),
+          to: new Date(Date.now() - 175 * 86400000),
+        }),
         direcciones: {
           create: {
             provincia: faker.location.state(),
@@ -53,18 +98,27 @@ async function main() {
     usuarios.push(usuario);
   }
 
-  console.log(`3. Generando ${cantidadOrdenes} compras simuladas...`);
+  console.log(
+    `3. Generando ${cantidadOrdenes} compras simuladas con distribución realista...`,
+  );
 
   for (let i = 0; i < cantidadOrdenes; i++) {
     const usuario = faker.helpers.arrayElement(usuarios);
     const direccion = usuario.direcciones[0];
     const productoElegido = faker.helpers.arrayElement(productos);
     const envioElegido = faker.helpers.arrayElement(opcionesEnvio);
-    const fechaCompra = faker.date.recent({ days: 90 });
+    const fechaCompra = generarFechaCompraEscalonada();
+
+    const cantidad = faker.helpers.weightedArrayElement([
+      { weight: 80, value: 1 },
+      { weight: 15, value: 2 },
+      { weight: 5, value: 3 },
+    ]);
 
     const costoEnvioCentavos = envioElegido.precio * 100;
     const precioProductoCentavos = productoElegido.precio;
-    const totalCentavos = precioProductoCentavos + costoEnvioCentavos;
+    const totalCentavos =
+      precioProductoCentavos * cantidad + costoEnvioCentavos;
 
     const orden = await prisma.ordenCompra.create({
       data: {
@@ -86,7 +140,7 @@ async function main() {
             {
               productoId: String(productoElegido.id),
               precio: precioProductoCentavos,
-              cantidad: 1,
+              cantidad: cantidad,
             },
           ],
         },
@@ -94,7 +148,7 @@ async function main() {
     });
 
     console.log(
-      `[${i + 1}/${cantidadOrdenes}] Orden procesada (ID: ${orden.id})`,
+      `[${i + 1}/${cantidadOrdenes}] Orden procesada (ID: ${orden.id}, Fecha: ${fechaCompra.toISOString().split("T")[0]})`,
     );
   }
 
