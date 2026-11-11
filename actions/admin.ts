@@ -220,8 +220,27 @@ async function crearUsuariosFalsos(CANTIDAD_USUARIOS: number) {
 
 export async function limpiarDatosPrueba() {
   try {
+    const condicionOrdenes = {
+      OR: [
+        { usuarioId: { startsWith: "mock_user_" } },
+        { pagoId: { startsWith: "pago_mock_" } },
+        { id: { startsWith: "mock_ord_" } },
+        { envioId: { startsWith: "TRK_MOCK_" } },
+      ],
+    };
+
     await prisma.$transaction([
+      prisma.itemOrdenCompra.deleteMany({
+        where: {
+          ordenCompra: condicionOrdenes,
+        },
+      }),
+
       prisma.ordenCompra.deleteMany({
+        where: condicionOrdenes,
+      }),
+
+      prisma.direccion.deleteMany({
         where: {
           usuarioId: { startsWith: "mock_user_" },
         },

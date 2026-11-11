@@ -1,77 +1,48 @@
 import { EstadoOrden } from "@/lib/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
+import { mockPerfumes } from "@/lib/mockPerfumes";
+import { obtenerCotizacionesEnvioMock } from "@/lib/mockEnvios";
 import { faker } from "@faker-js/faker/locale/es";
 
-interface ProductoSeller {
-  producto_id: string;
-  vendedor_id: string;
-  precio: number;
-  titulo: string;
-  imagen?: string;
-}
+function generarFechaCompraEscalonada(): Date {
+  const ahora = new Date();
 
-interface OpcionEnvio {
-  operador: string;
-  tipo_servicio: string;
-  precio: number;
-  demora_dias: number;
-}
+  // Offset en meses (0 = mes actual, 5 = hace 5 meses)
+  const mesOffset = faker.helpers.weightedArrayElement([
+    { weight: 6, value: 5 },
+    { weight: 10, value: 4 },
+    { weight: 15, value: 3 },
+    { weight: 22, value: 2 },
+    { weight: 32, value: 1 },
+    { weight: 15, value: 0 },
+  ]);
 
-const SELLER_API_URL =
-  process.env.SELLER_API_URL ||
-  "https://proyecto-c-seller-perfume-libre.vercel.app/api";
-const SHIPPING_API_URL =
-  process.env.SHIPPING_API_URL ||
-  "https://proyecto-c-shipping2-perfume-libre.vercel.app/api";
-const FEEDBACK_API_URL =
-  process.env.FEEDBACK_API_URL ||
-  "https://proyecto-c-feedback2-perfume-libre.vercel.app/api";
-
-async function cotizarEnvioSeed(
-  codigo_postal: string,
-  direccion_entrega: string,
-): Promise<OpcionEnvio[]> {
-  try {
-    const bodyData = { codigo_postal, direccion_entrega };
-
-    const response = await fetch(`${SHIPPING_API_URL}/shipping/cotizar`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(bodyData),
-    });
-
-    if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
-    const data = await response.json();
-
-    if (!data.opciones || !Array.isArray(data.opciones)) {
-      throw new Error("Formato inválido");
-    }
-    return data.opciones;
-  } catch (error) {
-    console.warn(
-      `⚠️ Cotización real falló para CP ${codigo_postal}, usando Mock.`,
+  if (mesOffset === 0) {
+    // Mes actual: desde el día 1 hasta la fecha/hora actual
+    const inicioMes = new Date(
+      ahora.getFullYear(),
+      ahora.getMonth(),
+      1,
+      0,
+      0,
+      0,
     );
-    return [
-      {
-        operador: "Correo Argentino",
-        tipo_servicio: "Clásico",
-        precio: 3500,
-        demora_dias: 5,
-      },
-      {
-        operador: "Andreani",
-        tipo_servicio: "Rapido",
-        precio: 7800,
-        demora_dias: 1,
-      },
-      {
-        operador: "OCA",
-        tipo_servicio: "Express",
-        precio: 5000,
-        demora_dias: 3,
-      },
-    ];
+    return faker.date.between({ from: inicioMes, to: ahora });
   }
+
+  // Meses anteriores: fecha aleatoria entre el día 1 y el último día de ese mes específico
+  const fechaReferencia = new Date(
+    ahora.getFullYear(),
+    ahora.getMonth() - mesOffset,
+    1,
+  );
+  const anio = fechaReferencia.getFullYear();
+  const mes = fechaReferencia.getMonth();
+
+  const inicioMes = new Date(anio, mes, 1, 0, 0, 0);
+  const finMes = new Date(anio, mes + 1, 0, 23, 59, 59);
+
+  return faker.date.between({ from: inicioMes, to: finMes });
 }
 
 async function main() {
@@ -91,33 +62,25 @@ async function main() {
     `Corriendo seed con ${cantidadUsuarios} usuarios y ${cantidadOrdenes} órdenes...`,
   );
 
-  console.log("1. Obteniendo catálogo real de Seller App...");
+  console.log("1. Cargando catálogo mock de perfumes y opciones de envío...");
+  const productos = mockPerfumes;
+  const opcionesEnvio = await obtenerCotizacionesEnvioMock();
 
-  const headers = new Headers();
-  headers.append("titulo", " ");
-  headers.append("categorias", JSON.stringify([]));
-  headers.append("pagina", "1");
-  headers.append("cantidad_pagina", "50");
-  headers.append("api_key", process.env.SELLER_API_KEY || "");
-
-  const responseSeller = await fetch(`${SELLER_API_URL}/seller/productos`, {
-    method: "GET",
-    headers: headers,
-  });
-
-  if (!responseSeller.ok) throw new Error("Falló Seller API");
-  const dataSeller = await responseSeller.json();
-  const productos: ProductoSeller[] = dataSeller.items || [];
-
-  if (productos.length === 0) throw new Error("No hay productos en Seller App");
+  if (productos.length === 0) {
+    throw new Error("No hay productos en el mock de perfumes.");
+  }
 
   console.log(`2. Creando ${cantidadUsuarios} usuarios de prueba...`);
   const usuarios = [];
   for (let i = 0; i < cantidadUsuarios; i++) {
+    // Los usuarios se crean con una fecha anterior al rango de compras para garantizar coherencia
     const usuario = await prisma.usuario.create({
       data: {
         id: `mock_user_${faker.string.alphanumeric(10)}`,
-        createdAt: faker.date.recent({ days: 90 }),
+        createdAt: faker.date.between({
+          from: new Date(Date.now() - 220 * 86400000),
+          to: new Date(Date.now() - 175 * 86400000),
+        }),
         direcciones: {
           create: {
             provincia: faker.location.state(),
@@ -136,31 +99,33 @@ async function main() {
   }
 
   console.log(
-    `3. Generando ${cantidadOrdenes} compras y sincronizando con Shipping y Feedback...`,
+    `3. Generando ${cantidadOrdenes} compras simuladas con distribución realista...`,
   );
 
   for (let i = 0; i < cantidadOrdenes; i++) {
     const usuario = faker.helpers.arrayElement(usuarios);
     const direccion = usuario.direcciones[0];
     const productoElegido = faker.helpers.arrayElement(productos);
-    const fechaCompra = faker.date.recent({ days: 90 });
-
-    const opcionesEnvio = await cotizarEnvioSeed(
-      direccion.codigoPostal,
-      `${direccion.calle} ${direccion.altura}`,
-    );
-
     const envioElegido = faker.helpers.arrayElement(opcionesEnvio);
+    const fechaCompra = generarFechaCompraEscalonada();
+
+    const cantidad = faker.helpers.weightedArrayElement([
+      { weight: 80, value: 1 },
+      { weight: 15, value: 2 },
+      { weight: 5, value: 3 },
+    ]);
 
     const costoEnvioCentavos = envioElegido.precio * 100;
-    const precioProductoCentavos = Math.round(Number(productoElegido.precio));
-    const totalCentavos = precioProductoCentavos + costoEnvioCentavos;
+    const precioProductoCentavos = productoElegido.precio;
+    const totalCentavos =
+      precioProductoCentavos * cantidad + costoEnvioCentavos;
 
     const orden = await prisma.ordenCompra.create({
       data: {
         usuarioId: usuario.id,
-        vendedorId: productoElegido.vendedor_id || "vendedor_mock",
+        vendedorId: productoElegido.vendedor || "vendedor_mock",
         pagoId: `pago_mock_${faker.string.alphanumeric(10)}`,
+        envioId: `TRK_MOCK_${faker.string.alphanumeric(8).toUpperCase()}`,
         estado: EstadoOrden.ENTREGADO,
         total: totalCentavos,
         createdAt: fechaCompra,
@@ -173,82 +138,18 @@ async function main() {
         items: {
           create: [
             {
-              productoId: String(productoElegido.producto_id),
+              productoId: String(productoElegido.id),
               precio: precioProductoCentavos,
-              cantidad: 1,
+              cantidad: cantidad,
             },
           ],
         },
       },
     });
-    try {
-      const bodyShipping = {
-        id_orden: orden.id,
-        id_pedido: orden.id,
-        id_comprador: usuario.id,
-        id_vendedor: productoElegido.vendedor_id || "vendedor_desconocido",
-        direccion_entrega: `${direccion.calle} ${direccion.altura}`,
-        items: [{ productoId: productoElegido.producto_id }],
-        servicio_elegido: {
-          operador: envioElegido.operador,
-          precio: envioElegido.precio,
-          tipo_servicio: envioElegido.tipo_servicio,
-          demora_dias: envioElegido.demora_dias,
-        },
-        usuarioId: usuario.id,
-      };
 
-      const resShipping = await fetch(`${SHIPPING_API_URL}/shipping/ordenes`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(bodyShipping),
-      });
-
-      if (resShipping.ok) {
-        const dataShipping = await resShipping.json();
-        await prisma.ordenCompra.update({
-          where: { id: orden.id },
-          data: { envioId: dataShipping.trackingId || `TRK-${orden.id}` },
-        });
-      }
-    } catch (e) {
-      console.warn(
-        `No se pudo sincronizar envío de orden ${orden.id} con Shipping App`,
-      );
-    }
-
-    if (Math.random() > 0.5) {
-      const calificacion = faker.number.int({ min: 1, max: 5 });
-
-      const comentario =
-        calificacion < 3
-          ? faker.helpers.arrayElement([
-              "Llegó roto",
-              "El aroma no dura nada",
-              "No es lo que esperaba",
-              "Mala atención del vendedor",
-            ])
-          : faker.helpers.arrayElement(["", "Excelente perfume", "Me encantó"]);
-
-      try {
-        await fetch(`${FEEDBACK_API_URL}/resenas`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            usuarioId: usuario.id,
-            productoId: String(productoElegido.producto_id),
-            vendedorId: productoElegido.vendedor_id || "vendedor_mock",
-            ordenCompraId: orden.id,
-            calificacion: calificacion,
-            comentario: comentario,
-          }),
-        });
-      } catch (e) {
-        console.warn(`No se pudo crear reseña para orden ${orden.id}`);
-      }
-    }
-
-    console.log(`[${i + 1}/${cantidadOrdenes}] Orden procesada`);
+    console.log(
+      `[${i + 1}/${cantidadOrdenes}] Orden procesada (ID: ${orden.id}, Fecha: ${fechaCompra.toISOString().split("T")[0]})`,
+    );
   }
 
   console.log(`Simulación completada con éxito.`);
