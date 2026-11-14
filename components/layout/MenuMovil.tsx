@@ -1,8 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useTransition } from "react";
-import { useRouter } from "next/navigation";
-import { useAuth, useUser, SignInButton, UserButton } from "@clerk/nextjs";
+import { SignInButton, UserButton } from "@clerk/nextjs";
 import {
   Heart,
   LayoutDashboard,
@@ -23,6 +21,7 @@ import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "../ui/button";
 import { Skeleton } from "../ui/skeleton";
 import Link from "next/link";
+import { useOptimisticAuth } from "./useOptimisticAuth";
 
 interface MenuMovilProps {
   initialSignedIn: boolean;
@@ -33,20 +32,10 @@ export default function MenuMovil({
   initialSignedIn,
   initialAdmin,
 }: MenuMovilProps) {
-  const { isSignedIn, isLoaded: isAuthLoaded } = useAuth();
-  const { user, isLoaded: isUserLoaded } = useUser();
-  const router = useRouter();
-  const [, startTransition] = useTransition();
-
-  const signedIn = isAuthLoaded ? (isSignedIn ?? false) : initialSignedIn;
-
-  const esAdmin = isUserLoaded
-    ? user?.publicMetadata?.rol === "ADMIN"
-    : initialSignedIn
-      ? initialAdmin
-      : undefined;
-
-  const prevSignedIn = useRef(signedIn);
+  const { signedIn, esAdmin } = useOptimisticAuth(
+    initialSignedIn,
+    initialAdmin,
+  );
 
   return (
     <Sheet>

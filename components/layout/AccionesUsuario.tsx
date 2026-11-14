@@ -1,8 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useTransition } from "react";
-import { useRouter } from "next/navigation";
-import { useAuth, useUser, SignInButton, UserButton } from "@clerk/nextjs";
+import { SignInButton, UserButton } from "@clerk/nextjs";
 import {
   Heart,
   LayoutDashboard,
@@ -14,6 +12,7 @@ import { Button, buttonVariants } from "../ui/button";
 import { Skeleton } from "../ui/skeleton";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { useOptimisticAuth } from "./useOptimisticAuth";
 
 interface AccionesUsuarioProps {
   initialSignedIn: boolean;
@@ -24,22 +23,10 @@ export default function AccionesUsuario({
   initialSignedIn,
   initialAdmin,
 }: AccionesUsuarioProps) {
-  const { isSignedIn, isLoaded: isAuthLoaded } = useAuth();
-  const { user, isLoaded: isUserLoaded } = useUser();
-  const router = useRouter();
-  const [, startTransition] = useTransition();
-
-  // El estado principal de sesión lo controla useAuth en el cliente
-  const signedIn = isAuthLoaded ? (isSignedIn ?? false) : initialSignedIn;
-
-  // Rol admin: si useUser aún no cargó en un login de cliente, es undefined para mostrar skeleton localizado
-  const esAdmin = isUserLoaded
-    ? user?.publicMetadata?.rol === "ADMIN"
-    : initialSignedIn
-      ? initialAdmin
-      : undefined;
-
-  const prevSignedIn = useRef(signedIn);
+  const { signedIn, esAdmin } = useOptimisticAuth(
+    initialSignedIn,
+    initialAdmin,
+  );
 
   return (
     <div className="flex items-center gap-2 md:gap-4 shrink-0">
