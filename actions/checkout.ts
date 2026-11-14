@@ -11,6 +11,7 @@ import { prisma } from "@/lib/prisma";
 import { EstadosOrden } from "@/schema/perfume.schema";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { asegurarUsuario } from "./usuario";
 
 export async function iniciarProcesamientoCompra(
   direccionId: string,
@@ -20,6 +21,8 @@ export async function iniciarProcesamientoCompra(
 ) {
   const { userId } = await auth();
   if (!userId) throw new Error("No autorizado");
+
+  await asegurarUsuario(userId);
 
   if (!productosIds || productosIds.length === 0) {
     throw new Error("No hay productos seleccionados para comprar");

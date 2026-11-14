@@ -1,8 +1,6 @@
 "use server";
 
-import { createClerkClient, currentUser } from "@clerk/nextjs/server";
-import { clerkClient } from "@clerk/nextjs/server";
-import { obtenerRolUsuario } from "./usuario";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 import { EstadoOrden, RolUsuario } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { EstadoOrdenType, EstadosOrden } from "@/schema/perfume.schema";
@@ -18,14 +16,8 @@ const comision = 0.1;
 
 export async function obtenerAdminPageData() {
   try {
-    const user = await currentUser();
-    if (!user) {
-      return null;
-    }
-
-    const rolUsuario = await obtenerRolUsuario();
-
-    if (rolUsuario?.rol !== RolUsuario.ADMIN) {
+    const { userId, sessionClaims } = await auth();
+    if (!userId || sessionClaims?.metadata?.rol !== "ADMIN") {
       return null;
     }
 

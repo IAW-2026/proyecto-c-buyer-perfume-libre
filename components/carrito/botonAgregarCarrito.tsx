@@ -47,7 +47,7 @@ export function BotonAgregarCarrito({
 
     if (!userId) {
       localStorage.setItem("intencionAgregarCarrito", perfumeId);
-      clerk.redirectToSignIn();
+      clerk.openSignIn();
       return;
     }
 

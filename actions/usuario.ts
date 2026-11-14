@@ -2,23 +2,35 @@
 
 import { RolUsuario } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
-import { currentUser } from "@clerk/nextjs/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
+
+export async function asegurarUsuario(userId: string) {
+  try {
+    return await prisma.usuario.upsert({
+      where: { id: userId },
+      update: {},
+      create: {
+        id: userId,
+        rol: RolUsuario.USER,
+      },
+    });
+  } catch (error) {
+    console.error("Error en asegurarUsuario:", error);
+    return await prisma.usuario.findUnique({
+      where: { id: userId },
+    });
+  }
+}
 
 export async function sincronizarUsuario() {
   try {
-    const user = await currentUser();
+    const { userId } = await auth();
 
-    if (!user) {
+    if (!userId) {
       throw new Error("Usuario no autenticado");
     }
 
-    const usuarioDB = await prisma.usuario.upsert({
-      where: { id: user.id },
-      update: {},
-      create: {
-        id: user.id,
-      },
-    });
+    await asegurarUsuario(userId);
   } catch (error) {
     console.error("Error al sincronizar el usuario:", error);
     throw new Error("Error al sincronizar el usuario");
@@ -27,38 +39,47 @@ export async function sincronizarUsuario() {
 
 export async function actualizarRol(usuarioId: string, nuevoRol: RolUsuario) {
   try {
-    await prisma.usuario.update({
+    await prisma.usuario.upsert({
       where: { id: usuarioId },
-      data: { rol: nuevoRol },
+      update: { rol: nuevoRol },
+      create: {
+        id: usuarioId,
+        rol: nuevoRol,
+      },
     });
-  } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new Error("NOT_FOUND");
-    }
 
+    const client = await clerkClient();
+    await client.users.updateUserMetadata(usuarioId, {
+      publicMetadata: {
+        rol: nuevoRol,
+      },
+    });
+  } catch (error: unknown) {
+    console.error("Error al actualizar rol:", error);
     throw new Error("Error al actualizar el rol del usuario");
   }
 }
 
 export async function obtenerRolUsuario() {
   try {
-    const user = await currentUser();
+    const { userId, sessionClaims } = await auth();
 
-    if (!user) {
-      throw new Error("Usuario no autenticado");
+    if (!userId) {
+      return null;
+    }
+
+    const rolClaim = sessionClaims?.metadata?.rol;
+    if (rolClaim) {
+      return { rol: rolClaim as RolUsuario };
     }
 
     const rolUsuario = await prisma.usuario.findUnique({
-      where: { id: user.id },
+      where: { id: userId },
       select: { rol: true },
     });
 
-    if (!rolUsuario) {
-      throw new Error("Usuario no encontrado en la base de datos");
-    }
-
     return rolUsuario;
   } catch (error) {
-    null;
+    return null;
   }
 }

@@ -1,7 +1,12 @@
-import { obtenerRolUsuario } from "@/actions/usuario";
+"use client";
+
+import { useEffect, useRef, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth, useUser, SignInButton, UserButton } from "@clerk/nextjs";
 import {
   Heart,
   LayoutDashboard,
+  LucideIcon,
   Menu,
   ShoppingBag,
   ShoppingCart,
@@ -16,15 +21,41 @@ import {
 } from "../ui/sheet";
 import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "../ui/button";
-import { Show, SignInButton, UserButton } from "@clerk/nextjs";
-import { RolUsuario } from "@/lib/generated/prisma/enums";
+import { Skeleton } from "../ui/skeleton";
 import Link from "next/link";
 
-export default async function MenuMovil() {
-  let rolUsuario;
-  try {
-    rolUsuario = await obtenerRolUsuario();
-  } catch (error) {}
+interface MenuMovilProps {
+  initialSignedIn: boolean;
+  initialAdmin: boolean;
+}
+
+export default function MenuMovil({
+  initialSignedIn,
+  initialAdmin,
+}: MenuMovilProps) {
+  const { isSignedIn, isLoaded: isAuthLoaded } = useAuth();
+  const { user, isLoaded: isUserLoaded } = useUser();
+  const router = useRouter();
+  const [, startTransition] = useTransition();
+
+  const signedIn = isAuthLoaded ? (isSignedIn ?? false) : initialSignedIn;
+
+  const esAdmin = isUserLoaded
+    ? user?.publicMetadata?.rol === "ADMIN"
+    : initialSignedIn
+      ? initialAdmin
+      : undefined;
+
+  const prevSignedIn = useRef(signedIn);
+
+  useEffect(() => {
+    if (isAuthLoaded && prevSignedIn.current !== (isSignedIn ?? false)) {
+      prevSignedIn.current = isSignedIn ?? false;
+      startTransition(() => {
+        router.refresh();
+      });
+    }
+  }, [isAuthLoaded, isSignedIn, router]);
 
   return (
     <Sheet>
@@ -49,42 +80,50 @@ export default async function MenuMovil() {
         </SheetHeader>
 
         <div className="flex flex-col gap-1">
-          <Show when="signed-in">
-            <div className="mb-6 px-4 py-3 bg-secondary/10 border border-border/40 rounded-sm">
-              <UserButton showName />
-            </div>
+          {signedIn && (
+            <div className="flex flex-col gap-1 animate-in fade-in duration-300">
+              <div className="mb-6 px-4 py-3 bg-secondary/10 border border-border/40 rounded-sm">
+                <UserButton showName />
+              </div>
 
-            {rolUsuario?.rol === RolUsuario.ADMIN && (
+              {esAdmin === undefined ? (
+                <div className="p-3.5">
+                  <Skeleton className="h-5 w-32 rounded-sm" />
+                </div>
+              ) : esAdmin ? (
+                <MobileMenuLink
+                  href="/admin/dashboard"
+                  icon={LayoutDashboard}
+                  label="Panel de Control"
+                />
+              ) : null}
               <MobileMenuLink
-                href="/admin/dashboard"
-                icon={LayoutDashboard}
-                label="Panel de Control"
+                href="/compras"
+                icon={ShoppingBag}
+                label="Mis Compras"
               />
-            )}
-            <MobileMenuLink
-              href="/compras"
-              icon={ShoppingBag}
-              label="Mis Compras"
-            />
-            <MobileMenuLink
-              href="/favoritos"
-              icon={Heart}
-              label="Lista de Deseos"
-            />
-            <MobileMenuLink
-              href="/carrito"
-              icon={ShoppingCart}
-              label="Bolsa de Compras"
-            />
-          </Show>
+              <MobileMenuLink
+                href="/favoritos"
+                icon={Heart}
+                label="Lista de Deseos"
+              />
+              <MobileMenuLink
+                href="/carrito"
+                icon={ShoppingCart}
+                label="Bolsa de Compras"
+              />
+            </div>
+          )}
 
-          <Show when="signed-out">
-            <SignInButton mode="modal">
-              <Button className="w-full mt-4 h-12 text-[11px] uppercase tracking-[0.08em] font-bold rounded-sm bg-foreground text-background hover:bg-foreground/90">
-                Ingresar a mi cuenta
-              </Button>
-            </SignInButton>
-          </Show>
+          {!signedIn && (
+            <div className="animate-in fade-in duration-300">
+              <SignInButton mode="modal">
+                <Button className="w-full mt-4 h-12 text-[11px] uppercase tracking-[0.08em] font-bold rounded-sm bg-foreground text-background hover:bg-foreground/90">
+                  Ingresar a mi cuenta
+                </Button>
+              </SignInButton>
+            </div>
+          )}
         </div>
       </SheetContent>
     </Sheet>
@@ -97,7 +136,7 @@ function MobileMenuLink({
   label,
 }: {
   href: string;
-  icon: any;
+  icon: LucideIcon;
   label: string;
 }) {
   return (

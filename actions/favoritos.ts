@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
+import { asegurarUsuario } from "./usuario";
 
 export async function toggleFavorito(productoId: string) {
   try {
@@ -11,6 +12,8 @@ export async function toggleFavorito(productoId: string) {
     if (!userId) {
       throw new Error("Usuario no autenticado");
     }
+
+    await asegurarUsuario(userId);
 
     const favoritoExistente = await prisma.favorito.findUnique({
       where: {
