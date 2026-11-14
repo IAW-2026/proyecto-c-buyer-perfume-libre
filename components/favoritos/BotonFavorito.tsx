@@ -26,10 +26,13 @@ export function BotonFavorito({
         localStorage.removeItem("intencionFavorito");
 
         if (!esFav) {
-          setEsFav(true);
-          toggleFavorito(perfumeId).catch((err) => {
-            setEsFav(false);
-          });
+          toggleFavorito(perfumeId)
+            .then(() => {
+              setEsFav(true);
+            })
+            .catch(() => {
+              setEsFav(false);
+            });
         }
       }
     }
@@ -41,7 +44,7 @@ export function BotonFavorito({
 
     if (!userId) {
       localStorage.setItem("intencionFavorito", perfumeId);
-      clerk.redirectToSignIn();
+      clerk.openSignIn();
       return;
     }
 

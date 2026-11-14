@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
-import { RolUsuario } from "@/lib/generated/prisma/client";
-import { obtenerRolUsuario } from "@/actions/usuario";
+import { auth } from "@clerk/nextjs/server";
 import AdminHeader from "@/components/admin/AdminHeader";
 import AdminNav from "@/components/admin/AdminNav";
 
@@ -9,9 +8,9 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const rolUsuario = await obtenerRolUsuario();
+  const { sessionClaims } = await auth();
 
-  if (!rolUsuario || rolUsuario.rol !== RolUsuario.ADMIN) {
+  if (sessionClaims?.metadata?.rol !== "ADMIN") {
     redirect("/");
   }
 

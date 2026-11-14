@@ -47,3 +47,6 @@ todo.txt
 /.clerk/
 
 /lib/generated/prisma
+
+.vercel
+.env*
