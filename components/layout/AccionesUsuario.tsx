@@ -41,15 +41,6 @@ export default function AccionesUsuario({
 
   const prevSignedIn = useRef(signedIn);
 
-  useEffect(() => {
-    if (isAuthLoaded && prevSignedIn.current !== (isSignedIn ?? false)) {
-      prevSignedIn.current = isSignedIn ?? false;
-      startTransition(() => {
-        router.refresh();
-      });
-    }
-  }, [isAuthLoaded, isSignedIn, router]);
-
   return (
     <div className="flex items-center gap-2 md:gap-4 shrink-0">
       {!signedIn && (

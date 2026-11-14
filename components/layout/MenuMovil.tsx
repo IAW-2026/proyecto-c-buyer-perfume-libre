@@ -48,15 +48,6 @@ export default function MenuMovil({
 
   const prevSignedIn = useRef(signedIn);
 
-  useEffect(() => {
-    if (isAuthLoaded && prevSignedIn.current !== (isSignedIn ?? false)) {
-      prevSignedIn.current = isSignedIn ?? false;
-      startTransition(() => {
-        router.refresh();
-      });
-    }
-  }, [isAuthLoaded, isSignedIn, router]);
-
   return (
     <Sheet>
       <SheetTrigger
