@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { Direccion } from "@/schema/direccion.schema";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
+import { asegurarUsuario } from "./usuario";
 
 export async function obtenerDireccionesUsuario() {
   try {
@@ -54,6 +55,8 @@ export async function agregarDireccion(datosDireccion: Direccion) {
     if (!userId) {
       throw new Error("Usuario no autenticado");
     }
+
+    await asegurarUsuario(userId);
 
     const nuevaDireccion = await prisma.direccion.create({
       data: {

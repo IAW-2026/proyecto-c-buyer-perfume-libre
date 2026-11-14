@@ -153,8 +153,6 @@ async function obtenerCatalogoReal(
 async function obtenerCatalogoMock(
   filtros: FiltrosCatalogo,
 ): Promise<{ items: PerfumeCard[]; total: number }> {
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-
   const { q, marca, genero, tamano, precioMin, precioMax, page, limit } =
     filtros;
 

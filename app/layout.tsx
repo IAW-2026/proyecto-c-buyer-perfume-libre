@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Geist, Geist_Mono } from "next/font/google";
-import { UsuarioSync } from "@/components/auth/UsuarioSync";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
@@ -33,7 +32,6 @@ export default function RootLayout({
       >
         <ClerkProvider>
           <ScrollToTop />
-          <UsuarioSync />
           {children}
           <Toaster position="bottom-right" />
         </ClerkProvider>
