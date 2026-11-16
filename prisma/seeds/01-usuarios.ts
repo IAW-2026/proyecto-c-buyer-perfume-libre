@@ -38,7 +38,7 @@ function generarFechaUsuarioUltimos12Meses(): Date {
   return faker.date.between({ from: inicioMes, to: finMes });
 }
 
-export async function seedUsuarios(cantidad = 460) {
+export async function seedUsuarios(cantidad = 1200) {
   console.log(`👤 [01-usuarios] Generando ${cantidad} usuarios tipo Clerk...`);
 
   const usuariosData: {

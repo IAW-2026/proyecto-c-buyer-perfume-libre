@@ -17,7 +17,7 @@ export async function runAllSeeds() {
     await resetDatabase();
 
     // 01. Usuarios con crecimiento a 12 meses
-    await seedUsuarios(460);
+    await seedUsuarios(1200);
 
     // 02. Direcciones ponderadas por provincias argentinas
     await seedDirecciones();
