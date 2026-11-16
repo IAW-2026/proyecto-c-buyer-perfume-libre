@@ -23,7 +23,7 @@ export default function AccionesUsuario({
   initialSignedIn,
   initialAdmin,
 }: AccionesUsuarioProps) {
-  const { signedIn, esAdmin } = useOptimisticAuth(
+  const { signedIn, esAdmin, user } = useOptimisticAuth(
     initialSignedIn,
     initialAdmin,
   );
@@ -57,7 +57,15 @@ export default function AccionesUsuario({
           <HeaderButton href="/compras" icon={ShoppingBag} label="Compras" />
           <HeaderButton href="/favoritos" icon={Heart} label="Favoritos" />
           <HeaderButton href="/carrito" icon={ShoppingCart} label="Carrito" />
-          <div className="relative w-7 h-7 flex items-center justify-center shrink-0 mx-1.5">
+          <div className="relative w-7 h-7 flex items-center justify-center shrink-0 mx-1.5 rounded-full overflow-hidden">
+            {user?.imageUrl && (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img
+                src={user.imageUrl}
+                alt="Avatar"
+                className="absolute inset-0 w-full h-full object-cover rounded-full pointer-events-none"
+              />
+            )}
             <UserButton />
           </div>
         </div>
