@@ -71,11 +71,9 @@ async function obtenerCatalogoReal(
     headers.append("pagina", String(page || 1));
     headers.append("cantidad_pagina", String(limit || 12));
 
-    headers.append("api_key", process.env.SELLER_API_KEY || "");
+    headers.append("api_key", process.env.SELLER_API_KEY!);
 
-    const baseUrl =
-      process.env.SELLER_API_URL ||
-      "https://proyecto-c-seller-perfume-libre.vercel.app/api";
+    const baseUrl = process.env.SELLER_API_URL;
     const response = await fetch(`${baseUrl}/seller/productos`, {
       method: "GET",
       headers: headers,
@@ -99,9 +97,7 @@ async function obtenerCatalogoReal(
     }));
 
     try {
-      const feedbackBaseUrl =
-        process.env.FEEDBACK_API_URL ||
-        "https://proyecto-c-feedback2-perfume-libre.vercel.app/api/";
+      const feedbackBaseUrl = process.env.FEEDBACK_API_URL;
 
       const promesasCalificaciones = itemsMapeados.map((item) =>
         fetch(`${feedbackBaseUrl}/resenas/producto/${item.id}/resumen`, {
@@ -230,14 +226,9 @@ async function obtenerDetallePerfumeMock(id: string): Promise<Perfume> {
 
 async function obtenerDetallePerfumeReal(id: string): Promise<Perfume> {
   try {
-    const sellerUrl =
-      process.env.SELLER_API_URL ||
-      "https://proyecto-c-seller-perfume-libre.vercel.app/api";
+    const sellerUrl = process.env.SELLER_API_URL;
     const headersSeller = new Headers();
-    headersSeller.append(
-      "api_key",
-      process.env.SELLER_API_KEY || "perfumelibre2026",
-    );
+    headersSeller.append("api_key", process.env.SELLER_API_KEY!);
 
     const resSeller = await fetch(`${sellerUrl}/seller/productos/${id}`, {
       method: "GET",
@@ -260,9 +251,7 @@ async function obtenerDetallePerfumeReal(id: string): Promise<Perfume> {
     let calificacionVendedor = 0;
 
     try {
-      const feedbackBaseUrl =
-        process.env.FEEDBACK_API_URL ||
-        "https://proyecto-c-feedback2-perfume-libre.vercel.app/api/";
+      const feedbackBaseUrl = process.env.FEEDBACK_API_URL;
       const [resProducto, resVendedor] = await Promise.allSettled([
         fetch(`${feedbackBaseUrl}/resenas/producto/${id}/resumen`, {
           cache: "no-store",
@@ -815,9 +804,7 @@ async function generarOrdenEnvioReal(
       usuarioId: "user_3EPf5YLDhCGrt6m1RgRzt6SCU8i",
     };
 
-    const shippingBaseUrl =
-      process.env.SHIPPING_API_URL ||
-      "https://proyecto-c-shipping2-perfume-libre.vercel.app/api";
+    const shippingBaseUrl = process.env.SHIPPING_API_URL;
 
     const response = await fetch(`${shippingBaseUrl}/shipping/ordenes`, {
       method: "POST",
@@ -864,9 +851,7 @@ async function obtenerCotizacionesEnvioReal(
   direccion_entrega: string,
 ) {
   try {
-    const shippingBaseUrl =
-      process.env.SHIPPING_API_URL ||
-      "https://proyecto-c-shipping2-perfume-libre.vercel.app/api";
+    const shippingBaseUrl = process.env.SHIPPING_API_URL;
 
     const bodyData = {
       codigo_postal: codigo_postal,
@@ -903,13 +888,11 @@ async function obtenerCotizacionesEnvioReal(
 }
 
 export async function fetchProductoDesdeSeller(id: string) {
-  const baseUrl =
-    process.env.SELLER_API_URL ||
-    "https://proyecto-c-seller-perfume-libre.vercel.app/api";
+  const baseUrl = process.env.SELLER_API_URL;
   const urlExacta = `${baseUrl}/seller/productos/${id}`;
 
   const headers = new Headers();
-  headers.append("api_key", process.env.SELLER_API_KEY || "perfumelibre2026");
+  headers.append("api_key", process.env.SELLER_API_KEY!);
 
   const res = await fetch(urlExacta, {
     method: "GET",
@@ -939,7 +922,7 @@ export async function obtenerAccessTokenVendedor(idVendedor: string) {
 
 async function obtenerAccessTokenVendedorReal(idVendedor: string) {
   const headers = new Headers();
-  headers.append("api_key", process.env.SELLER_API_KEY || "");
+  headers.append("api_key", process.env.SELLER_API_KEY!);
 
   const url = `${process.env.SELLER_API_URL}/seller/vendedores/${idVendedor}/access_token`;
 
