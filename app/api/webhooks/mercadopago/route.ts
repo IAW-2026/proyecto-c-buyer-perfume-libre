@@ -1,5 +1,4 @@
 import { aprobarOrden, rechazarOrden } from "@/actions/checkout";
-import { EstadosOrden } from "@/schema/perfume.schema";
 import { MercadoPagoConfig, Payment } from "mercadopago";
 import { NextResponse } from "next/server";
 
@@ -43,7 +42,6 @@ export async function POST(request: Request) {
       }
     }
 
-    // A Mercado Pago siempre hay que clavarle un 200 OK rápido, sino te sigue insistiendo
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
     console.error("Error en Webhook de MP:", error);

@@ -143,9 +143,19 @@ export async function POST(request: Request) {
       idempotencyKey: keyCliente,
     } = validation.data;
 
-    // 3. Buscar orden y verificar pertenencia y estado pendiente (401/403/404/400 diferenciados)
+    // 3. Buscar orden y verificar pertenencia y estado pendiente (401/403/404/400/409 diferenciados)
     const verif = await verificarOrdenParaPago(ordenId, userId);
     if (!verif.success) {
+      // Si la orden ya fue aprobada y pagada (reintento del cliente ante timeout de red previo),
+      // responder de manera idempotente devolviendo el ID de pago ya registrado para redirigir exitosamente.
+      if (verif.status === 409 && verif.orden?.pagoId) {
+        return NextResponse.json({
+          id: verif.orden.pagoId,
+          status: "approved",
+          status_detail: "already_approved",
+        });
+      }
+
       return NextResponse.json(
         { error: verif.error },
         { status: verif.status },
@@ -221,9 +231,21 @@ export async function POST(request: Request) {
     }
 
     if (response.status === "approved") {
-      await aprobarOrden(orden.id, response.id.toString());
+      const resAprob = await aprobarOrden(orden.id, response.id.toString());
+      if (!resAprob.success) {
+        console.error(
+          `[process-payment] Error al aprobar la orden ${orden.id}:`,
+          resAprob.error,
+        );
+      }
     } else if (response.status === "rejected") {
-      await rechazarOrden(orden.id, response.id.toString());
+      const resRech = await rechazarOrden(orden.id, response.id.toString());
+      if (!resRech.success) {
+        console.error(
+          `[process-payment] Error al rechazar la orden ${orden.id}:`,
+          resRech.error,
+        );
+      }
     }
 
     // 7. Devolver la respuesta de Mercado Pago al frontend
