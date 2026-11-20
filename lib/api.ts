@@ -630,7 +630,7 @@ export async function obtenerHistorialEnvio(
   const usarApiReal = process.env.USE_REAL_API === "true";
 
   if (usarApiReal && trackingId) {
-    return obtenerHistorialEnvioReal(trackingId);
+    return obtenerHistorialEnvioReal(trackingId, estado);
   } else {
     return obtenerHistorialSimulado(estado || "PAGADO");
   }

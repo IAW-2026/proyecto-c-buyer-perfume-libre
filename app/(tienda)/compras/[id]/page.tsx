@@ -9,7 +9,6 @@ import { cn, formatearPrecio, obtenerLabelEstado } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import {
-  EstadoOrdenType,
   EstadosOrden,
   ItemDeOrdenDetallado,
 } from "@/schema/perfume.schema";
@@ -331,7 +330,9 @@ async function obtenerItemOrden(
   if (!productoDetalle) {
     return null;
   }
-  const estadoValidado = EstadosOrden.parse(datosEnvio.estadoActual);
+  const estadoValidado = datosEnvio?.estadoActual
+    ? EstadosOrden.parse(datosEnvio.estadoActual)
+    : ordenDb.ordenCompra.estado;
   const { id: idItem, ...restoDeOrdenDb } = ordenDb;
 
   return {
@@ -342,7 +343,7 @@ async function obtenerItemOrden(
       estado: estadoValidado,
       itemsComprados: itemsComprados || 1,
     },
-    historialEnvio: datosEnvio.historial,
+    historialEnvio: datosEnvio?.historial || [],
     nombreProducto: productoDetalle.nombre,
     vendedor: productoDetalle.vendedor,
     imagenUrl: productoDetalle.imagenesUrl[0],
