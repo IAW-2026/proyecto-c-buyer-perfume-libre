@@ -12,6 +12,7 @@ import { EstadosOrden } from "@/schema/perfume.schema";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { asegurarUsuario } from "./usuario";
+import { requireAdmin, requireUser } from "@/lib/auth/guards";
 
 export async function iniciarProcesamientoCompra(
   direccionId: string,
@@ -150,6 +151,12 @@ export async function actualizarOrden(
   idPago?: string,
   idEnvio?: string,
 ) {
+  // Solo administradores pueden alterar arbitrariamente el estado de una orden vía RPC
+  const { userId } = await auth();
+  if (userId) {
+    await requireAdmin();
+  }
+
   try {
     await prisma.ordenCompra.update({
       where: { id: idOrden },
@@ -168,6 +175,8 @@ export async function actualizarOrden(
 
 export async function obtenerOrden(idOrden: string) {
   try {
+    const { userId } = await auth();
+
     const orden = await prisma.ordenCompra.findUnique({
       where: { id: idOrden },
       include: {
@@ -176,6 +185,11 @@ export async function obtenerOrden(idOrden: string) {
     });
 
     if (!orden) throw new Error("Orden no encontrada");
+
+    // Si la llamada proviene de un usuario en sesión (RPC de cliente), validar pertenencia o rol admin
+    if (userId && orden.usuarioId !== userId) {
+      await requireAdmin();
+    }
 
     const direccion = await prisma.direccion.findUnique({
       where: { id: orden.direccionId },
@@ -339,6 +353,11 @@ export async function rechazarOrden(idOrden: string, idPago: string) {
 }
 
 export async function vaciarCarrito(usuarioId: string) {
+  const currentUserId = await requireUser();
+  if (usuarioId !== currentUserId) {
+    await requireAdmin();
+  }
+
   try {
     await prisma.carrito.deleteMany({
       where: { usuarioId },
@@ -375,6 +394,18 @@ export async function actualizarEstadoEnvio(
 }
 
 export async function obtenerItemsOrdenParaSeller(ordenId: string) {
+  const { userId } = await auth();
+  if (userId) {
+    const ordenUsuario = await prisma.ordenCompra.findUnique({
+      where: { id: ordenId },
+      select: { usuarioId: true },
+    });
+    if (!ordenUsuario) throw new Error("NOT_FOUND");
+    if (ordenUsuario.usuarioId !== userId) {
+      await requireAdmin();
+    }
+  }
+
   try {
     const orden = await prisma.ordenCompra.findUnique({
       where: { id: ordenId },

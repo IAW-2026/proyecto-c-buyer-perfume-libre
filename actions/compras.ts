@@ -4,8 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { obtenerDetallePerfume } from "@/lib/api";
-import { EstadosOrden } from "@/schema/perfume.schema";
 import { EstadoOrden } from "@/lib/generated/prisma/enums";
+import { requireAdmin, requireUser } from "@/lib/auth/guards";
 
 export async function obtenerComprasDelUsuario() {
   try {
@@ -80,7 +80,7 @@ export async function verDetallesCompra(ordenId: string) {
         try {
           const producto = await obtenerDetallePerfume(item.productoId);
           return { ...item, producto };
-        } catch (e) {
+        } catch {
           // Si no se encuentra el producto, devolvemos el item sin detalles
           return { ...item, producto: null };
         }
@@ -170,10 +170,31 @@ export async function simularCambioEstado(
   itemId: string,
   nuevoEstado: EstadoOrden,
 ) {
+  const userId = await requireUser();
+
+  // Validar pertenencia: el usuario solo puede simular sobre su propia orden (a menos que sea ADMIN)
+  const orden = await prisma.ordenCompra.findFirst({
+    where: {
+      id: ordenId,
+      usuarioId: userId,
+    },
+  });
+
+  if (!orden) {
+    // Si no es el propietario, requerir rol ADMIN
+    await requireAdmin();
+  }
+
+  const estadosValidos = Object.values(EstadoOrden);
+  if (!estadosValidos.includes(nuevoEstado)) {
+    throw new Error("Estado de orden inválido");
+  }
+
   await prisma.ordenCompra.update({
     where: { id: ordenId },
     data: { estado: nuevoEstado },
   });
 
   revalidatePath(`/compras/${ordenId}?itemId=${itemId}`);
+  return { success: true };
 }
