@@ -9,7 +9,11 @@ const isPublicRoute = createRouteMatcher([
   "/sing-up(.*)",
   "/producto/(.*)",
   "/api/webhooks(.*)",
-  "/api(.*)",
+  "/api/cron(.*)",
+  "/api/ordenes(.*)",
+  "/api/notificaciones(.*)",
+  "/api/compras(.*)",
+  "/api/admin(.*)",
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
@@ -23,7 +27,14 @@ export default clerkMiddleware(async (auth, req) => {
   }
 
   if (!isPublicRoute(req)) {
-    await auth.protect();
+    if (req.nextUrl.pathname.startsWith("/api/")) {
+      const { userId } = await auth();
+      if (!userId) {
+        return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+      }
+    } else {
+      await auth.protect();
+    }
   }
 });
 

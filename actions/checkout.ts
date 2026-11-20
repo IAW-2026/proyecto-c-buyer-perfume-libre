@@ -64,18 +64,23 @@ export async function iniciarProcesamientoCompra(
 
   let vendedorId = "vendedor_generico";
   if (itemsAProcesar.length > 0) {
-    try {
-      const productoData = await fetchProductoDesdeSeller(
-        itemsAProcesar[0].productoId,
-      );
-      if (productoData && productoData.vendedor?.clerk_id) {
-        vendedorId = String(productoData.vendedor.clerk_id);
+    const usarApiReal = process.env.USE_REAL_API === "true";
+    if (usarApiReal) {
+      try {
+        const productoData = await fetchProductoDesdeSeller(
+          itemsAProcesar[0].productoId,
+        );
+        if (productoData && productoData.vendedor?.clerk_id) {
+          vendedorId = String(productoData.vendedor.clerk_id);
+        }
+      } catch (error) {
+        console.warn(
+          "No pudimos contactar a Seller App para obtener el vendedor, usando genérico:",
+          error,
+        );
       }
-    } catch (error) {
-      console.warn(
-        "No pudimos contactar a Seller App para obtener el vendedor, usando genérico:",
-        error,
-      );
+    } else {
+      vendedorId = "user_3EXlfKfNj061hH7lOCEhs7Wg7qy";
     }
   }
 
@@ -182,14 +187,19 @@ export async function obtenerOrden(idOrden: string) {
   }
 }
 
-export async function verDetallesOrden(idOrden: string) {
+export async function verDetallesOrden(idOrden: string, usuarioId?: string) {
   try {
     const orden = await prisma.ordenCompra.findFirst({
-      where: { id: idOrden },
+      where: {
+        id: idOrden,
+        ...(usuarioId ? { usuarioId } : {}),
+      },
       select: {
         id: true,
+        usuarioId: true,
         vendedorId: true,
         total: true,
+        estado: true,
       },
     });
 
@@ -199,13 +209,93 @@ export async function verDetallesOrden(idOrden: string) {
   }
 }
 
+export type ResultadoVerificacionOrdenPago =
+  | {
+      success: true;
+      orden: {
+        id: string;
+        usuarioId: string;
+        vendedorId: string;
+        total: number;
+        estado: EstadoOrden;
+      };
+    }
+  | { success: false; status: 401 | 403 | 404 | 400 | 409; error: string };
+
+export async function verificarOrdenParaPago(
+  idOrden: string,
+  usuarioId: string,
+): Promise<ResultadoVerificacionOrdenPago> {
+  if (!usuarioId) {
+    return { success: false, status: 401, error: "No autorizado" };
+  }
+
+  try {
+    const orden = await prisma.ordenCompra.findUnique({
+      where: { id: idOrden },
+      select: {
+        id: true,
+        usuarioId: true,
+        vendedorId: true,
+        total: true,
+        estado: true,
+      },
+    });
+
+    if (!orden) {
+      return { success: false, status: 404, error: "Orden no encontrada" };
+    }
+
+    if (orden.usuarioId !== usuarioId) {
+      return {
+        success: false,
+        status: 403,
+        error: "No tienes permiso para operar sobre esta orden",
+      };
+    }
+
+    if (orden.estado !== EstadoOrden.PENDIENTE) {
+      return {
+        success: false,
+        status: 400,
+        error: "Solo se pueden pagar órdenes en estado pendiente",
+      };
+    }
+
+    return { success: true, orden };
+  } catch (error) {
+    throw new Error(`Error al verificar orden para pago: ${error}`);
+  }
+}
+
 export async function aprobarOrden(idOrden: string, idPago: string) {
+  // Transición atómica idempotente: solo avanza si la orden sigue en estado PENDIENTE.
+  // Esto previene que una ejecución concurrente (POST de pago vs Webhook de MP) duplique envíos.
+  const resultado = await prisma.ordenCompra.updateMany({
+    where: {
+      id: idOrden,
+      estado: EstadoOrden.PENDIENTE,
+    },
+    data: {
+      estado: EstadoOrden.PAGADO,
+      pagoId: idPago,
+    },
+  });
+
+  if (resultado.count === 0) {
+    console.log(
+      `[aprobarOrden] Orden ${idOrden} ya no está pendiente. Omitiendo duplicación de envío.`,
+    );
+    return { success: true, yaProcesada: true };
+  }
+
   const orden = await obtenerOrden(idOrden);
+  const calle = orden.direccion?.calle || "";
 
   const id_envio = await generarOrdenEnvio(
     idOrden,
     orden.usuarioId,
-    orden.direccion?.calle!,
+    calle,
     orden.items,
     {
       operador: orden.operadorEnvio,
@@ -215,16 +305,37 @@ export async function aprobarOrden(idOrden: string, idPago: string) {
     },
   );
 
-  await actualizarOrden(idOrden, EstadosOrden.enum.PAGADO, idPago, id_envio);
+  await prisma.ordenCompra.update({
+    where: { id: idOrden },
+    data: {
+      envioId: id_envio,
+    },
+  });
+
+  return { success: true, yaProcesada: false };
 }
 
 export async function rechazarOrden(idOrden: string, idPago: string) {
-  await actualizarOrden(
-    idOrden,
-    EstadosOrden.enum.CANCELADO,
-    idPago,
-    undefined,
-  );
+  // Transición atómica idempotente: solo avanza si sigue PENDIENTE
+  const resultado = await prisma.ordenCompra.updateMany({
+    where: {
+      id: idOrden,
+      estado: EstadoOrden.PENDIENTE,
+    },
+    data: {
+      estado: EstadoOrden.CANCELADO,
+      pagoId: idPago,
+    },
+  });
+
+  if (resultado.count === 0) {
+    console.log(
+      `[rechazarOrden] Orden ${idOrden} ya no está pendiente. Omitiendo rechazo duplicado.`,
+    );
+    return { success: true, yaProcesada: true };
+  }
+
+  return { success: true, yaProcesada: false };
 }
 
 export async function vaciarCarrito(usuarioId: string) {
@@ -240,19 +351,26 @@ export async function vaciarCarrito(usuarioId: string) {
 export async function actualizarEstadoEnvio(
   trackingId: string,
   nuevoEstado: EstadoOrden,
-  fecha: string,
+  fecha?: string,
 ) {
+  void fecha;
   try {
-    const orden = await prisma.ordenCompra.update({
+    await prisma.ordenCompra.update({
       where: { envioId: trackingId },
       data: { estado: nuevoEstado },
     });
-  } catch (error: any) {
-    if (error.code === "P2025") {
+  } catch (error: unknown) {
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      (error as { code: string }).code === "P2025"
+    ) {
       throw new Error(`NOT_FOUND`);
     }
 
-    throw new Error(`Error al actualizar el estado del envío ${error.message}`);
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`Error al actualizar el estado del envío ${message}`);
   }
 }
 

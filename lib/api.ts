@@ -888,6 +888,27 @@ async function obtenerCotizacionesEnvioReal(
 }
 
 export async function fetchProductoDesdeSeller(id: string) {
+  const usarApiReal = process.env.USE_REAL_API === "true";
+  if (!usarApiReal) {
+    const mockP = mockPerfumes.find((p) => p.id === id);
+    if (!mockP) {
+      throw new Error(`Perfume mock con ID ${id} no encontrado`);
+    }
+    return {
+      producto: {
+        producto_id: mockP.id,
+        titulo: mockP.nombre,
+        descripcion: mockP.descripcion || "",
+        precio: mockP.precio / 100,
+        imagen: mockP.imagenesUrl[0] || "/placeholder-perfume.jpg",
+      },
+      vendedor: {
+        nombre: mockP.vendedor,
+        clerk_id: "user_3EXlfKfNj061hH7lOCEhs7Wg7qy",
+      },
+    };
+  }
+
   const baseUrl = process.env.SELLER_API_URL;
   const urlExacta = `${baseUrl}/seller/productos/${id}`;
 
