@@ -22,6 +22,9 @@ import {
   enviarResenaVendedorReal,
 } from "@/actions/resenas";
 import { obtenerHistorialEnvioReal } from "@/actions/tracking";
+import { sellerClient } from "@/lib/integrations/seller-client";
+import { shippingClient } from "@/lib/integrations/shipping-client";
+import { feedbackClient } from "@/lib/integrations/feedback-client";
 
 // TODO: Refactorizar este archivo
 
@@ -65,28 +68,14 @@ async function obtenerCatalogoReal(
       categorias.push(...generosArr.map((g) => g.toLowerCase()));
     }
 
-    const headers = new Headers();
-    headers.append("titulo", q ? q.toString() : " ");
-    headers.append("categorias", JSON.stringify(categorias));
-    headers.append("pagina", String(page || 1));
-    headers.append("cantidad_pagina", String(limit || 12));
-
-    headers.append("api_key", process.env.SELLER_API_KEY!);
-
-    const baseUrl = process.env.SELLER_API_URL;
-    const response = await fetch(`${baseUrl}/seller/productos`, {
-      method: "GET",
-      headers: headers,
-      cache: "no-store",
+    const data = await sellerClient.obtenerProductos({
+      titulo: q ? q.toString() : undefined,
+      categorias,
+      page: page || 1,
+      limit: limit || 12,
     });
 
-    if (!response.ok) {
-      throw new Error(`Error de la API Seller: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-
-    let itemsMapeados: PerfumeCard[] = (data.items || []).map((prod: any) => ({
+    let itemsMapeados: PerfumeCard[] = (data.items || []).map((prod) => ({
       id: String(prod.producto_id),
       nombre: prod.titulo,
       precio: Math.round(Number(prod.precio)) * 100,
@@ -97,13 +86,9 @@ async function obtenerCatalogoReal(
     }));
 
     try {
-      const feedbackBaseUrl = process.env.FEEDBACK_API_URL;
-
       const promesasCalificaciones = itemsMapeados.map((item) =>
-        fetch(`${feedbackBaseUrl}/resenas/producto/${item.id}/resumen`, {
-          cache: "no-store",
-        })
-          .then((res) => (res.ok ? res.json() : null))
+        feedbackClient
+          .obtenerResumenProducto(item.id)
           .catch(() => null),
       );
 
@@ -226,21 +211,7 @@ async function obtenerDetallePerfumeMock(id: string): Promise<Perfume> {
 
 async function obtenerDetallePerfumeReal(id: string): Promise<Perfume> {
   try {
-    const sellerUrl = process.env.SELLER_API_URL;
-    const headersSeller = new Headers();
-    headersSeller.append("api_key", process.env.SELLER_API_KEY!);
-
-    const resSeller = await fetch(`${sellerUrl}/seller/productos/${id}`, {
-      method: "GET",
-      headers: headersSeller,
-      cache: "no-store",
-    });
-
-    if (!resSeller.ok) {
-      throw new Error(`Error API Seller: ${resSeller.status}`);
-    }
-
-    const dataSeller = await resSeller.json();
+    const dataSeller = await sellerClient.obtenerProductoPorId(id);
 
     const dataProducto = dataSeller.producto;
     const vendedorId = String(
@@ -251,24 +222,17 @@ async function obtenerDetallePerfumeReal(id: string): Promise<Perfume> {
     let calificacionVendedor = 0;
 
     try {
-      const feedbackBaseUrl = process.env.FEEDBACK_API_URL;
       const [resProducto, resVendedor] = await Promise.allSettled([
-        fetch(`${feedbackBaseUrl}/resenas/producto/${id}/resumen`, {
-          cache: "no-store",
-        }),
-        fetch(`${feedbackBaseUrl}/resenas/vendedor/${vendedorId}/resumen`, {
-          cache: "no-store",
-        }),
+        feedbackClient.obtenerResumenProducto(id),
+        feedbackClient.obtenerResumenVendedor(vendedorId),
       ]);
 
-      if (resProducto.status === "fulfilled" && resProducto.value.ok) {
-        const dataProd = await resProducto.value.json();
-        calificacionProducto = Number(dataProd.promedio_producto) || 0;
+      if (resProducto.status === "fulfilled" && resProducto.value) {
+        calificacionProducto = Number(resProducto.value.promedio_producto) || 0;
       }
 
-      if (resVendedor.status === "fulfilled" && resVendedor.value.ok) {
-        const dataVend = await resVendedor.value.json();
-        calificacionVendedor = Number(dataVend.promedio_vendedor) || 0;
+      if (resVendedor.status === "fulfilled" && resVendedor.value) {
+        calificacionVendedor = Number(resVendedor.value.promedio_vendedor) || 0;
       }
     } catch (errFeedback) {
       console.warn(
@@ -287,7 +251,7 @@ async function obtenerDetallePerfumeReal(id: string): Promise<Perfume> {
       descripcion: dataProducto.descripcion || "Sin descripción disponible.",
       calificacionProducto: calificacionProducto,
       calificacionVendedor: calificacionVendedor,
-      vendedor: dataSeller.vendedor.nombre,
+      vendedor: dataSeller.vendedor?.nombre || "Vendedor Oficial",
       genero: "Unisex",
     };
 
@@ -785,7 +749,7 @@ async function generarOrdenEnvioReal(
         const { producto, vendedor } = await fetchProductoDesdeSeller(
           items[0].productoId,
         );
-        if (vendedor.clerk_id) {
+        if (vendedor?.clerk_id) {
           id_vendedor = String(vendedor.clerk_id);
         }
       } catch (err) {
@@ -804,23 +768,7 @@ async function generarOrdenEnvioReal(
       usuarioId: "user_3EPf5YLDhCGrt6m1RgRzt6SCU8i",
     };
 
-    const shippingBaseUrl = process.env.SHIPPING_API_URL;
-
-    const response = await fetch(`${shippingBaseUrl}/shipping/ordenes`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(bodyData),
-    });
-
-    if (!response.ok) {
-      throw new Error(
-        `Error al generar envío en Shipping App: ${response.status}`,
-      );
-    }
-
-    const data = await response.json();
+    const data = await shippingClient.crearOrdenEnvio(bodyData);
 
     return data.trackingId || `TRK-${id_orden.slice(-4)}`;
   } catch (error) {
@@ -851,33 +799,10 @@ async function obtenerCotizacionesEnvioReal(
   direccion_entrega: string,
 ) {
   try {
-    const shippingBaseUrl = process.env.SHIPPING_API_URL;
-
-    const bodyData = {
-      codigo_postal: codigo_postal,
-      direccion_entrega: direccion_entrega,
-    };
-
-    const response = await fetch(`${shippingBaseUrl}/shipping/cotizar`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(bodyData),
-      cache: "no-store",
-    });
-
-    if (!response.ok) {
-      throw new Error(`Error API Shipping al cotizar: ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    if (!data.opciones || !Array.isArray(data.opciones)) {
-      throw new Error("La API de Shipping no devolvió el formato esperado");
-    }
-
-    return data.opciones;
+    return await shippingClient.obtenerCotizaciones(
+      codigo_postal,
+      direccion_entrega,
+    );
   } catch (error) {
     console.error(
       "⚠️ Falló la cotización real, usando Mock de contingencia:",
@@ -909,26 +834,14 @@ export async function fetchProductoDesdeSeller(id: string) {
     };
   }
 
-  const baseUrl = process.env.SELLER_API_URL;
-  const urlExacta = `${baseUrl}/seller/productos/${id}`;
-
-  const headers = new Headers();
-  headers.append("api_key", process.env.SELLER_API_KEY!);
-
-  const res = await fetch(urlExacta, {
-    method: "GET",
-    headers: headers,
-    cache: "no-store",
-  });
-
-  if (!res.ok) {
-    throw new Error(
-      `Error API Seller al obtener producto ${id}: ${res.status}`,
-    );
-  }
-
-  const data = await res.json();
-  return { producto: data.producto, vendedor: data.vendedor };
+  const data = await sellerClient.obtenerProductoPorId(id);
+  return {
+    producto: data.producto,
+    vendedor: data.vendedor ?? {
+      nombre: "Vendedor Oficial",
+      clerk_id: "user_3EXlfKfNj061hH7lOCEhs7Wg7qy",
+    },
+  };
 }
 
 export async function obtenerAccessTokenVendedor(idVendedor: string) {
@@ -942,26 +855,7 @@ export async function obtenerAccessTokenVendedor(idVendedor: string) {
 }
 
 async function obtenerAccessTokenVendedorReal(idVendedor: string) {
-  const headers = new Headers();
-  headers.append("api_key", process.env.SELLER_API_KEY!);
-
-  const url = `${process.env.SELLER_API_URL}/seller/vendedores/${idVendedor}/access_token`;
-
-  const res = await fetch(url, {
-    method: "GET",
-    headers: headers,
-    cache: "no-store",
-  });
-
-  if (!res.ok) {
-    throw new Error(
-      `Error API Seller al obtener access token del vendedor ${idVendedor}: ${res.status}`,
-    );
-  }
-
-  const data = await res.json();
-
-  return data.access_token;
+  return sellerClient.obtenerAccessTokenVendedor(idVendedor);
 }
 
 async function obtenerAccessTokenVendedorMock() {

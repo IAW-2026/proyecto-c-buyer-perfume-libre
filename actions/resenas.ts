@@ -1,6 +1,7 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
+import { feedbackClient } from "@/lib/integrations/feedback-client";
 
 export async function enviarResenaProductoReal(
   productoId: string,
@@ -16,42 +17,17 @@ export async function enviarResenaProductoReal(
     throw new Error("Debes iniciar sesión para dejar una reseña.");
   }
 
-  const feedbackBaseUrl =
-    process.env.FEEDBACK_API_URL ||
-    "https://proyecto-c-feedback2-perfume-libre.vercel.app/api";
-
-  const bodyData = {
-    id_producto: productoId,
-    id_orden: ordenId,
-    puntuacion: rating,
-    comentario: comentario || "",
-    imagenes: imagenes || [],
-  };
-
-  const finalBodyData = {
-    ...bodyData,
-    id_usuario: userId,
-  };
-
-  const response = await fetch(`${feedbackBaseUrl}/resenas/producto`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-      api_key: process.env.FEEDBACK_API_KEY as string,
+  return feedbackClient.crearResenaProducto(
+    {
+      id_producto: productoId,
+      id_orden: ordenId,
+      id_usuario: userId ?? undefined,
+      puntuacion: rating,
+      comentario: comentario || "",
+      imagenes: imagenes || [],
     },
-    body: JSON.stringify(finalBodyData),
-  });
-
-  const result = await response.json();
-  if (!response.ok) {
-    console.error("Error de Feedback App (Producto):", result);
-    throw new Error(
-      result.mensaje || "Ocurrió un error al enviar la reseña del producto.",
-    );
-  }
-
-  return result;
+    token,
+  );
 }
 
 export async function enviarResenaVendedorReal(
@@ -67,40 +43,14 @@ export async function enviarResenaVendedorReal(
     throw new Error("Debes iniciar sesión para valorar a un vendedor.");
   }
 
-  const feedbackBaseUrl =
-    process.env.FEEDBACK_API_URL ||
-    "https://proyecto-c-feedback2-perfume-libre.vercel.app/api";
-
-  const bodyData = {
-    id_vendedor: vendedorId,
-    id_orden: ordenId,
-    puntuacion: rating,
-    comentario: comentario || "",
-  };
-
-  const finalBodyData = {
-    ...bodyData,
-    id_usuario: userId,
-  };
-
-  const response = await fetch(`${feedbackBaseUrl}/resenas/vendedor`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-      api_key: process.env.FEEDBACK_API_KEY as string,
+  return feedbackClient.crearResenaVendedor(
+    {
+      id_vendedor: vendedorId,
+      id_orden: ordenId,
+      id_usuario: userId ?? undefined,
+      puntuacion: rating,
+      comentario: comentario || "",
     },
-    body: JSON.stringify(finalBodyData),
-  });
-
-  const result = await response.json();
-
-  if (!response.ok) {
-    console.error("Error de Feedback App (Vendedor):", result);
-    throw new Error(
-      result.mensaje || "Ocurrió un error al calificar al vendedor.",
-    );
-  }
-
-  return result;
+    token,
+  );
 }

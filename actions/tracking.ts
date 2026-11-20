@@ -3,6 +3,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { EstadoOrdenType, EstadosOrden } from "@/schema/perfume.schema";
 import { obtenerHistorialSimulado } from "@/lib/mockEnvios";
+import { shippingClient } from "@/lib/integrations/shipping-client";
 
 export interface ItemHistorialEnvio {
   fecha: string;
@@ -57,24 +58,7 @@ export async function obtenerHistorialEnvioReal(
   const token = await getToken();
 
   try {
-    const shippingBaseUrl =
-      process.env.SHIPPING_API_URL ||
-      "https://proyecto-c-shipping2-perfume-libre.vercel.app/api";
-
-    const response = await fetch(`${shippingBaseUrl}/shipping/${trackingId}`, {
-      headers: {
-        "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-      method: "GET",
-      cache: "no-store",
-    });
-
-    if (!response.ok) {
-      throw new Error(`Error API Shipping: ${response.status}`);
-    }
-
-    const data = await response.json();
+    const data = await shippingClient.obtenerHistorial(trackingId, token);
 
     const estadoActual = normalizarEstadoEnvio(
       data.estado_actual || data.estado || estadoFallback,
