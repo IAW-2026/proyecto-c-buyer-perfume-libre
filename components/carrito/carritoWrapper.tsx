@@ -14,6 +14,7 @@ import { Card } from "../ui/card";
 import Link from "next/link";
 import { buttonVariants } from "../ui/button";
 import { CheckCircle2, Circle, ShoppingBag } from "lucide-react";
+import { toast } from "sonner";
 
 type AccionOptimista =
   | { tipo: "ELIMINAR"; id: string }
@@ -73,8 +74,16 @@ export function CarritoWrapper({
         cantidad: nuevaCantidad,
       });
       try {
-        await actualizarCantidadEnCarrito(id, nuevaCantidad);
-      } catch (error) {}
+        const res = await actualizarCantidadEnCarrito({
+          productoId: id,
+          nuevaCantidad,
+        });
+        if (!res.success) {
+          toast.error(res.error.message);
+        }
+      } catch {
+        toast.error("No se pudo actualizar la cantidad");
+      }
     });
   };
 
@@ -82,8 +91,13 @@ export function CarritoWrapper({
     startTransition(async () => {
       dispatchOptimistic({ tipo: "ELIMINAR", id });
       try {
-        await eliminarDelCarrito(id);
-      } catch (error) {}
+        const res = await eliminarDelCarrito({ productoId: id });
+        if (!res.success) {
+          toast.error(res.error.message);
+        }
+      } catch {
+        toast.error("No se pudo eliminar el producto del carrito");
+      }
     });
   };
 

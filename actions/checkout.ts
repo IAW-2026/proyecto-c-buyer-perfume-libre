@@ -1,201 +1,191 @@
 "use server";
 
-import {
-  generarOrdenEnvio,
-  obtenerSnapshotsProductos,
-} from "@/lib/api";
-import { EstadoOrden, Prisma } from "@/lib/generated/prisma/client";
-import { OpcionEnvio } from "@/lib/mockEnvios";
-import { prisma } from "@/lib/prisma";
-import { EstadosOrden } from "@/schema/perfume.schema";
-import { auth } from "@clerk/nextjs/server";
+import { z } from "zod";
 import { redirect } from "next/navigation";
-import { asegurarUsuario } from "./usuario";
+import { auth } from "@clerk/nextjs/server";
+import { EstadoOrden, Prisma } from "@/lib/generated/prisma/client";
+import { EstadosOrden } from "@/schema/perfume.schema";
+import { prisma } from "@/lib/prisma";
+import { generarOrdenEnvio, obtenerSnapshotsProductos } from "@/lib/api";
 import { requireAdmin, requireUser } from "@/lib/auth/guards";
+import { createAuthAction } from "@/lib/errors/safe-action";
+import {
+  NotFoundError,
+  ConflictError,
+} from "@/lib/errors/domain-errors";
+import { asegurarUsuario } from "./usuario";
 
-export async function iniciarProcesamientoCompra(
-  direccionId: string,
-  datosEnvio: OpcionEnvio,
-  productosIds: string[],
-  esCompraDirecta: boolean,
-) {
-  const userId = await requireUser();
+/**
+ * Server Action autenticada para iniciar la compra desde el panel de checkout.
+ * Valida dirección, pertenencia, productos y métodos de envío.
+ * Crea atómicamente la OrdenCompra con snapshots descriptivos y redirige a confirmación.
+ */
+export const iniciarProcesamientoCompra = createAuthAction({
+  schema: z.object({
+    direccionId: z.string().min(1, "ID de dirección requerido"),
+    datosEnvio: z.object({
+      operador: z.string().min(1, "Operador de envío requerido"),
+      tipo_servicio: z.string().min(1, "Tipo de servicio requerido"),
+      precio: z.number().min(0, "El precio de envío no puede ser negativo"),
+      demora_dias: z.number().int().optional().default(3),
+    }),
+    productosIds: z
+      .array(z.string().min(1))
+      .min(1, "No hay productos seleccionados para comprar"),
+    esCompraDirecta: z.boolean().default(false),
+  }),
+  handler: async (
+    { direccionId, datosEnvio, productosIds, esCompraDirecta },
+    { userId },
+  ) => {
+    await asegurarUsuario(userId);
 
-  await asegurarUsuario(userId);
-
-  if (
-    !direccionId ||
-    typeof direccionId !== "string" ||
-    direccionId.trim() === ""
-  ) {
-    throw new Error("ID de dirección inválido");
-  }
-
-  // Validar que la dirección exista y pertenezca al usuario autenticado
-  const direccion = await prisma.direccion.findFirst({
-    where: { id: direccionId, usuarioId: userId },
-  });
-  if (!direccion) {
-    throw new Error(
-      "Dirección no encontrada o no pertenece al usuario autenticado",
-    );
-  }
-
-  if (
-    !productosIds ||
-    !Array.isArray(productosIds) ||
-    productosIds.length === 0
-  ) {
-    throw new Error("No hay productos seleccionados para comprar");
-  }
-
-  if (
-    !datosEnvio ||
-    typeof datosEnvio.precio !== "number" ||
-    datosEnvio.precio < 0 ||
-    !datosEnvio.operador ||
-    !datosEnvio.tipo_servicio
-  ) {
-    throw new Error("Datos de envío inválidos");
-  }
-
-  let itemsAProcesar: { productoId: string; cantidad: number }[] = [];
-
-  if (esCompraDirecta) {
-    itemsAProcesar = [{ productoId: productosIds[0], cantidad: 1 }];
-  } else {
-    const itemsCarrito = await prisma.carrito.findMany({
-      where: {
-        usuarioId: userId,
-        productoId: { in: productosIds },
-      },
+    // Validar que la dirección exista y pertenezca al usuario autenticado (control IDOR)
+    const direccion = await prisma.direccion.findFirst({
+      where: { id: direccionId, usuarioId: userId },
     });
-
-    if (itemsCarrito.length === 0) {
-      throw new Error("Los productos seleccionados ya no están en el carrito");
+    if (!direccion) {
+      throw new NotFoundError("Dirección", direccionId);
     }
 
-    itemsAProcesar = itemsCarrito.map((item) => ({
-      productoId: item.productoId,
-      cantidad: item.cantidad,
-    }));
-  }
+    let itemsAProcesar: { productoId: string; cantidad: number }[] = [];
 
-  // Revalidar productos y capturar snapshots atómicos con Seller API o Mock en el momento de confirmar
-  const idsProductos = itemsAProcesar.map((item) => item.productoId);
-  const mapaSnapshots = await obtenerSnapshotsProductos(idsProductos);
-
-  for (const item of itemsAProcesar) {
-    const snapshot = mapaSnapshots.get(item.productoId);
-    if (
-      !snapshot ||
-      typeof snapshot.precioCentavos !== "number" ||
-      snapshot.precioCentavos <= 0
-    ) {
-      throw new Error(
-        `El producto con ID "${item.productoId}" no tiene un precio válido disponible. Operación cancelada para proteger la integridad de la orden.`,
-      );
-    }
-  }
-
-  const totalProductos = itemsAProcesar.reduce((acc, item) => {
-    const snapshot = mapaSnapshots.get(item.productoId)!;
-    return acc + snapshot.precioCentavos * item.cantidad;
-  }, 0);
-
-  const costoEnvioCentavos = Math.round(datosEnvio.precio * 100);
-  const total = totalProductos + costoEnvioCentavos;
-
-  // Derivar vendedorId directamente del snapshot atómico validado
-  const primerItemSnapshot = mapaSnapshots.get(itemsAProcesar[0].productoId);
-  const vendedorId =
-    primerItemSnapshot?.vendedorClerkId || "user_3EXlfKfNj061hH7lOCEhs7Wg7qy";
-
-  // Transacción atómica: Creación de la orden y vaciado seguro de los ítems del carrito
-  const nuevaOrden = await prisma.$transaction(async (tx) => {
-    if (!esCompraDirecta) {
-      const itemsEnCarrito = await tx.carrito.findMany({
+    if (esCompraDirecta) {
+      itemsAProcesar = [{ productoId: productosIds[0], cantidad: 1 }];
+    } else {
+      const itemsCarrito = await prisma.carrito.findMany({
         where: {
           usuarioId: userId,
           productoId: { in: productosIds },
         },
       });
 
-      if (itemsEnCarrito.length === 0) {
-        throw new Error(
+      if (itemsCarrito.length === 0) {
+        throw new ConflictError(
           "Los productos seleccionados ya no se encuentran en el carrito",
+        );
+      }
+
+      itemsAProcesar = itemsCarrito.map((item) => ({
+        productoId: item.productoId,
+        cantidad: item.cantidad,
+      }));
+    }
+
+    // Revalidar productos y capturar snapshots atómicos con Seller API o mock
+    const idsProductos = itemsAProcesar.map((item) => item.productoId);
+    const mapaSnapshots = await obtenerSnapshotsProductos(idsProductos);
+
+    for (const item of itemsAProcesar) {
+      const snapshot = mapaSnapshots.get(item.productoId);
+      if (
+        !snapshot ||
+        typeof snapshot.precioCentavos !== "number" ||
+        snapshot.precioCentavos <= 0
+      ) {
+        throw new ConflictError(
+          `El producto con ID "${item.productoId}" no tiene un precio válido disponible. Operación cancelada para proteger la integridad de la orden.`,
         );
       }
     }
 
-    const orden = await tx.ordenCompra.create({
-      data: {
-        usuarioId: userId,
-        estado: EstadosOrden.enum.PENDIENTE,
-        costoEnvio: costoEnvioCentavos,
-        vendedorId: vendedorId,
-        operadorEnvio: datosEnvio.operador,
-        servicioEnvio: datosEnvio.tipo_servicio,
-        demoraDias: datosEnvio.demora_dias,
-        direccionId: direccionId,
-        total: total,
-        items: {
-          create: itemsAProcesar.map((item) => {
-            const snapshot = mapaSnapshots.get(item.productoId)!;
-            return {
-              productoId: item.productoId,
-              nombre: snapshot.nombre,
-              marca: snapshot.marca,
-              imagenUrl: snapshot.imagenUrl,
-              vendedor: snapshot.vendedor,
-              precio: snapshot.precioCentavos,
-              cantidad: item.cantidad,
-            };
-          }),
-        },
-      },
-    });
+    const totalProductos = itemsAProcesar.reduce((acc, item) => {
+      const snapshot = mapaSnapshots.get(item.productoId)!;
+      return acc + snapshot.precioCentavos * item.cantidad;
+    }, 0);
 
-    if (!esCompraDirecta) {
-      await tx.carrito.deleteMany({
-        where: {
+    const costoEnvioCentavos = Math.round(datosEnvio.precio * 100);
+    const total = totalProductos + costoEnvioCentavos;
+
+    // Derivar vendedorId directamente del snapshot validado
+    const primerItemSnapshot = mapaSnapshots.get(itemsAProcesar[0].productoId);
+    const vendedorId =
+      primerItemSnapshot?.vendedorClerkId || "user_3EXlfKfNj061hH7lOCEhs7Wg7qy";
+
+    // Transacción atómica: Creación de orden con snapshots y vaciado del carrito
+    const nuevaOrden = await prisma.$transaction(async (tx) => {
+      if (!esCompraDirecta) {
+        const itemsEnCarrito = await tx.carrito.findMany({
+          where: {
+            usuarioId: userId,
+            productoId: { in: productosIds },
+          },
+        });
+
+        if (itemsEnCarrito.length === 0) {
+          throw new ConflictError(
+            "Los productos seleccionados ya no se encuentran en el carrito",
+          );
+        }
+      }
+
+      const orden = await tx.ordenCompra.create({
+        data: {
           usuarioId: userId,
-          productoId: { in: productosIds },
+          estado: EstadosOrden.enum.PENDIENTE,
+          costoEnvio: costoEnvioCentavos,
+          vendedorId: vendedorId,
+          operadorEnvio: datosEnvio.operador,
+          servicioEnvio: datosEnvio.tipo_servicio,
+          demoraDias: datosEnvio.demora_dias ?? 3,
+          direccionId: direccionId,
+          total: total,
+          items: {
+            create: itemsAProcesar.map((item) => {
+              const snapshot = mapaSnapshots.get(item.productoId)!;
+              return {
+                productoId: item.productoId,
+                nombre: snapshot.nombre,
+                marca: snapshot.marca,
+                imagenUrl: snapshot.imagenUrl,
+                vendedor: snapshot.vendedor,
+                precio: snapshot.precioCentavos,
+                cantidad: item.cantidad,
+              };
+            }),
+          },
         },
       });
-    }
 
-    return orden;
-  });
+      if (!esCompraDirecta) {
+        await tx.carrito.deleteMany({
+          where: {
+            usuarioId: userId,
+            productoId: { in: productosIds },
+          },
+        });
+      }
 
-  redirect(`/checkout/confirmacion?ordenId=${nuevaOrden.id}`);
-}
+      return orden;
+    });
+
+    // Control de flujo oficial: rethrowIfNavigationError preservará este redirect intacto
+    redirect(`/checkout/confirmacion?ordenId=${nuevaOrden.id}`);
+  },
+});
 
 export async function obtenerOrdenDeUsuario(
   idOrden: string,
   estado: EstadoOrden | EstadoOrden[],
 ) {
-  try {
-    const { userId } = await auth();
-    if (!userId) throw new Error("No autorizado");
+  const userId = await requireUser();
 
-    const orden = await prisma.ordenCompra.findFirst({
-      where: {
-        id: idOrden,
-        usuarioId: userId,
-        estado: Array.isArray(estado) ? { in: estado } : estado,
-      },
-      include: {
-        items: true,
-      },
-    });
+  const orden = await prisma.ordenCompra.findFirst({
+    where: {
+      id: idOrden,
+      usuarioId: userId,
+      estado: Array.isArray(estado) ? { in: estado } : estado,
+    },
+    include: {
+      items: true,
+    },
+  });
 
-    if (!orden) throw new Error("Orden no encontrada");
-
-    return orden;
-  } catch (error) {
-    throw new Error(`Error al obtener la orden ${error}`);
+  if (!orden) {
+    throw new NotFoundError("Orden", idOrden);
   }
+
+  return orden;
 }
 
 export async function actualizarOrden(
@@ -204,78 +194,71 @@ export async function actualizarOrden(
   idPago?: string,
   idEnvio?: string,
 ) {
-  // Solo administradores pueden alterar arbitrariamente el estado de una orden vía RPC
   const { userId } = await auth();
   if (userId) {
     await requireAdmin();
   }
 
-  try {
-    const dataToUpdate: Prisma.OrdenCompraUpdateInput = {
-      estado,
-    };
-    if (idPago !== undefined) dataToUpdate.pagoId = idPago;
-    if (idEnvio !== undefined) dataToUpdate.envioId = idEnvio;
+  const dataToUpdate: Prisma.OrdenCompraUpdateInput = {
+    estado,
+  };
+  if (idPago !== undefined) dataToUpdate.pagoId = idPago;
+  if (idEnvio !== undefined) dataToUpdate.envioId = idEnvio;
 
-    await prisma.ordenCompra.update({
-      where: { id: idOrden },
-      data: dataToUpdate,
-    });
+  const orden = await prisma.ordenCompra.update({
+    where: { id: idOrden },
+    data: dataToUpdate,
+  });
 
-    return { success: true };
-  } catch (error) {
-    throw new Error(`Error al actualizar la orden ${error}`);
-  }
+  return { success: true, ordenId: orden.id };
 }
 
 export async function obtenerOrden(idOrden: string) {
-  try {
-    const { userId } = await auth();
+  const { userId } = await auth();
 
-    const orden = await prisma.ordenCompra.findUnique({
-      where: { id: idOrden },
-      include: {
-        items: true,
-      },
-    });
+  const orden = await prisma.ordenCompra.findUnique({
+    where: { id: idOrden },
+    include: {
+      items: true,
+    },
+  });
 
-    if (!orden) throw new Error("Orden no encontrada");
-
-    // Si la llamada proviene de un usuario en sesión (RPC de cliente), validar pertenencia o rol admin
-    if (userId && orden.usuarioId !== userId) {
-      await requireAdmin();
-    }
-
-    const direccion = await prisma.direccion.findUnique({
-      where: { id: orden.direccionId },
-    });
-
-    return { ...orden, direccion };
-  } catch (error) {
-    throw new Error(`Error al obtener la orden ${error}`);
+  if (!orden) {
+    throw new NotFoundError("Orden", idOrden);
   }
+
+  // Si la llamada proviene de un usuario en sesión, validar pertenencia o rol admin
+  if (userId && orden.usuarioId !== userId) {
+    await requireAdmin();
+  }
+
+  const direccion = await prisma.direccion.findUnique({
+    where: { id: orden.direccionId },
+  });
+
+  return { ...orden, direccion };
 }
 
 export async function verDetallesOrden(idOrden: string, usuarioId?: string) {
-  try {
-    const orden = await prisma.ordenCompra.findFirst({
-      where: {
-        id: idOrden,
-        ...(usuarioId ? { usuarioId } : {}),
-      },
-      select: {
-        id: true,
-        usuarioId: true,
-        vendedorId: true,
-        total: true,
-        estado: true,
-      },
-    });
+  const orden = await prisma.ordenCompra.findFirst({
+    where: {
+      id: idOrden,
+      ...(usuarioId ? { usuarioId } : {}),
+    },
+    select: {
+      id: true,
+      usuarioId: true,
+      vendedorId: true,
+      total: true,
+      estado: true,
+    },
+  });
 
-    return orden;
-  } catch (error) {
-    throw new Error(`Error al obtener la orden ${error}`);
+  if (!orden) {
+    throw new NotFoundError("Orden", idOrden);
   }
+
+  return orden;
 }
 
 export type ResultadoVerificacionOrdenPago =
@@ -312,56 +295,52 @@ export async function verificarOrdenParaPago(
     return { success: false, status: 401, error: "No autorizado" };
   }
 
-  try {
-    const orden = await prisma.ordenCompra.findUnique({
-      where: { id: idOrden },
-      select: {
-        id: true,
-        usuarioId: true,
-        vendedorId: true,
-        total: true,
-        estado: true,
-        pagoId: true,
-      },
-    });
+  const orden = await prisma.ordenCompra.findUnique({
+    where: { id: idOrden },
+    select: {
+      id: true,
+      usuarioId: true,
+      vendedorId: true,
+      total: true,
+      estado: true,
+      pagoId: true,
+    },
+  });
 
-    if (!orden) {
-      return { success: false, status: 404, error: "Orden no encontrada" };
-    }
-
-    if (orden.usuarioId !== usuarioId) {
-      return {
-        success: false,
-        status: 403,
-        error: "No tienes permiso para operar sobre esta orden",
-      };
-    }
-
-    if (orden.estado === EstadoOrden.PAGADO) {
-      return {
-        success: false,
-        status: 409,
-        error: "La orden ya ha sido pagada previamente",
-        orden,
-      };
-    }
-
-    if (
-      orden.estado !== EstadoOrden.PENDIENTE &&
-      orden.estado !== EstadoOrden.CANCELADO
-    ) {
-      return {
-        success: false,
-        status: 400,
-        error: "Solo se pueden pagar órdenes en estado pendiente o cancelado",
-        orden,
-      };
-    }
-
-    return { success: true, orden };
-  } catch (error) {
-    throw new Error(`Error al verificar orden para pago: ${error}`);
+  if (!orden) {
+    return { success: false, status: 404, error: "Orden no encontrada" };
   }
+
+  if (orden.usuarioId !== usuarioId) {
+    return {
+      success: false,
+      status: 403,
+      error: "No tienes permiso para operar sobre esta orden",
+    };
+  }
+
+  if (orden.estado === EstadoOrden.PAGADO) {
+    return {
+      success: false,
+      status: 409,
+      error: "La orden ya ha sido pagada previamente",
+      orden,
+    };
+  }
+
+  if (
+    orden.estado !== EstadoOrden.PENDIENTE &&
+    orden.estado !== EstadoOrden.CANCELADO
+  ) {
+    return {
+      success: false,
+      status: 400,
+      error: "Solo se pueden pagar órdenes en estado pendiente o cancelado",
+      orden,
+    };
+  }
+
+  return { success: true, orden };
 }
 
 export async function aprobarOrden(
@@ -398,12 +377,11 @@ export async function aprobarOrden(
   });
 
   if (!ordenActual) {
-    throw new Error(`Orden ${idOrden} no encontrada`);
+    throw new NotFoundError("Orden", idOrden);
   }
 
   // Si la orden ya está pagada:
   if (ordenActual.estado === EstadoOrden.PAGADO) {
-    // Si ya tiene el envío generado, la operación es 100% idempotente: no duplicar envío
     if (ordenActual.envioId) {
       console.log(
         `[aprobarOrden] Orden ${idOrden} ya está PAGADA y con envío (${ordenActual.envioId}). Operación idempotente.`,
@@ -411,7 +389,6 @@ export async function aprobarOrden(
       return { success: true, yaProcesada: true, envioId: ordenActual.envioId };
     }
 
-    // Si está PAGADA pero no tiene envioId (ej. fallo previo en shipping app), generar el envío pendiente
     console.log(
       `[aprobarOrden] Orden ${idOrden} está PAGADA pero pendiente de envío. Generando envío...`,
     );
@@ -452,7 +429,6 @@ export async function aprobarOrden(
   });
 
   if (resultado.count === 0) {
-    // Otra ejecución concurrente (ej. webhook de MP) actualizó la orden casi simultáneamente
     const ordenRevisada = await prisma.ordenCompra.findUnique({
       where: { id: idOrden },
       select: { envioId: true, estado: true },
@@ -464,7 +440,7 @@ export async function aprobarOrden(
     };
   }
 
-  // 4. Generar orden de envío en Shipping App (fuera de la transacción de DB para no retener conexiones)
+  // 4. Generar orden de envío en Shipping App
   const orden = await obtenerOrden(idOrden);
   const calle = orden.direccion?.calle || "";
 
@@ -497,7 +473,7 @@ export async function rechazarOrden(
 ): Promise<{ success: boolean; yaProcesada?: boolean; error?: string }> {
   const idPagoStr = String(idPago);
 
-  // 1. Control de unicidad de pagoId: verificar si ya fue asignado a otra orden
+  // 1. Control de unicidad de pagoId
   const ordenConEstePago = await prisma.ordenCompra.findUnique({
     where: { pagoId: idPagoStr },
     select: { id: true, estado: true },
@@ -520,10 +496,9 @@ export async function rechazarOrden(
   });
 
   if (!ordenActual) {
-    throw new Error(`Orden ${idOrden} no encontrada`);
+    throw new NotFoundError("Orden", idOrden);
   }
 
-  // Si ya está CANCELADA con este pago, es una operación idempotente
   if (ordenActual.estado === EstadoOrden.CANCELADO) {
     if (ordenActual.pagoId !== idPagoStr) {
       await prisma.ordenCompra.update({
@@ -534,7 +509,6 @@ export async function rechazarOrden(
     return { success: true, yaProcesada: true };
   }
 
-  // Si ya está PAGADA, no permitir que un evento de rechazo tardío cancele una orden ya pagada
   if (ordenActual.estado === EstadoOrden.PAGADO) {
     console.warn(
       `[rechazarOrden] Se intentó rechazar la orden ${idOrden} que ya está PAGADA. Ignorando evento tardío.`,
@@ -545,7 +519,7 @@ export async function rechazarOrden(
     };
   }
 
-  // 3. Transición atómica condicional: Solo pasa a CANCELADO si sigue en PENDIENTE o CANCELADO
+  // 3. Transición atómica condicional
   const resultado = await prisma.ordenCompra.updateMany({
     where: {
       id: idOrden,
@@ -570,13 +544,9 @@ export async function vaciarCarrito(usuarioId: string) {
     await requireAdmin();
   }
 
-  try {
-    await prisma.carrito.deleteMany({
-      where: { usuarioId },
-    });
-  } catch (error) {
-    throw new Error(`Error al vaciar el carrito ${error}`);
-  }
+  await prisma.carrito.deleteMany({
+    where: { usuarioId },
+  });
 }
 
 export async function actualizarEstadoEnvio(
@@ -597,11 +567,9 @@ export async function actualizarEstadoEnvio(
       "code" in error &&
       (error as { code: string }).code === "P2025"
     ) {
-      throw new Error(`NOT_FOUND`);
+      throw new NotFoundError("Envío con trackingId", trackingId);
     }
-
-    const message = error instanceof Error ? error.message : String(error);
-    throw new Error(`Error al actualizar el estado del envío ${message}`);
+    throw error;
   }
 }
 
@@ -612,47 +580,37 @@ export async function obtenerItemsOrdenParaSeller(ordenId: string) {
       where: { id: ordenId },
       select: { usuarioId: true },
     });
-    if (!ordenUsuario) throw new Error("NOT_FOUND");
+    if (!ordenUsuario) throw new NotFoundError("Orden", ordenId);
     if (ordenUsuario.usuarioId !== userId) {
       await requireAdmin();
     }
   }
 
-  try {
-    const orden = await prisma.ordenCompra.findUnique({
-      where: { id: ordenId },
-      select: {
-        usuarioId: true,
-        items: {
-          select: {
-            productoId: true,
-            cantidad: true,
-          },
+  const orden = await prisma.ordenCompra.findUnique({
+    where: { id: ordenId },
+    select: {
+      usuarioId: true,
+      items: {
+        select: {
+          productoId: true,
+          cantidad: true,
         },
       },
-    });
+    },
+  });
 
-    if (!orden) throw new Error("NOT_FOUND");
+  if (!orden) throw new NotFoundError("Orden", ordenId);
 
-    return orden;
-  } catch (error) {
-    throw new Error(`Error al obtener los items de la orden ${error}`);
-  }
+  return orden;
 }
 
 export async function obtenerEstadoOrden(paymentId: string) {
-  try {
-    const orden = await prisma.ordenCompra.findFirst({
-      where: {
-        id: paymentId,
-      },
-      select: {
-        estado: true,
-      },
-    });
-
-    return orden;
-  } catch (error) {
-    throw new Error(`Error al obtener el estado de la orden ${error}`);
-  }
+  return await prisma.ordenCompra.findFirst({
+    where: {
+      id: paymentId,
+    },
+    select: {
+      estado: true,
+    },
+  });
 }

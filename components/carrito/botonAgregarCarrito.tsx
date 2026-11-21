@@ -32,9 +32,17 @@ export function BotonAgregarCarrito({
       if (agregarPendiente === perfumeId) {
         localStorage.removeItem("intencionAgregarCarrito");
 
-        agregarAlCarrito(perfumeId)
-          .then(() => toast.success("¡Agregado al carrito!"))
-          .catch((err) => {
+        agregarAlCarrito({ productoId: perfumeId })
+          .then((res) => {
+            if (res.success) {
+              toast.success("¡Agregado al carrito!");
+            } else {
+              toast.error("No se pudo agregar al carrito", {
+                description: res.error.message,
+              });
+            }
+          })
+          .catch(() => {
             toast.error("Hubo un problema al guardar tu producto.");
           });
       }
@@ -53,9 +61,15 @@ export function BotonAgregarCarrito({
 
     startTransition(async () => {
       try {
-        await agregarAlCarrito(perfumeId);
-        toast.success("¡Agregado al carrito!");
-      } catch (error) {
+        const res = await agregarAlCarrito({ productoId: perfumeId });
+        if (res.success) {
+          toast.success("¡Agregado al carrito!");
+        } else {
+          toast.error("No se pudo agregar al carrito", {
+            description: res.error.message,
+          });
+        }
+      } catch {
         toast.error("No se pudo agregar al carrito", {
           description: "Por favor, intentá nuevamente en unos minutos.",
         });

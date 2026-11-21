@@ -15,6 +15,7 @@ import {
 import { simularCambioEstado } from "@/actions/compras";
 import { cn } from "@/lib/utils";
 import { EstadoOrden } from "@/lib/generated/prisma/enums";
+import { toast } from "sonner";
 
 export function SimuladorEnvio({
   ordenId,
@@ -27,7 +28,16 @@ export function SimuladorEnvio({
 
   const handleCambio = (nuevoEstado: EstadoOrden) => {
     startTransition(async () => {
-      await simularCambioEstado(ordenId, itemId, nuevoEstado);
+      const res = await simularCambioEstado({
+        ordenId,
+        itemId,
+        nuevoEstado,
+      });
+      if (res.success) {
+        toast.success(`Estado actualizado a ${nuevoEstado}`);
+      } else {
+        toast.error(res.error.message);
+      }
     });
   };
 

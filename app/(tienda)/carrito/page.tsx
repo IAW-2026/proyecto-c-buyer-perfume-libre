@@ -13,7 +13,8 @@ export const metadata = {
 };
 
 export default async function CarritoPage() {
-  const productosCarritoDb = await obtenerCarritoDelUsuario();
+  const res = await obtenerCarritoDelUsuario();
+  const productosCarritoDb = res.success ? res.data : [];
 
   if (productosCarritoDb.length === 0) {
     return (

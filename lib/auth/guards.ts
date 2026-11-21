@@ -1,20 +1,9 @@
 import { auth } from "@clerk/nextjs/server";
 import { RolUsuario } from "@/lib/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
+import { UnauthorizedError, ForbiddenError } from "@/lib/errors/domain-errors";
 
-export class UnauthorizedError extends Error {
-  constructor(message = "UNAUTHORIZED: Debes iniciar sesión") {
-    super(message);
-    this.name = "UnauthorizedError";
-  }
-}
-
-export class ForbiddenError extends Error {
-  constructor(message = "FORBIDDEN: Permisos insuficientes") {
-    super(message);
-    this.name = "ForbiddenError";
-  }
-}
+export { UnauthorizedError, ForbiddenError };
 
 /**
  * Exige que exista un usuario autenticado.
@@ -51,7 +40,7 @@ export async function requireAdmin(): Promise<string> {
   });
 
   if (usuario?.rol !== RolUsuario.ADMIN) {
-    throw new ForbiddenError("FORBIDDEN: Permisos de administrador requeridos");
+    throw new ForbiddenError("Permisos de administrador requeridos");
   }
 
   return userId;

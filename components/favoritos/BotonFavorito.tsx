@@ -5,6 +5,7 @@ import { Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toggleFavorito } from "@/actions/favoritos";
 import { useAuth, useClerk } from "@clerk/nextjs";
+import { toast } from "sonner";
 
 export function BotonFavorito({
   perfumeId,
@@ -26,9 +27,14 @@ export function BotonFavorito({
         localStorage.removeItem("intencionFavorito");
 
         if (!esFav) {
-          toggleFavorito(perfumeId)
-            .then(() => {
-              setEsFav(true);
+          toggleFavorito({ productoId: perfumeId })
+            .then((res) => {
+              if (res.success) {
+                setEsFav(res.data.enFavoritos);
+              } else {
+                setEsFav(false);
+                toast.error(res.error.message);
+              }
             })
             .catch(() => {
               setEsFav(false);
@@ -48,11 +54,20 @@ export function BotonFavorito({
       return;
     }
 
+    const estadoPrevio = esFav;
     setEsFav(!esFav);
+
     try {
-      await toggleFavorito(perfumeId);
-    } catch (error) {
-      setEsFav(esFav);
+      const res = await toggleFavorito({ productoId: perfumeId });
+      if (!res.success) {
+        setEsFav(estadoPrevio);
+        toast.error(res.error.message);
+      } else {
+        setEsFav(res.data.enFavoritos);
+      }
+    } catch {
+      setEsFav(estadoPrevio);
+      toast.error("No se pudo actualizar el estado de favoritos");
     }
   };
 

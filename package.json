@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "node node_modules/jiti/lib/jiti-cli.mjs lib/errors/__tests__/error-handler.test.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {

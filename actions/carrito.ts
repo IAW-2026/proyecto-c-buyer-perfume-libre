@@ -1,21 +1,21 @@
 "use server";
 
+import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { auth } from "@clerk/nextjs/server";
-import { revalidatePath } from "next/dist/server/web/spec-extension/revalidate";
+import { revalidatePath } from "next/cache";
+import { createAuthAction } from "@/lib/errors/safe-action";
+import { NotFoundError, ForbiddenError } from "@/lib/errors/domain-errors";
 import { asegurarUsuario } from "./usuario";
 
-export async function agregarAlCarrito(productoId: string) {
-  try {
-    const { userId } = await auth();
-
-    if (!userId) {
-      throw new Error("Usuario no autenticado");
-    }
-
+export const agregarAlCarrito = createAuthAction({
+  schema: z.object({
+    productoId: z.string().min(1, "El ID del producto es requerido"),
+    cantidad: z.number().int().min(1, "La cantidad mínima es 1").optional().default(1),
+  }),
+  handler: async ({ productoId, cantidad }, { userId }) => {
     await asegurarUsuario(userId);
 
-    const favoritoExistente = await prisma.carrito.upsert({
+    const item = await prisma.carrito.upsert({
       where: {
         usuarioId_productoId: {
           usuarioId: userId,
@@ -25,25 +25,24 @@ export async function agregarAlCarrito(productoId: string) {
       create: {
         usuarioId: userId,
         productoId: productoId,
-        cantidad: 1,
+        cantidad: cantidad ?? 1,
       },
-      update: {},
+      update: {
+        ...(cantidad && cantidad > 1 ? { cantidad: { increment: cantidad } } : {}),
+      },
     });
-  } catch (error) {
-    console.error("Error en agregarAlCarrito:", error);
-    throw new Error("No se pudo agregar el producto al carrito");
-  }
-}
 
-export async function eliminarDelCarrito(productoId: string) {
-  try {
-    const { userId } = await auth();
+    revalidatePath("/carrito");
+    return { id: item.id, productoId: item.productoId, cantidad: item.cantidad };
+  },
+});
 
-    if (!userId) {
-      throw new Error("Usuario no autenticado");
-    }
-
-    await prisma.carrito.delete({
+export const eliminarDelCarrito = createAuthAction({
+  schema: z.object({
+    productoId: z.string().min(1, "El ID del producto es requerido"),
+  }),
+  handler: async ({ productoId }, { userId }) => {
+    const item = await prisma.carrito.findUnique({
       where: {
         usuarioId_productoId: {
           usuarioId: userId,
@@ -51,22 +50,28 @@ export async function eliminarDelCarrito(productoId: string) {
         },
       },
     });
-  } catch (error) {
-    console.error("Error en eliminarDelCarrito:", error);
-    throw new Error("No se pudo eliminar el producto del carrito");
-  }
 
-  revalidatePath("/carrito");
-}
-
-export async function obtenerCarritoDelUsuario() {
-  try {
-    const { userId } = await auth();
-
-    if (!userId) {
-      throw new Error("Usuario no autenticado");
+    if (!item) {
+      throw new NotFoundError("Producto en el carrito", productoId);
     }
 
+    if (item.usuarioId !== userId) {
+      throw new ForbiddenError("No puedes eliminar un producto de otro carrito");
+    }
+
+    await prisma.carrito.delete({
+      where: {
+        id: item.id,
+      },
+    });
+
+    revalidatePath("/carrito");
+    return { eliminado: true };
+  },
+});
+
+export const obtenerCarritoDelUsuario = createAuthAction({
+  handler: async (_input, { userId }) => {
     const carrito = await prisma.carrito.findMany({
       where: {
         usuarioId: userId,
@@ -81,23 +86,15 @@ export async function obtenerCarritoDelUsuario() {
       productoId: item.productoId,
       cantidad: item.cantidad,
     }));
-  } catch (error) {
-    console.error("Error en obtenerCarritoDelUsuario:", error);
-    throw new Error("No se pudieron obtener los productos del carrito");
-  }
-}
+  },
+});
 
-export async function actualizarCantidadEnCarrito(
-  productoId: string,
-  nuevaCantidad: number,
-) {
-  try {
-    const { userId } = await auth();
-
-    if (!userId) {
-      throw new Error("Usuario no autenticado");
-    }
-
+export const actualizarCantidadEnCarrito = createAuthAction({
+  schema: z.object({
+    productoId: z.string().min(1, "El ID del producto es requerido"),
+    nuevaCantidad: z.number().int().min(1, "La cantidad debe ser al menos 1"),
+  }),
+  handler: async ({ productoId, nuevaCantidad }, { userId }) => {
     const carritoItem = await prisma.carrito.findUnique({
       where: {
         usuarioId_productoId: {
@@ -107,11 +104,16 @@ export async function actualizarCantidadEnCarrito(
       },
       select: {
         id: true,
+        usuarioId: true,
       },
     });
 
     if (!carritoItem) {
-      throw new Error("Producto no encontrado en el carrito");
+      throw new NotFoundError("Producto en el carrito", productoId);
+    }
+
+    if (carritoItem.usuarioId !== userId) {
+      throw new ForbiddenError("No puedes modificar el carrito de otro usuario");
     }
 
     await prisma.carrito.update({
@@ -122,12 +124,8 @@ export async function actualizarCantidadEnCarrito(
         cantidad: nuevaCantidad,
       },
     });
-  } catch (error) {
-    console.error("Error en actualizarCantidadEnCarrito:", error);
-    throw new Error(
-      "No se pudo actualizar la cantidad del producto en el carrito",
-    );
-  }
 
-  revalidatePath("/carrito");
-}
+    revalidatePath("/carrito");
+    return { actualizado: true, nuevaCantidad };
+  },
+});

@@ -1,5 +1,6 @@
 import { actualizarEstadoEnvio } from "@/actions/checkout";
 import { validateApiKey } from "@/lib/api";
+import { NotFoundError } from "@/lib/errors";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
@@ -24,8 +25,14 @@ export async function POST(req: Request) {
       { success: true, mensaje: "Estado actualizado" },
       { status: 200 },
     );
-  } catch (error: any) {
-    if (error.message === "NOT_FOUND") {
+  } catch (error: unknown) {
+    if (
+      error instanceof NotFoundError ||
+      (typeof error === "object" &&
+        error !== null &&
+        "code" in error &&
+        (error as { code: string }).code === "NOT_FOUND")
+    ) {
       return NextResponse.json(
         { error: "No se encontró ninguna orden con ese tracking_id" },
         { status: 404 },

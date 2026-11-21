@@ -82,7 +82,8 @@ export default async function ProductoDetalle({
   let estaEnFavoritos = false;
 
   if (userId && idReal) {
-    estaEnFavoritos = await productoEstaEnFavoritos(idReal);
+    const favRes = await productoEstaEnFavoritos({ productoId: idReal });
+    estaEnFavoritos = favRes.success ? favRes.data : false;
   }
 
   return (
