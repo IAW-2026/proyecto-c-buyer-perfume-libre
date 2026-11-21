@@ -8,7 +8,13 @@
     "start": "next start",
     "lint": "eslint",
     "test": "node node_modules/jiti/lib/jiti-cli.mjs lib/errors/__tests__/error-handler.test.ts",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "seed": "npx tsx prisma/seeds/index.ts",
+    "seed:reset": "npx tsx prisma/seeds/00-reset.ts",
+    "seed:usuarios": "npx tsx prisma/seeds/01-usuarios.ts",
+    "seed:direcciones": "npx tsx prisma/seeds/02-direcciones.ts",
+    "seed:ordenes": "npx tsx prisma/seeds/03-ordenes-e-items.ts",
+    "seed:carritos": "npx tsx prisma/seeds/04-carrito-favoritos.ts"
   },
   "dependencies": {
     "@ai-sdk/groq": "^4.0.35",
