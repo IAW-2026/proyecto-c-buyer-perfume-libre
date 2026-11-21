@@ -19,6 +19,7 @@ import { notFound } from "next/navigation";
 import { obtenerDetallePerfume, obtenerHistorialEnvio } from "@/lib/api";
 import { SeccionResenas } from "@/components/compras/SeccionResenas";
 import { SimuladorEnvio } from "@/components/compras/SelectorEnvio";
+import { obtenerEstadoResenasOrden } from "@/actions/resenas";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -45,16 +46,31 @@ export default async function DetalleCompraPage({
     notFound();
   }
 
+  const estadoResenas =
+    orden.ordenCompra.estado === "ENTREGADO"
+      ? await obtenerEstadoResenasOrden(
+          orden.ordenCompraId,
+          orden.productoId,
+          orden.ordenCompra.vendedorId,
+        )
+      : null;
+
   return (
     <div className="min-h-screen bg-background">
       <main className="container mx-auto px-4 py-8 md:py-12 max-w-5xl">
-        <DetalleCompra orden={orden} />
+        <DetalleCompra orden={orden} estadoResenas={estadoResenas} />
       </main>
     </div>
   );
 }
 
-function DetalleCompra({ orden }: { orden: ItemDeOrdenDetallado }) {
+function DetalleCompra({
+  orden,
+  estadoResenas,
+}: {
+  orden: ItemDeOrdenDetallado;
+  estadoResenas: Awaited<ReturnType<typeof obtenerEstadoResenasOrden>> | null;
+}) {
   return (
     <div className="space-y-8">
       <div className="flex justify-between items-center">
@@ -96,12 +112,18 @@ function DetalleCompra({ orden }: { orden: ItemDeOrdenDetallado }) {
         </div>
       </div>
 
-      <PanelPrincipal orden={orden} />
+      <PanelPrincipal orden={orden} estadoResenas={estadoResenas} />
     </div>
   );
 }
 
-function PanelPrincipal({ orden }: { orden: ItemDeOrdenDetallado }) {
+function PanelPrincipal({
+  orden,
+  estadoResenas,
+}: {
+  orden: ItemDeOrdenDetallado;
+  estadoResenas: Awaited<ReturnType<typeof obtenerEstadoResenasOrden>> | null;
+}) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <div className="lg:col-span-2 space-y-8">
@@ -116,6 +138,10 @@ function PanelPrincipal({ orden }: { orden: ItemDeOrdenDetallado }) {
             vendedorId={orden.ordenCompra.vendedorId}
             vendedor={orden.vendedor}
             ordenId={orden.ordenCompraId}
+            yaResenadoProducto={estadoResenas?.yaResenadoProducto}
+            yaResenadoVendedor={estadoResenas?.yaResenadoVendedor}
+            calificacionProducto={estadoResenas?.calificacionProducto}
+            calificacionVendedor={estadoResenas?.calificacionVendedor}
           />
         )}
       </div>

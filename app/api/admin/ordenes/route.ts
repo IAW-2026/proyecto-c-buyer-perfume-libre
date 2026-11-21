@@ -8,7 +8,16 @@ export const GET = withApiHandler(async (req: Request) => {
     throw new UnauthorizedError("No autorizado");
   }
 
+  const { searchParams } = new URL(req.url);
+  const limit = Math.min(
+    Math.max(1, Number(searchParams.get("limit")) || 50),
+    100,
+  );
+  const offset = Math.max(0, Number(searchParams.get("offset")) || 0);
+
   const ordenes = await prisma.ordenCompra.findMany({
+    take: limit,
+    skip: offset,
     orderBy: { createdAt: "desc" },
   });
 
@@ -22,5 +31,12 @@ export const GET = withApiHandler(async (req: Request) => {
     estadoEnvio: orden.estado,
   }));
 
-  return NextResponse.json(resultado);
+  return NextResponse.json({
+    data: resultado,
+    pagination: {
+      limit,
+      offset,
+      totalEnLote: resultado.length,
+    },
+  });
 });

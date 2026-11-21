@@ -164,6 +164,8 @@ export async function limpiarDatosPrueba() {
 interface FiltrosOrdenes {
   q?: string;
   estado?: string;
+  limit?: number;
+  offset?: number;
 }
 
 export async function obtenerOrdenes(filtros?: FiltrosOrdenes) {
@@ -182,8 +184,13 @@ export async function obtenerOrdenes(filtros?: FiltrosOrdenes) {
       whereClause.estado = filtros.estado as EstadoOrden;
     }
 
+    const limit = Math.min(Math.max(1, filtros?.limit ?? 50), 100);
+    const offset = Math.max(0, filtros?.offset ?? 0);
+
     const ordenes = await prisma.ordenCompra.findMany({
       where: whereClause,
+      take: limit,
+      skip: offset,
       orderBy: {
         createdAt: "desc",
       },

@@ -25,6 +25,7 @@ import { obtenerHistorialEnvioReal } from "@/actions/tracking";
 import { sellerClient } from "@/lib/integrations/seller-client";
 import { shippingClient } from "@/lib/integrations/shipping-client";
 import { feedbackClient } from "@/lib/integrations/feedback-client";
+import { prisma } from "@/lib/prisma";
 
 // TODO: Refactorizar este archivo
 
@@ -86,25 +87,28 @@ async function obtenerCatalogoReal(
     }));
 
     try {
-      const promesasCalificaciones = itemsMapeados.map((item) =>
-        feedbackClient.obtenerResumenProducto(item.id).catch(() => null),
-      );
-
-      const resultadosCalificaciones = await Promise.all(
-        promesasCalificaciones,
-      );
-
-      itemsMapeados = itemsMapeados.map((item, index) => {
-        const ratingData = resultadosCalificaciones[index];
-        if (ratingData && ratingData.promedio_producto) {
-          item.calificacion = Number(ratingData.promedio_producto);
-        }
-        return item;
+      const idsProductos = itemsMapeados.map((item) => item.id);
+      const calificacionesDb = await prisma.resenaProducto.groupBy({
+        by: ["productoId"],
+        where: { productoId: { in: idsProductos } },
+        _avg: { puntuacion: true },
       });
-    } catch (errFeedback) {
+
+      const ratingMap = new Map(
+        calificacionesDb.map((c) => [
+          c.productoId,
+          c._avg.puntuacion ? Number(c._avg.puntuacion.toFixed(1)) : 0,
+        ]),
+      );
+
+      itemsMapeados = itemsMapeados.map((item) => ({
+        ...item,
+        calificacion: ratingMap.get(item.id) ?? 0,
+      }));
+    } catch (errDb) {
       console.warn(
-        "Aviso: No se pudieron cargar las calificaciones masivas",
-        errFeedback,
+        "Aviso: No se pudieron cargar las calificaciones masivas:",
+        errDb,
       );
     }
 
@@ -181,16 +185,90 @@ async function obtenerCatalogoMock(
   const items = validarTipo(resultado, PerfumeCardsSchema);
   const itemsPagina = items.slice(inicio, fin);
 
-  return { items: itemsPagina, total };
+  try {
+    const idsPagina = itemsPagina.map((item) => item.id);
+    const calificacionesDb = await prisma.resenaProducto.groupBy({
+      by: ["productoId"],
+      where: { productoId: { in: idsPagina } },
+      _avg: { puntuacion: true },
+    });
+
+    const ratingMap = new Map(
+      calificacionesDb.map((c) => [
+        c.productoId,
+        c._avg.puntuacion ? Number(c._avg.puntuacion.toFixed(1)) : 0,
+      ]),
+    );
+
+    const itemsEnriquecidos = itemsPagina.map((item) => ({
+      ...item,
+      calificacion: ratingMap.get(item.id) ?? 0,
+    }));
+
+    return { items: itemsEnriquecidos, total };
+  } catch {
+    return { items: itemsPagina, total };
+  }
 }
 
 export async function obtenerDetallePerfume(id: string): Promise<Perfume> {
   const usarApiReal = process.env.USE_REAL_API === "true";
 
+  let perfume: Perfume;
   if (usarApiReal) {
-    return obtenerDetallePerfumeReal(id);
+    perfume = await obtenerDetallePerfumeReal(id);
   } else {
-    return obtenerDetallePerfumeMock(id);
+    perfume = await obtenerDetallePerfumeMock(id);
+  }
+
+  return enriquecerConCalificacionesDb(perfume);
+}
+
+async function enriquecerConCalificacionesDb(
+  perfume: Perfume,
+): Promise<Perfume> {
+  try {
+    const [statsProducto, statsVendedor] = await Promise.all([
+      prisma.resenaProducto.aggregate({
+        where: { productoId: perfume.id },
+        _avg: { puntuacion: true },
+        _count: { id: true },
+      }),
+      prisma.resenaVendedor.aggregate({
+        where: {
+          OR: [
+            { vendedorId: perfume.vendedor },
+            { ordenCompra: { items: { some: { productoId: perfume.id } } } },
+            { vendedorId: "user_3EXlfKfNj061hH7lOCEhs7Wg7qy" },
+          ],
+        },
+        _avg: { puntuacion: true },
+        _count: { id: true },
+      }),
+    ]);
+
+    const calificacionProducto =
+      statsProducto._count.id > 0 && statsProducto._avg.puntuacion
+        ? Number(statsProducto._avg.puntuacion.toFixed(1))
+        : 0;
+
+    const calificacionVendedor =
+      statsVendedor._count.id > 0 && statsVendedor._avg.puntuacion
+        ? Number(statsVendedor._avg.puntuacion.toFixed(1))
+        : 0;
+
+    return {
+      ...perfume,
+      calificacionProducto,
+      calificacionVendedor,
+    };
+  } catch (err) {
+    console.error("Error al obtener calificaciones de DB:", err);
+    return {
+      ...perfume,
+      calificacionProducto: 0,
+      calificacionVendedor: 0,
+    };
   }
 }
 
@@ -469,38 +547,13 @@ export async function enviarResenaProducto(
   comentario?: string,
   imagenes?: string[],
 ) {
-  const usarApiReal = true;
-
-  console.warn("Entrando a reseñar");
-  if (usarApiReal) {
-    console.warn("Usando api real");
-    return enviarResenaProductoReal(
-      productoId,
-      ordenId,
-      rating,
-      comentario,
-      imagenes,
-    );
-  } else {
-    console.warn("Usando mock");
-    return enviarResenaProductoMock(productoId, ordenId, rating, comentario);
-  }
-}
-
-async function enviarResenaProductoMock(
-  productoId: string,
-  ordenId: string,
-  rating: number,
-  comentario?: string,
-) {
-  console.log("POST a API Feedback MOCK (Producto):", {
+  return enviarResenaProductoReal(
     productoId,
     ordenId,
     rating,
     comentario,
-  });
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-  return { estado: "success", mensaje: "Reseña simulada con éxito" };
+    imagenes,
+  );
 }
 
 export async function enviarResenaVendedor(
@@ -509,31 +562,7 @@ export async function enviarResenaVendedor(
   rating: number,
   comentario?: string,
 ) {
-  const usarApiReal = true;
-
-  if (usarApiReal) {
-    return enviarResenaVendedorReal(vendedorId, ordenId, rating, comentario);
-  } else {
-    return enviarResenaVendedorMock(vendedorId, ordenId, rating, comentario);
-  }
-}
-
-async function enviarResenaVendedorMock(
-  vendedorId: string,
-  ordenId: string,
-  rating: number,
-  comentario?: string,
-) {
-  console.log("POST a API Feedback MOCK (Vendedor):", {
-    vendedorId,
-    ordenId,
-    rating,
-    comentario,
-  });
-
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-
-  return { estado: "success", mensaje: "Reseña simulada con éxito" };
+  return enviarResenaVendedorReal(vendedorId, ordenId, rating, comentario);
 }
 
 export async function obtenerHistorialEnvio(
