@@ -55,7 +55,7 @@ async function obtenerCatalogoReal(
   filtros: FiltrosCatalogo,
 ): Promise<{ items: PerfumeCard[]; total: number }> {
   try {
-    const { q, marca, genero, tamano, precioMin, precioMax, page, limit } =
+    const { q, marca, genero, precioMin, precioMax, page, limit } =
       filtros;
 
     const categorias: string[] = [];
@@ -87,9 +87,7 @@ async function obtenerCatalogoReal(
 
     try {
       const promesasCalificaciones = itemsMapeados.map((item) =>
-        feedbackClient
-          .obtenerResumenProducto(item.id)
-          .catch(() => null),
+        feedbackClient.obtenerResumenProducto(item.id).catch(() => null),
       );
 
       const resultadosCalificaciones = await Promise.all(
@@ -402,65 +400,16 @@ export async function obtenerProductosComprados(
   ids: string[],
 ): Promise<PerfumeComprado[]> {
   if (!ids || ids.length === 0) return [];
-  const usarApiReal = process.env.USE_REAL_API === "true";
 
-  if (usarApiReal) {
-    return obtenerProductosCompradosReal(ids);
-  } else {
-    return obtenerProductosCompradosMock(ids);
-  }
-}
+  const mapa = await obtenerSnapshotsProductos(ids);
+  const items = Array.from(mapa.values()).map((s) => ({
+    id: s.id,
+    nombre: s.nombre,
+    vendedor: s.vendedor,
+    imagenesUrl: [s.imagenUrl],
+  }));
 
-async function obtenerProductosCompradosReal(
-  ids: string[],
-): Promise<PerfumeComprado[]> {
-  try {
-    const promesas = ids.map((id) =>
-      fetchProductoDesdeSeller(id).catch((err) => {
-        console.warn(`No se pudo cargar el producto ${id}:`, err.message);
-        return null;
-      }),
-    );
-
-    const resultadosRaw = await Promise.all(promesas);
-
-    const productosValidos = resultadosRaw.filter((prod) => prod !== null);
-    const itemsMapeados = productosValidos
-      .map((prod) => {
-        const item = prod.producto;
-        const vendedor = prod.vendedor;
-
-        if (!item) return null;
-
-        return {
-          id: String(item.producto_id),
-          nombre: item.titulo,
-          vendedor: vendedor.nombre || "N/A",
-          imagenesUrl: [item.imagen || "/placeholder-perfume.jpg"],
-        };
-      })
-      .filter((prod) => prod !== null);
-
-    return validarTipo(itemsMapeados, PerfumeCompradosSchema);
-  } catch (error) {
-    console.error(
-      "Error general obteniendo productos comprados reales, usando Mock:",
-      error,
-    );
-    return obtenerProductosCompradosMock(ids);
-  }
-}
-
-async function obtenerProductosCompradosMock(
-  ids: String[],
-): Promise<PerfumeComprado[]> {
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-
-  const perfumesFiltrados = mockPerfumes.filter((perfume) =>
-    ids.includes(perfume.id),
-  );
-
-  return validarTipo(perfumesFiltrados, PerfumeCompradosSchema);
+  return validarTipo(items, PerfumeCompradosSchema);
 }
 
 export async function obtenerDetallesProducto(
@@ -600,125 +549,117 @@ export async function obtenerHistorialEnvio(
   }
 }
 
+export interface SnapshotProducto {
+  id: string;
+  nombre: string;
+  marca: string;
+  imagenUrl: string;
+  vendedor: string;
+  vendedorClerkId?: string;
+  precioCentavos: number;
+}
+
+export async function obtenerSnapshotsProductos(
+  ids: string[],
+): Promise<Map<string, SnapshotProducto>> {
+  if (!ids || ids.length === 0) return new Map();
+
+  const uniqueIds = Array.from(new Set(ids));
+  const usarApiReal = process.env.USE_REAL_API === "true";
+  const mapa = new Map<string, SnapshotProducto>();
+
+  if (!usarApiReal) {
+    for (const id of uniqueIds) {
+      const mockP = mockPerfumes.find((p) => p.id === id);
+      if (mockP) {
+        mapa.set(id, {
+          id: mockP.id,
+          nombre: mockP.nombre,
+          marca:
+            mockP.marca || mockP.nombre.split(" ")[0] || "Marca Desconocida",
+          imagenUrl: mockP.imagenesUrl[0] || "/placeholder-perfume.jpg",
+          vendedor: mockP.vendedor || "Boutique Oficial",
+          vendedorClerkId: "user_3EXlfKfNj061hH7lOCEhs7Wg7qy",
+          precioCentavos: mockP.precio,
+        });
+      }
+    }
+    return mapa;
+  }
+
+  // API Real: Consultar en paralelo los IDs únicos
+  const resultados = await Promise.all(
+    uniqueIds.map(async (id) => {
+      try {
+        const data = await sellerClient.obtenerProductoPorId(id);
+        if (!data?.producto) return null;
+        const prod = data.producto;
+        const vend = data.vendedor;
+        const precioCentavos = Math.round(Number(prod.precio) * 100);
+
+        if (isNaN(precioCentavos) || precioCentavos <= 0) {
+          console.warn(`Producto ${id} devuelto por Seller sin precio válido.`);
+          return null;
+        }
+
+        const snapshot: SnapshotProducto = {
+          id: String(prod.producto_id || prod.id || id),
+          nombre: prod.titulo || "Perfume Premium",
+          marca:
+            (prod as { marca?: string }).marca ||
+            prod.titulo.split(" ")[0] ||
+            "Marca Desconocida",
+          imagenUrl:
+            prod.imagen ||
+            (prod.imagenes && prod.imagenes[0]) ||
+            "/placeholder-perfume.jpg",
+          vendedor: vend?.nombre || "Vendedor Oficial",
+          vendedorClerkId: vend?.clerk_id || "user_3EXlfKfNj061hH7lOCEhs7Wg7qy",
+          precioCentavos,
+        };
+        return snapshot;
+      } catch (err) {
+        console.warn(`Error al obtener snapshot para producto ${id}:`, err);
+        return null;
+      }
+    }),
+  );
+
+  for (const s of resultados) {
+    if (s) {
+      mapa.set(s.id, s);
+    }
+  }
+
+  return mapa;
+}
+
 export async function obtenerPreciosDeProductos(ids: string[]) {
   if (!ids || ids.length === 0) return [];
-
-  const usarApiReal = process.env.USE_REAL_API === "true";
-
-  if (usarApiReal) {
-    return obtenerPreciosDeProductosReal(ids);
-  } else {
-    return obtenerPreciosDeProductosMock(ids);
-  }
-}
-
-async function obtenerPreciosDeProductosReal(ids: string[]) {
-  try {
-    const promesas = ids.map((id) =>
-      fetchProductoDesdeSeller(id).catch((err) => {
-        console.warn(
-          `No se pudo cargar el precio del producto ${id}:`,
-          err.message,
-        );
-        return null;
-      }),
-    );
-
-    const resultadosRaw = await Promise.all(promesas);
-
-    const preciosMapeados = resultadosRaw
-      .filter((prod) => prod !== null)
-      .map((prod) => ({
-        id: String(prod.producto.producto_id),
-        precio: Math.round(Number(prod.producto.precio)) * 100,
-      }));
-
-    return preciosMapeados;
-  } catch (error) {
-    console.error(
-      "⚠️ Error crítico obteniendo precios reales, usando Mock:",
-      error,
-    );
-    return obtenerPreciosDeProductosMock(ids);
-  }
-}
-
-async function obtenerPreciosDeProductosMock(ids: string[]) {
-  await new Promise((resolve) => setTimeout(resolve, 600));
-
-  const preciosFiltrados = mockPerfumes
-    .filter((perfume) => ids.includes(perfume.id))
-    .map((perfume) => ({
-      id: perfume.id,
-      precio: perfume.precio,
-    }));
-
-  return preciosFiltrados;
+  const mapa = await obtenerSnapshotsProductos(ids);
+  return Array.from(mapa.values()).map((s) => ({
+    id: s.id,
+    precio: s.precioCentavos,
+  }));
 }
 
 export async function obtenerDetallesProductos(ids: string[]) {
   if (!ids || ids.length === 0) return [];
-
-  const usarApiReal = process.env.USE_REAL_API === "true";
-
-  if (usarApiReal) {
-    return obtenerDetallesProductosReal(ids);
-  } else {
-    return obtenerDetallesProductosMock(ids);
-  }
-}
-
-async function obtenerDetallesProductosReal(ids: string[]) {
-  try {
-    const promesas = ids.map((id) =>
-      fetchProductoDesdeSeller(id).catch((err) => {
-        console.warn(
-          `No se pudo cargar el resumen del producto ${id}:`,
-          err.message,
-        );
-        return null;
-      }),
-    );
-
-    const resultadosRaw = await Promise.all(promesas);
-    const resumenMapeado = resultadosRaw
-      .filter((prod) => prod !== null)
-      .map((prod) => ({
-        id: String(prod.producto.producto_id),
-        imagen: prod.producto.imagen || "/placeholder-perfume.jpg",
-        nombre: prod.producto.titulo,
-        vendedor: String(prod.vendedor.nombre || "Boutique Oficial"),
-      }));
-
-    return resumenMapeado;
-  } catch (error) {
-    console.error(
-      "⚠️ Error obteniendo detalles básicos reales, usando Mock:",
-      error,
-    );
-    return obtenerDetallesProductosMock(ids);
-  }
-}
-
-async function obtenerDetallesProductosMock(ids: string[]) {
-  await new Promise((resolve) => setTimeout(resolve, 600));
-
-  return mockPerfumes
-    .filter((perfume) => ids.includes(perfume.id))
-    .map((perfume) => ({
-      id: perfume.id,
-      imagen: perfume.imagenesUrl[0],
-      nombre: perfume.nombre,
-      vendedor: perfume.vendedor,
-    }));
+  const mapa = await obtenerSnapshotsProductos(ids);
+  return Array.from(mapa.values()).map((s) => ({
+    id: s.id,
+    imagen: s.imagenUrl,
+    nombre: s.nombre,
+    vendedor: s.vendedor,
+  }));
 }
 
 export async function generarOrdenEnvio(
   id_orden: string,
   id_comprador: string,
   direccion_entrega: string,
-  items: any[],
-  servicio_elegido: any,
+  items: Array<{ productoId: string; cantidad: number; precio: number } | Record<string, unknown>>,
+  servicio_elegido: Record<string, unknown>,
 ) {
   const usarApiReal = process.env.USE_REAL_API === "true";
 
@@ -739,20 +680,23 @@ async function generarOrdenEnvioReal(
   id_orden: string,
   id_comprador: string,
   direccion_entrega: string,
-  items: any[],
-  servicio_elegido: any,
+  items: Array<{ productoId: string; cantidad: number; precio: number } | Record<string, unknown>>,
+  servicio_elegido: Record<string, unknown>,
 ) {
   try {
     let id_vendedor = "vendedor_desconocido";
     if (items && items.length > 0) {
       try {
-        const { producto, vendedor } = await fetchProductoDesdeSeller(
-          items[0].productoId,
-        );
-        if (vendedor?.clerk_id) {
-          id_vendedor = String(vendedor.clerk_id);
+        const itemPrimero = items[0] as { productoId?: string };
+        if (itemPrimero.productoId) {
+          const { vendedor } = await fetchProductoDesdeSeller(
+            itemPrimero.productoId,
+          );
+          if (vendedor?.clerk_id) {
+            id_vendedor = String(vendedor.clerk_id);
+          }
         }
-      } catch (err) {
+      } catch {
         console.warn("No se pudo obtener el id_vendedor, usando genérico.");
       }
     }

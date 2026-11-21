@@ -97,9 +97,15 @@ model ItemOrdenCompra {
   id            String      @id @default(cuid())
   ordenCompraId String
   productoId    String
+  nombre        String?
+  marca         String?
+  imagenUrl     String?
+  vendedor      String?
   precio        Int
   cantidad      Int
   ordenCompra   OrdenCompra @relation(fields: [ordenCompraId], references: [id])
+
+  @@index([ordenCompraId])
 }
 /*
 * Feedback app es dueña de la información de las reseñas pero

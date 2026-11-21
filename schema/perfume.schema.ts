@@ -141,6 +141,10 @@ export const OrdenDeCompraDbSchema = z.object({
       productoId: z.string(),
       precio: z.number().int().positive(),
       cantidad: z.number().int().positive().min(1),
+      nombre: z.string().nullable().optional(),
+      marca: z.string().nullable().optional(),
+      imagenUrl: z.string().nullable().optional(),
+      vendedor: z.string().nullable().optional(),
     }),
   ),
 });

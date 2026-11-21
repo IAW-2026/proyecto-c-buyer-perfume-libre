@@ -319,17 +319,31 @@ async function obtenerItemOrden(
     return null;
   }
 
+  let nombreProducto = ordenDb.nombre;
+  let imagenUrl = ordenDb.imagenUrl;
+  let marca = ordenDb.marca;
+  let vendedor = ordenDb.vendedor;
+
+  // Fallback a Seller API SOLO si faltan datos descriptivos (órdenes legacy)
+  const necesitaFallback = !nombreProducto || !imagenUrl;
+
   const [productoDetalle, datosEnvio] = await Promise.all([
-    obtenerDetallePerfume(ordenDb.productoId),
+    necesitaFallback
+      ? obtenerDetallePerfume(ordenDb.productoId).catch(() => null)
+      : Promise.resolve(null),
     obtenerHistorialEnvio(
       ordenDb.ordenCompra.envioId?.toString() || "",
       ordenDb.ordenCompra.estado,
     ),
   ]);
 
-  if (!productoDetalle) {
-    return null;
+  if (productoDetalle) {
+    nombreProducto = nombreProducto || productoDetalle.nombre;
+    imagenUrl = imagenUrl || productoDetalle.imagenesUrl[0];
+    marca = marca || productoDetalle.marca;
+    vendedor = vendedor || productoDetalle.vendedor;
   }
+
   const estadoValidado = datosEnvio?.estadoActual
     ? EstadosOrden.parse(datosEnvio.estadoActual)
     : ordenDb.ordenCompra.estado;
@@ -344,10 +358,10 @@ async function obtenerItemOrden(
       itemsComprados: itemsComprados || 1,
     },
     historialEnvio: datosEnvio?.historial || [],
-    nombreProducto: productoDetalle.nombre,
-    vendedor: productoDetalle.vendedor,
-    imagenUrl: productoDetalle.imagenesUrl[0],
-    marca: productoDetalle.marca,
-    tamaño: productoDetalle.tamaño,
+    nombreProducto: nombreProducto || "Perfume Adquirido",
+    vendedor: vendedor || "Vendedor Oficial",
+    imagenUrl: imagenUrl || "/placeholder-perfume.jpg",
+    marca: marca || "Marca Desconocida",
+    tamaño: 100,
   };
 }

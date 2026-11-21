@@ -10,8 +10,10 @@ import {
 import { z } from "zod";
 
 /**
- * Servicio de servidor para la consulta y enriquecimiento del historial de compras del usuario.
- * Fusiona las órdenes persistidas en base de datos con los datos en tiempo real de Seller API.
+ * Servicio de servidor para la consulta del historial de compras del usuario.
+ * Prioriza los snapshots históricos inmutables persistidos en ItemOrdenCompra.
+ * Si existen órdenes legacy sin snapshot, realiza una consulta batch agrupando IDs únicos
+ * evitando cualquier problema de N+1 hacia Seller API.
  */
 export async function obtenerHistorialDelUsuario(): Promise<OrdenAgrupada[] | null> {
   const comprasDb = await obtenerComprasDelUsuario();
@@ -24,34 +26,43 @@ export async function obtenerHistorialDelUsuario(): Promise<OrdenAgrupada[] | nu
     return null;
   }
 
-  const perfumesCompradosId = obtenerIdComprados(comprasDbValidadas);
-
-  const detallePerfumesComprados =
-    await obtenerProductosComprados(perfumesCompradosId);
-
-  return fusionarCompradoConDetalles(
-    comprasDbValidadas,
-    detallePerfumesComprados,
+  // Identificar qué productos NO cuentan con snapshot histórico (órdenes legacy)
+  const legacyIds = Array.from(
+    new Set(
+      comprasDbValidadas
+        .flatMap((orden) => orden.items)
+        .filter((item) => !item.nombre || !item.imagenUrl)
+        .map((item) => item.productoId),
+    ),
   );
+
+  let legacyMap = new Map<string, PerfumeComprado>();
+  if (legacyIds.length > 0) {
+    try {
+      // Fallback batch agrupando IDs únicos: sin N+1
+      const detallePerfumesLegacy = await obtenerProductosComprados(legacyIds);
+      legacyMap = new Map(detallePerfumesLegacy.map((p) => [p.id, p]));
+    } catch (err) {
+      console.warn("⚠️ Falló el enriquecimiento batch de órdenes legacy desde Seller:", err);
+    }
+  }
+
+  return fusionarCompradoConSnapshots(comprasDbValidadas, legacyMap);
 }
 
-export function fusionarCompradoConDetalles(
+export function fusionarCompradoConSnapshots(
   compradoDb: OrdenDeCompraDb[],
-  productoDetalle: PerfumeComprado[],
+  legacyMap: Map<string, PerfumeComprado> = new Map(),
 ): OrdenAgrupada[] {
-  const detallesMap = new Map(
-    productoDetalle.map((producto) => [producto.id, producto]),
-  );
-
   const historialAgrupado: OrdenAgrupada[] = compradoDb.map((orden) => {
     const itemsProcesados: ItemOrdenDetalle[] = orden.items.map((item) => {
-      const detalleCatalogo = detallesMap.get(item.productoId);
+      const fallback = legacyMap.get(item.productoId);
       return {
         itemId: item.id,
         productoId: item.productoId,
-        nombre: detalleCatalogo?.nombre ?? "Producto no disponible",
-        vendedor: detalleCatalogo?.vendedor ?? "Desconocido",
-        imagenUrl: detalleCatalogo?.imagenUrl ?? "/placeholder-perfume.jpg",
+        nombre: item.nombre ?? fallback?.nombre ?? "Perfume Adquirido",
+        vendedor: item.vendedor ?? fallback?.vendedor ?? "Vendedor Oficial",
+        imagenUrl: item.imagenUrl ?? fallback?.imagenUrl ?? "/placeholder-perfume.jpg",
         precioHistorico: item.precio,
         cantidad: item.cantidad,
       };
@@ -73,6 +84,9 @@ export function fusionarCompradoConDetalles(
 
   return historialAgrupado;
 }
+
+// Compatibilidad retroactiva con helpers de historial
+export const fusionarCompradoConDetalles = fusionarCompradoConSnapshots;
 
 export function obtenerIdComprados(comprasDb: OrdenDeCompraDb[]): string[] {
   return comprasDb.flatMap((orden) =>

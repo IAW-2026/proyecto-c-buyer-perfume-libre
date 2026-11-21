@@ -1,9 +1,8 @@
 "use server";
 
 import {
-  fetchProductoDesdeSeller,
   generarOrdenEnvio,
-  obtenerPreciosDeProductos,
+  obtenerSnapshotsProductos,
 } from "@/lib/api";
 import { EstadoOrden, Prisma } from "@/lib/generated/prisma/client";
 import { OpcionEnvio } from "@/lib/mockEnvios";
@@ -82,20 +81,17 @@ export async function iniciarProcesamientoCompra(
     }));
   }
 
-  // Revalidar precios con Seller API en el momento de confirmar
+  // Revalidar productos y capturar snapshots atómicos con Seller API o Mock en el momento de confirmar
   const idsProductos = itemsAProcesar.map((item) => item.productoId);
-  const preciosProductos = await obtenerPreciosDeProductos(idsProductos);
-
-  const mapaPrecios = new Map<string, number>();
-  for (const p of preciosProductos) {
-    if (typeof p.precio === "number" && p.precio > 0) {
-      mapaPrecios.set(p.id, p.precio);
-    }
-  }
+  const mapaSnapshots = await obtenerSnapshotsProductos(idsProductos);
 
   for (const item of itemsAProcesar) {
-    const precio = mapaPrecios.get(item.productoId);
-    if (precio === undefined || precio <= 0) {
+    const snapshot = mapaSnapshots.get(item.productoId);
+    if (
+      !snapshot ||
+      typeof snapshot.precioCentavos !== "number" ||
+      snapshot.precioCentavos <= 0
+    ) {
       throw new Error(
         `El producto con ID "${item.productoId}" no tiene un precio válido disponible. Operación cancelada para proteger la integridad de la orden.`,
       );
@@ -103,34 +99,17 @@ export async function iniciarProcesamientoCompra(
   }
 
   const totalProductos = itemsAProcesar.reduce((acc, item) => {
-    const precioUnitario = mapaPrecios.get(item.productoId)!;
-    return acc + precioUnitario * item.cantidad;
+    const snapshot = mapaSnapshots.get(item.productoId)!;
+    return acc + snapshot.precioCentavos * item.cantidad;
   }, 0);
 
   const costoEnvioCentavos = Math.round(datosEnvio.precio * 100);
   const total = totalProductos + costoEnvioCentavos;
 
-  let vendedorId = "vendedor_generico";
-  if (itemsAProcesar.length > 0) {
-    const usarApiReal = process.env.USE_REAL_API === "true";
-    if (usarApiReal) {
-      try {
-        const productoData = await fetchProductoDesdeSeller(
-          itemsAProcesar[0].productoId,
-        );
-        if (productoData && productoData.vendedor?.clerk_id) {
-          vendedorId = String(productoData.vendedor.clerk_id);
-        }
-      } catch (error) {
-        console.warn(
-          "No pudimos contactar a Seller App para obtener el vendedor, usando genérico:",
-          error,
-        );
-      }
-    } else {
-      vendedorId = "user_3EXlfKfNj061hH7lOCEhs7Wg7qy";
-    }
-  }
+  // Derivar vendedorId directamente del snapshot atómico validado
+  const primerItemSnapshot = mapaSnapshots.get(itemsAProcesar[0].productoId);
+  const vendedorId =
+    primerItemSnapshot?.vendedorClerkId || "user_3EXlfKfNj061hH7lOCEhs7Wg7qy";
 
   // Transacción atómica: Creación de la orden y vaciado seguro de los ítems del carrito
   const nuevaOrden = await prisma.$transaction(async (tx) => {
@@ -161,11 +140,18 @@ export async function iniciarProcesamientoCompra(
         direccionId: direccionId,
         total: total,
         items: {
-          create: itemsAProcesar.map((item) => ({
-            productoId: item.productoId,
-            cantidad: item.cantidad,
-            precio: mapaPrecios.get(item.productoId)!,
-          })),
+          create: itemsAProcesar.map((item) => {
+            const snapshot = mapaSnapshots.get(item.productoId)!;
+            return {
+              productoId: item.productoId,
+              nombre: snapshot.nombre,
+              marca: snapshot.marca,
+              imagenUrl: snapshot.imagenUrl,
+              vendedor: snapshot.vendedor,
+              precio: snapshot.precioCentavos,
+              cantidad: item.cantidad,
+            };
+          }),
         },
       },
     });

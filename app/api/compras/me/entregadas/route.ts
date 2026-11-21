@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { fetchProductoDesdeSeller, validateApiKey } from "@/lib/api";
+import { obtenerSnapshotsProductos, validateApiKey } from "@/lib/api";
 import { EstadoOrden } from "@/lib/generated/prisma/enums";
 
 export async function GET(req: Request) {
@@ -32,54 +32,56 @@ export async function GET(req: Request) {
       },
     });
 
-    const usarApiReal = process.env.USE_REAL_API === "true";
+    // Identificar productos legacy sin snapshot entre todas las órdenes entregadas
+    const itemsSinSnapshot = ordenesEntregadas
+      .flatMap((orden) => orden.items)
+      .filter((item) => !item.nombre || !item.imagenUrl);
 
-    const respuestaFinal = await Promise.all(
-      ordenesEntregadas.map(async (orden) => {
-        const itemsProcesados = await Promise.all(
-          orden.items.map(async (item) => {
-            if (usarApiReal) {
-              try {
-                const prodSeller = await fetchProductoDesdeSeller(
-                  item.productoId,
-                );
-                return {
-                  id_producto: item.productoId,
-                  nombre_producto:
-                    prodSeller.producto.titulo || "Perfume Premium",
-                  imagen:
-                    prodSeller.producto.imagen || "/placeholder-perfume.jpg",
-                };
-              } catch (errSeller) {
-                console.warn(
-                  `[API Entregadas] Error trayendo producto ${item.productoId} de Seller, usando mock:`,
-                  errSeller,
-                );
-              }
-            }
+    const legacyMap = new Map<string, { titulo: string; imagen: string }>();
 
-            return {
-              id_producto: item.productoId,
-              nombre_producto: `Perfume Mock ID: ${item.productoId}`,
-              imagen:
-                "https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=400&q=80",
-            };
-          }),
-        );
+    if (itemsSinSnapshot.length > 0) {
+      const uniqueLegacyIds = Array.from(
+        new Set(itemsSinSnapshot.map((i) => i.productoId)),
+      );
 
-        const idVendedorSimulado = `user_3EXlfKfNj061hH7lOCEhs7Wg7qy`;
-        const nombreVendedorSimulado = `Vendedor Simulado`;
+      try {
+        const snapshots = await obtenerSnapshotsProductos(uniqueLegacyIds);
+        for (const [id, snap] of snapshots.entries()) {
+          legacyMap.set(id, {
+            titulo: snap.nombre,
+            imagen: snap.imagenUrl,
+          });
+        }
+      } catch (err) {
+        console.warn("[API Entregadas] Error obteniendo snapshots legacy:", err);
+      }
+    }
 
+    const respuestaFinal = ordenesEntregadas.map((orden) => {
+      const itemsProcesados = orden.items.map((item) => {
+        const fallback = legacyMap.get(item.productoId);
         return {
-          id_orden: orden.id,
-          id_comprador: orden.usuarioId,
-          id_vendedor: idVendedorSimulado,
-          nombre_vendedor: nombreVendedorSimulado,
-          fecha_compra: orden.createdAt.toISOString(),
-          items: itemsProcesados,
+          id_producto: item.productoId,
+          nombre_producto:
+            item.nombre ||
+            fallback?.titulo ||
+            `Perfume ID: ${item.productoId}`,
+          imagen:
+            item.imagenUrl ||
+            fallback?.imagen ||
+            "/placeholder-perfume.jpg",
         };
-      }),
-    );
+      });
+
+      return {
+        id_orden: orden.id,
+        id_comprador: orden.usuarioId,
+        id_vendedor: orden.vendedorId || "user_3EXlfKfNj061hH7lOCEhs7Wg7qy",
+        nombre_vendedor: orden.items[0]?.vendedor || "Vendedor Oficial",
+        fecha_compra: orden.createdAt.toISOString(),
+        items: itemsProcesados,
+      };
+    });
 
     return NextResponse.json(respuestaFinal, { status: 200 });
   } catch (error) {

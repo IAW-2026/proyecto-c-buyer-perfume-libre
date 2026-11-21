@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { obtenerDetallePerfume } from "@/lib/api";
 import { EstadoOrden } from "@/lib/generated/prisma/enums";
 import { requireAdmin, requireUser } from "@/lib/auth/guards";
+import { Perfume } from "@/schema/perfume.schema";
 
 export async function obtenerComprasDelUsuario() {
   try {
@@ -27,6 +28,10 @@ export async function obtenerComprasDelUsuario() {
           select: {
             id: true,
             productoId: true,
+            nombre: true,
+            marca: true,
+            imagenUrl: true,
+            vendedor: true,
             precio: true,
             cantidad: true,
           },
@@ -61,6 +66,10 @@ export async function verDetallesCompra(ordenId: string) {
           select: {
             id: true,
             productoId: true,
+            nombre: true,
+            marca: true,
+            imagenUrl: true,
+            vendedor: true,
             precio: true,
             cantidad: true,
           },
@@ -74,18 +83,49 @@ export async function verDetallesCompra(ordenId: string) {
       throw new Error("Orden no encontrada");
     }
 
-    // Enriquecer cada item con los detalles del producto desde la API externa
-    const itemsEnriquecidos = await Promise.all(
-      orden.items.map(async (item) => {
-        try {
-          const producto = await obtenerDetallePerfume(item.productoId);
-          return { ...item, producto };
-        } catch {
-          // Si no se encuentra el producto, devolvemos el item sin detalles
-          return { ...item, producto: null };
-        }
-      }),
+    // Identificar si existen ítems legacy sin snapshot descriptivo
+    const itemsSinSnapshot = orden.items.filter(
+      (item) => !item.nombre || !item.imagenUrl,
     );
+
+    let legacyMap = new Map<string, Perfume | null>();
+    if (itemsSinSnapshot.length > 0) {
+      const uniqueLegacyIds = Array.from(
+        new Set(itemsSinSnapshot.map((i) => i.productoId)),
+      );
+      const resultadosFallback = await Promise.all(
+        uniqueLegacyIds.map(async (id) => {
+          try {
+            const producto = await obtenerDetallePerfume(id);
+            return { id, producto };
+          } catch {
+            return { id, producto: null };
+          }
+        }),
+      );
+      legacyMap = new Map(resultadosFallback.map((r) => [r.id, r.producto]));
+    }
+
+    const itemsEnriquecidos = orden.items.map((item) => {
+      // Si el ítem ya posee snapshot histórico, se utiliza directamente sin golpear la red
+      if (item.nombre && item.imagenUrl) {
+        return {
+          ...item,
+          producto: {
+            id: item.productoId,
+            nombre: item.nombre,
+            marca: item.marca || "Desconocida",
+            vendedor: item.vendedor || "Vendedor Oficial",
+            imagenesUrl: [item.imagenUrl],
+            precio: item.precio,
+          },
+        };
+      }
+
+      // Fallback para ítems legacy
+      const productoFallback = legacyMap.get(item.productoId);
+      return { ...item, producto: productoFallback || null };
+    });
 
     return { ...orden, items: itemsEnriquecidos };
   } catch (error) {
