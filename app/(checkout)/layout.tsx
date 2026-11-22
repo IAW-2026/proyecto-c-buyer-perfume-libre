@@ -1,5 +1,7 @@
 import HeaderCheckout from "@/components/layout/HeaderCheckout";
 
+export const dynamic = "force-dynamic";
+
 export default function CheckoutLayout({
   children,
 }: {
@@ -9,7 +11,7 @@ export default function CheckoutLayout({
     <div className="min-h-screen bg-background flex flex-col selection:bg-accent/30 selection:text-foreground">
       <HeaderCheckout />
 
-      <main className="flex-1 flex flex-col">{children}</main>
+      <main id="main-content" className="flex-1 flex flex-col">{children}</main>
     </div>
   );
 }

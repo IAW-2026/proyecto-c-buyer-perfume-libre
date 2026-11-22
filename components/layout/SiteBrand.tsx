@@ -15,7 +15,7 @@ export default function SiteBrand() {
         Perfume{" "}
         <em
           style={{
-            color: "#c2a679",
+            color: "#85642f",
             fontStyle: "italic",
           }}
         >

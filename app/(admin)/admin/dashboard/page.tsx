@@ -11,6 +11,8 @@ import { formatearPrecio } from "@/lib/utils";
 import { Package, TrendingUp, Users } from "lucide-react";
 import { redirect } from "next/navigation";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Panel de Control - Admin",
   description:

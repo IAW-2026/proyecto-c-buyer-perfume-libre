@@ -185,6 +185,7 @@ function CarouselPrevious({
       data-slot="carousel-previous"
       variant={variant}
       size={size}
+      aria-label="Diapositiva anterior"
       className={cn(
         "absolute touch-manipulation rounded-full",
         orientation === "horizontal"
@@ -197,7 +198,7 @@ function CarouselPrevious({
       {...props}
     >
       <ChevronLeftIcon />
-      <span className="sr-only">Previous slide</span>
+      <span className="sr-only">Diapositiva anterior</span>
     </Button>
   )
 }
@@ -215,6 +216,7 @@ function CarouselNext({
       data-slot="carousel-next"
       variant={variant}
       size={size}
+      aria-label="Diapositiva siguiente"
       className={cn(
         "absolute touch-manipulation rounded-full",
         orientation === "horizontal"
@@ -227,7 +229,7 @@ function CarouselNext({
       {...props}
     >
       <ChevronRightIcon />
-      <span className="sr-only">Next slide</span>
+      <span className="sr-only">Diapositiva siguiente</span>
     </Button>
   )
 }

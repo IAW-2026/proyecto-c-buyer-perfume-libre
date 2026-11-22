@@ -33,13 +33,14 @@ export default function Paginador({
   const paginas = Array.from({ length: totalPaginas }, (_, i) => i + 1);
 
   return (
-    <div className="flex items-center justify-center gap-2">
+    <nav aria-label="Paginación del catálogo" className="flex items-center justify-center gap-2">
       <Button
         variant="outline"
         size="icon"
         onClick={() => cambiarPagina(paginaActual - 1)}
         disabled={paginaActual === 1}
         className="h-9 w-9"
+        aria-label="Página anterior"
       >
         <ChevronLeft className="h-4 w-4" />
       </Button>
@@ -55,6 +56,8 @@ export default function Paginador({
               size="icon"
               onClick={() => cambiarPagina(pagina)}
               className={`h-9 w-9 ${esPaginaActual ? "pointer-events-none" : ""}`}
+              aria-label={`Página ${pagina}`}
+              aria-current={esPaginaActual ? "page" : undefined}
             >
               {pagina}
             </Button>
@@ -68,9 +71,10 @@ export default function Paginador({
         onClick={() => cambiarPagina(paginaActual + 1)}
         disabled={paginaActual === totalPaginas}
         className="h-9 w-9"
+        aria-label="Página siguiente"
       >
         <ChevronRight className="h-4 w-4" />
       </Button>
-    </div>
+    </nav>
   );
 }

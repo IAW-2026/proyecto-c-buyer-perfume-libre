@@ -5,6 +5,10 @@ import { formatearPrecio, generarUrl } from "@/lib/utils";
 import { PerfumeCard } from "@/schema/perfume.schema";
 import CalificacionEstrellas from "../calificacionEstrellas";
 
+interface ProductCardProps extends PerfumeCard {
+  prioridad?: boolean;
+}
+
 export default function ProductCard({
   id,
   nombre,
@@ -13,14 +17,19 @@ export default function ProductCard({
   tamaño,
   imagenUrl,
   calificacion,
-}: PerfumeCard) {
+  prioridad = false,
+}: ProductCardProps) {
   const slug = generarUrl(nombre, id);
   const urlDetalle = `/producto/${slug}`;
 
   return (
     <Link href={urlDetalle} className="block h-full outline-none">
       <Card className="group flex h-full w-full flex-col overflow-hidden border border-border bg-card p-0 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(28,21,16,0.13)]">
-        <ProductCardImagen imagenUrl={imagenUrl} nombre={nombre} />
+        <ProductCardImagen
+          imagenUrl={imagenUrl}
+          nombre={nombre}
+          prioridad={prioridad}
+        />
 
         <ProductCardContenido
           id={id}
@@ -38,9 +47,11 @@ export default function ProductCard({
 function ProductCardImagen({
   imagenUrl,
   nombre,
+  prioridad = false,
 }: {
   imagenUrl: string;
   nombre: string;
+  prioridad?: boolean;
 }) {
   return (
     <div className="relative aspect-3/4 overflow-hidden bg-secondary">
@@ -48,8 +59,9 @@ function ProductCardImagen({
         src={imagenUrl}
         alt={`Perfume ${nombre}`}
         fill
+        priority={prioridad}
         className="object-cover transition-transform duration-500 group-hover:scale-105"
-        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 20vw"
       />
     </div>
   );

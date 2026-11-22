@@ -9,7 +9,7 @@ export default function TiendaLayout({
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
 
-      <main className="flex-1 flex flex-col">{children}</main>
+      <main id="main-content" className="flex-1 flex flex-col">{children}</main>
     </div>
   );
 }

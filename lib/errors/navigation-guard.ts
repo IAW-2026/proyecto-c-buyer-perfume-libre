@@ -15,7 +15,8 @@ export function rethrowIfNavigationError(error: unknown): void {
     const digest = String((error as { digest?: unknown }).digest ?? "");
     if (
       digest.startsWith("NEXT_REDIRECT") ||
-      digest.startsWith("NEXT_NOT_FOUND")
+      digest.startsWith("NEXT_NOT_FOUND") ||
+      digest.startsWith("DYNAMIC_SERVER_USAGE")
     ) {
       throw error;
     }

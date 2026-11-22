@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { EstadoOrdenType, EstadosOrden } from "@/schema/perfume.schema";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth/guards";
+import { rethrowIfNavigationError } from "@/lib/errors/navigation-guard";
 
 const EstadosOrdenInactivas: EstadoOrdenType[] = [
   EstadosOrden.enum.PENDIENTE,
@@ -16,9 +17,8 @@ const EstadosOrdenInactivas: EstadoOrdenType[] = [
 const comision = 0.1;
 
 export async function obtenerAdminPageData() {
+  await requireAdmin();
   try {
-    await requireAdmin();
-
     const [gananciaNeta, cantOrdenes, cantUsuarios, historialGrafico] =
       await Promise.all([
         calcularGanancias(),
@@ -34,6 +34,7 @@ export async function obtenerAdminPageData() {
       grafico: historialGrafico,
     };
   } catch (error) {
+    rethrowIfNavigationError(error);
     console.error("Error en obtenerAdminPageData:", error);
     return null;
   }

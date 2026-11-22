@@ -70,18 +70,21 @@ function AcordionCheckList({
       <AccordionContent className="flex flex-col gap-3.5 pb-4 pt-1">
         {items.map((item) => {
           const isChecked = seleccionados.includes(item);
+          const itemId = `${paramName}-${item.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
 
           return (
             <div key={item} className="flex items-center space-x-3">
               <Checkbox
-                id={`${paramName}-${item}`}
+                id={itemId}
+                aria-label={`${title}: ${item}${suffix ? ` ${suffix}` : ""}`}
                 checked={isChecked}
                 onCheckedChange={(c) => handleCheckedChange(item, c as boolean)}
                 className="h-4 w-4 rounded-full border-none bg-secondary transition-colors cursor-pointer [&_svg]:hidden data-[state=checked]:bg-accent"
               />
 
               <Label
-                htmlFor={`${paramName}-${item}`}
+                id={`${itemId}-label`}
+                htmlFor={itemId}
                 className="cursor-pointer text-[13px] font-normal leading-none text-muted-foreground hover:text-foreground transition-colors peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
                 {item}
@@ -149,6 +152,7 @@ function FiltroPrecio() {
             type="number"
             min="0"
             placeholder="Mínimo"
+            aria-label="Precio mínimo en pesos"
             className={`h-9 text-[13px] bg-secondary/30 border-border/60 focus-visible:ring-accent ${noSpinnersClass}`}
             value={min}
             onChange={(e) => setMin(e.target.value)}
@@ -158,6 +162,7 @@ function FiltroPrecio() {
             type="number"
             min="0"
             placeholder="Máximo"
+            aria-label="Precio máximo en pesos"
             className={`h-9 text-[13px] bg-secondary/30 border-border/60 focus-visible:ring-accent ${noSpinnersClass}`}
             value={max}
             onChange={(e) => setMax(e.target.value)}
@@ -165,6 +170,7 @@ function FiltroPrecio() {
           <Button
             type="submit"
             size="icon"
+            aria-label="Aplicar filtro de precio"
             className="h-9 w-9 shrink-0 rounded-md bg-foreground text-background hover:bg-foreground/90 transition-colors"
           >
             <ChevronRight className="h-4 w-4" />
@@ -189,6 +195,7 @@ const GENEROS_MOCK = ["Hombre", "Mujer", "Unisex"];
 export function ContenidoFiltros() {
   return (
     <div className="w-full pb-8 pr-4 pl-4 md:pl-0 md:pr-2">
+      <h2 className="sr-only">Filtros del catálogo</h2>
       <Accordion
         multiple
         defaultValue={["Marca", "Género", "Precio", "Tamaño"]}

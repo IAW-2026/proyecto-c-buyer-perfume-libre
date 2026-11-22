@@ -72,16 +72,20 @@ export function BotonFavorito({
     }
   };
 
+  const labelAccesible = esFav ? "Quitar de favoritos" : "Agregar a favoritos";
+
   return (
     <Button
       variant="outline"
       size="icon"
       className="rounded-full shadow-sm hover:scale-110 transition-transform bg-white/80 backdrop-blur-sm"
       onClick={handleToggle}
+      aria-label={labelAccesible}
     >
       <Heart
         className={`h-5 w-5 transition-colors ${esFav ? "fill-red-500 text-red-500" : "text-slate-400"}`}
       />
+      <span className="sr-only">{labelAccesible}</span>
     </Button>
   );
 }

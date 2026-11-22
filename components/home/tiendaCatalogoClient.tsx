@@ -24,6 +24,8 @@ export default function TiendaCatalogoClient({ children }: Props) {
       <div className="flex items-center justify-between">
         <Button
           variant="outline"
+          aria-expanded={filtrosAbiertos}
+          aria-controls="panel-filtros-desktop"
           onClick={() => setFiltrosAbiertos((value) => !value)}
           className={`hidden md:flex h-10 items-center gap-2 rounded-[8px] border px-4 transition-all duration-200 ${
             filtrosAbiertos
@@ -69,17 +71,20 @@ export default function TiendaCatalogoClient({ children }: Props) {
       </div>
 
       <div className="flex items-start">
-        <div
+        <aside
+          id="panel-filtros-desktop"
+          aria-label="Filtros del catálogo"
+          inert={!filtrosAbiertos ? true : undefined}
           className={`hidden md:block shrink-0 overflow-y-auto overflow-x-hidden transition-all duration-300 ease-in-out [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-thumb]:rounded-full ${
             filtrosAbiertos
-              ? "w-68 mr-4 max-h-[calc(100vh-160px)] opacity-100"
-              : "w-0 max-h-0 opacity-0"
+              ? "w-68 mr-4 max-h-[calc(100vh-160px)] opacity-100 visible"
+              : "w-0 max-h-0 opacity-0 pointer-events-none invisible"
           }`}
         >
           <div className="w-64">
             <ContenidoFiltros />
           </div>
-        </div>
+        </aside>
 
         <div className="flex-1 min-w-0">{children}</div>
       </div>
