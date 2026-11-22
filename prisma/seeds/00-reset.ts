@@ -26,47 +26,61 @@ export async function resetDatabase() {
   };
 
   const resultado = await prisma.$transaction(async (tx) => {
-    // 1. Ítems de órdenes de prueba (requerido por foreign key)
-    const items = await tx.itemOrdenCompra.deleteMany({
-      where: { ordenCompra: condicionOrdenesSeed },
-    });
-
-    // 2. Órdenes de prueba
-    const ordenes = await tx.ordenCompra.deleteMany({
-      where: condicionOrdenesSeed,
-    });
-
-    // 3. Carritos vinculados a usuarios de prueba
-    const carritos = await tx.carrito.deleteMany({
-      where: { usuario: condicionUsuariosSeed },
-    });
-
-    // 4. Favoritos vinculados a usuarios de prueba
-    const favoritos = await tx.favorito.deleteMany({
-      where: { usuario: condicionUsuariosSeed },
-    });
-
-    // 5. Direcciones vinculadas a usuarios de prueba
-    const direcciones = await tx.direccion.deleteMany({
-      where: { usuario: condicionUsuariosSeed },
-    });
-
-    // 6. Resúmenes de prueba (si existieran con prefijo seed/mock)
-    const resumenes = await tx.resumenProductoIA.deleteMany({
+    // 1. Reseñas vinculadas a órdenes o usuarios de prueba (requerido por foreign keys)
+    const resenasProductos = await tx.resenaProducto.deleteMany({
       where: {
         OR: [
-          { productoId: { startsWith: "seed_" } },
-          { productoId: { startsWith: "mock_" } },
+          { ordenCompra: condicionOrdenesSeed },
+          { usuario: condicionUsuariosSeed },
         ],
       },
     });
 
-    // 7. Usuarios de prueba
+    const resenasVendedores = await tx.resenaVendedor.deleteMany({
+      where: {
+        OR: [
+          { ordenCompra: condicionOrdenesSeed },
+          { usuario: condicionUsuariosSeed },
+        ],
+      },
+    });
+
+    // 2. Ítems de órdenes de prueba (requerido por foreign key)
+    const items = await tx.itemOrdenCompra.deleteMany({
+      where: { ordenCompra: condicionOrdenesSeed },
+    });
+
+    // 3. Órdenes de prueba
+    const ordenes = await tx.ordenCompra.deleteMany({
+      where: condicionOrdenesSeed,
+    });
+
+    // 4. Carritos vinculados a usuarios de prueba
+    const carritos = await tx.carrito.deleteMany({
+      where: { usuario: condicionUsuariosSeed },
+    });
+
+    // 5. Favoritos vinculados a usuarios de prueba
+    const favoritos = await tx.favorito.deleteMany({
+      where: { usuario: condicionUsuariosSeed },
+    });
+
+    // 6. Direcciones vinculadas a usuarios de prueba
+    const direcciones = await tx.direccion.deleteMany({
+      where: { usuario: condicionUsuariosSeed },
+    });
+
+    // 7. Resúmenes de prueba de IA
+    const resumenes = await tx.resumenProductoIA.deleteMany({});
+
+    // 8. Usuarios de prueba
     const usuarios = await tx.usuario.deleteMany({
       where: condicionUsuariosSeed,
     });
 
     return {
+      resenasProductos: resenasProductos.count,
+      resenasVendedores: resenasVendedores.count,
       items: items.count,
       ordenes: ordenes.count,
       carritos: carritos.count,
@@ -78,15 +92,15 @@ export async function resetDatabase() {
   });
 
   console.log("✅ [00-reset] Limpieza de datos de prueba completada:");
-  console.log(` • Ítems eliminados:        ${resultado.items}`);
-  console.log(` • Órdenes eliminadas:      ${resultado.ordenes}`);
-  console.log(` • Carritos eliminados:     ${resultado.carritos}`);
-  console.log(` • Favoritos eliminados:    ${resultado.favoritos}`);
-  console.log(` • Direcciones eliminadas:  ${resultado.direcciones}`);
-  if (resultado.resumenes > 0) {
-    console.log(` • Resúmenes eliminados:    ${resultado.resumenes}`);
-  }
-  console.log(` • Usuarios eliminados:     ${resultado.usuarios}\n`);
+  console.log(` • Reseñas prod. eliminadas:    ${resultado.resenasProductos}`);
+  console.log(` • Reseñas vend. eliminadas:    ${resultado.resenasVendedores}`);
+  console.log(` • Ítems eliminados:            ${resultado.items}`);
+  console.log(` • Órdenes eliminadas:          ${resultado.ordenes}`);
+  console.log(` • Carritos eliminados:         ${resultado.carritos}`);
+  console.log(` • Favoritos eliminados:        ${resultado.favoritos}`);
+  console.log(` • Direcciones eliminadas:      ${resultado.direcciones}`);
+  console.log(` • Resúmenes IA eliminados:     ${resultado.resumenes}`);
+  console.log(` • Usuarios eliminados:         ${resultado.usuarios}\n`);
 
   return resultado;
 }

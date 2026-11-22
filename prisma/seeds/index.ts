@@ -4,6 +4,7 @@ import { seedUsuarios } from "./01-usuarios";
 import { seedDirecciones } from "./02-direcciones";
 import { seedOrdenesEItems } from "./03-ordenes-e-items";
 import { seedCarritoFavoritos } from "./04-carrito-favoritos";
+import { seedResenas } from "./05-resenas";
 
 export async function runAllSeeds() {
   console.log("==================================================");
@@ -27,6 +28,9 @@ export async function runAllSeeds() {
 
     // 04. Favoritos y carritos respetando unique constraints
     await seedCarritoFavoritos();
+
+    // 05. Reseñas reales y resúmenes de IA para catálogo
+    await seedResenas();
 
     const duracion = ((Date.now() - inicio) / 1000).toFixed(1);
     console.log("==================================================");
