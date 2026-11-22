@@ -48,6 +48,7 @@ Para la evaluación del sistema, se crearon las siguientes cuentas de prueba de 
 El objetivo principal de la **Buyer App** es brindar una experiencia integral, fluida y transparente dentro del marketplace C2C de _Perfume Libre_.
 
 La aplicación cubre el ciclo de vida completo del comprador:
+
 - **Exploración y Decisión:** Catálogo completo de fragancias enriquecido con calificaciones dinámicas calculadas desde la base de datos y **resúmenes de opiniones generados por Inteligencia Artificial** para reducir la fatiga de decisión.
 - **Conversión y Checkout:** Gestión reactiva del carrito de compras y favoritos con actualizaciones optimistas, cálculo logístico según el destino y pasarela de pago segura con Mercado Pago Checkout Bricks.
 - **Experiencia Posventa y Comunidad:** Trazabilidad de estados de envío y un sistema de **reseñas verificadas**, donde los compradores califican la autenticidad y características del perfume y el servicio del vendedor únicamente tras la entrega de su orden.
