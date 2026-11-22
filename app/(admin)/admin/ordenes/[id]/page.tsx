@@ -13,6 +13,7 @@ import {
   Truck,
   User,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -40,7 +41,7 @@ export default async function AdminDetalleOrdenPage({
   const usuario = await obtenerDatosUsuario(orden.usuarioId);
 
   const detallesPerfumes = await obtenerDetallesProductos(
-    orden.items.map((item: any) => item.productoId),
+    orden.items.map((item) => item.productoId),
   );
 
   return (
@@ -103,7 +104,7 @@ export default async function AdminDetalleOrdenPage({
               {orden.items.map((item) => (
                 <div key={item.id} className="flex gap-5 p-5 items-center">
                   <div className="relative w-14 shrink-0 aspect-3/4 bg-secondary rounded-sm border border-border/40 overflow-hidden flex items-center justify-center">
-                    <img
+                    <Image
                       src={
                         detallesPerfumes.find(
                           (perfume) => perfume.id === item.productoId,
@@ -114,6 +115,8 @@ export default async function AdminDetalleOrdenPage({
                           (perfume) => perfume.id === item.productoId,
                         )?.nombre || "Producto del catalogo"
                       }
+                      width={56}
+                      height={75}
                       className="h-full w-full object-cover mix-blend-multiply"
                     />
                   </div>

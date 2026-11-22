@@ -8,7 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { COLOR_ESTADOS_STRING } from "@/schema/perfume.schema";
 import { formatearPrecio } from "@/lib/utils";
 import { format } from "date-fns";

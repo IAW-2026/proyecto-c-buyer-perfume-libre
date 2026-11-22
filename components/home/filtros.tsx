@@ -31,12 +31,15 @@ function AcordionCheckList({
   const searchParams = useSearchParams();
 
   const seleccionadosEnUrl = searchParams.getAll(paramName);
+  const urlKey = seleccionadosEnUrl.join(",");
+  const [prevUrlKey, setPrevUrlKey] = useState(urlKey);
   const [seleccionados, setSeleccionados] =
     useState<string[]>(seleccionadosEnUrl);
 
-  React.useEffect(() => {
+  if (prevUrlKey !== urlKey) {
+    setPrevUrlKey(urlKey);
     setSeleccionados(seleccionadosEnUrl);
-  }, [searchParams, paramName]);
+  }
 
   const handleCheckedChange = (item: string, isChecked: boolean) => {
     if (isChecked) {

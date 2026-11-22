@@ -66,7 +66,7 @@ export default async function ProductoDetalle({
   let producto: Perfume;
   try {
     producto = await obtenerDetallePerfume(idReal);
-  } catch (error) {
+  } catch {
     return notFound();
   }
 

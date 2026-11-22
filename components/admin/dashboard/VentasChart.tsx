@@ -10,8 +10,13 @@ import {
 } from "recharts";
 import { formatearPrecio } from "@/lib/utils";
 
+interface DatoVenta {
+  mes: string;
+  ventas: number;
+}
+
 interface VentasChartProps {
-  data: any[];
+  data: DatoVenta[];
 }
 
 export function VentasChart({ data }: VentasChartProps) {
@@ -55,7 +60,7 @@ export function VentasChart({ data }: VentasChartProps) {
             color: "#888888",
             marginBottom: "4px",
           }}
-          formatter={(value: any) => [
+          formatter={(value) => [
             formatearPrecio(Number(value || 0)),
             "Facturación",
           ]}

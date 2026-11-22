@@ -1,4 +1,4 @@
-import { obtenerItemsOrdenParaSeller, obtenerOrden } from "@/actions/checkout";
+import { obtenerItemsOrdenParaSeller } from "@/actions/checkout";
 import { validateApiKey } from "@/lib/api";
 import { NextResponse } from "next/server";
 
@@ -35,8 +35,9 @@ export async function GET(request: Request, segmentData: Params) {
     };
 
     return NextResponse.json(responseData, { status: 200 });
-  } catch (error: any) {
-    if (error.message === "Orden no encontrada") {
+  } catch (error: unknown) {
+    const errMessage = error instanceof Error ? error.message : "Error desconocido";
+    if (errMessage === "Orden no encontrada") {
       return NextResponse.json(
         { error: "No se encontró ninguna orden con ese ID" },
         { status: 404 },
@@ -44,7 +45,7 @@ export async function GET(request: Request, segmentData: Params) {
     }
 
     return NextResponse.json(
-      { error: "Error interno en el servidor: " + error.message },
+      { error: "Error interno en el servidor: " + errMessage },
       { status: 500 },
     );
   }

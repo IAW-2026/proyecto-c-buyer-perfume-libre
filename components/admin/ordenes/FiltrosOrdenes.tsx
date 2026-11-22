@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { useState, useEffect, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, X } from "lucide-react";
@@ -25,10 +25,12 @@ export function FiltrosOrdenes() {
   const currentEstado = searchParams.get("estado") ?? "Todos";
 
   const [termino, setTermino] = useState(currentQ);
+  const [prevQ, setPrevQ] = useState(currentQ);
 
-  useEffect(() => {
+  if (prevQ !== currentQ) {
+    setPrevQ(currentQ);
     setTermino(currentQ);
-  }, [currentQ]);
+  }
 
   const updateFiltro = (key: string, value: string | null) => {
     const params = new URLSearchParams(searchParams.toString());

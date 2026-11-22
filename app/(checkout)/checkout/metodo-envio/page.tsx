@@ -33,7 +33,7 @@ export default async function MetodoEnvioPage({ searchParams }: Props) {
   let direccion;
   try {
     direccion = await obtenerDireccionPorId(direccionId);
-  } catch (error) {
+  } catch {
     redirect("/checkout/envio");
   }
 
