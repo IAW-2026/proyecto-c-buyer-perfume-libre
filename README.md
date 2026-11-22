@@ -28,36 +28,56 @@ Para la evaluación del sistema, se crearon las siguientes cuentas de prueba de 
 
 1. **Iniciar Sesión:** Haga clic en el botón "Ingresar" del Header y utilice las credenciales provistas arriba según el caso de uso que desee testear.
 2. **Flujo de Compra (Buyer):** Explore el catálogo de perfumes, aplique filtros por marcas o precios, agregue productos al carrito, gestione sus direcciones de envío en su perfil y complete la pasarela de checkout para generar una orden de compra.
-3. **Flujo de Gestión (Admin):** Al iniciar sesión como administrador, aparecerá el botón "Admin" en el Header. Desde allí podrá acceder al Panel de Control para visualizar las métricas clave (ganancias, órdenes, usuarios) y la evolución gráfica de las ventas de la tienda.
-4. **Modificación de Roles Dinámica (Backdoor):** Si ya inició sesión con cualquier cuenta y desea alterar su rol manualmente, visite:
+3. **Flujo de Reseñas Verificadas y Resumen de IA:** Una vez que una orden es entregada, el comprador puede calificar tanto el producto como la atención del vendedor desde el detalle de su compra (`/compras/[id]`). En la página de producto (`/producto/[id]`), podrá ver las calificaciones calculadas en tiempo real desde la base de datos y la tarjeta dorada de **Resumen con Inteligencia Artificial**, sintetizando las opiniones de la comunidad sin demoras en el render.
+4. **Flujo de Gestión (Admin):** Al iniciar sesión como administrador, aparecerá el botón "Admin" en el Header. Desde allí podrá acceder al Panel de Control para visualizar las métricas clave (ganancias, órdenes, usuarios) y la evolución gráfica de las ventas de la tienda.
+5. **Modificación de Roles Dinámica (Backdoor):** Si ya inició sesión con cualquier cuenta y desea alterar su rol manualmente, visite:
    - Hacerse Administrador: `/api/roles/actualizar?secret=IAW&rol=ADMIN`
    - Volver a ser Usuario Normal: `/api/roles/actualizar?secret=IAW&rol=USER`
-5. **Sembrado de datos**
-   para simular datos de pruebas se utiliza el siguiente script:
-   `npx prisma db seed`
-   si se quiere especificar la cantidad de usuarios y/o ordenes a crear utilizar el siguiente comando:
-   `npx prisma db seed -- --usuarios=x --ordenes=y`
+6. **Pipeline de Sembrado de Datos (Seeds):**
+   Para poblar la base de datos con un conjunto representativo y realista (1.200 usuarios, órdenes estacionales, direcciones, favoritos, carritos, más de 800 reseñas y resúmenes de IA):
+   - Ejecutar el pipeline completo: `npm run seed`
+   - Ejecutar únicamente el sembrado de reseñas e IA: `npm run seed:resenas`
+   - Scripts individuales: `npm run seed:reset`, `npm run seed:usuarios`, `npm run seed:direcciones`, `npm run seed:ordenes`, `npm run seed:carritos`
+7. **Pruebas Automatizadas:**
+   - Ejecutar suite de pruebas unitarias: `npm test`
 
 ---
 
 ## 4. Descripción del Proyecto
 
-El objetivo principal de la **Buyer App** es brindar una experiencia fluida, rápida y segura de exploración, selección y compra de fragancias para los usuarios finales dentro del ecosistema de _Perfume Libre_.
+El objetivo principal de la **Buyer App** es brindar una experiencia integral, fluida y transparente dentro del marketplace C2C de _Perfume Libre_.
 
-La interfaz se encarga de centralizar de manera eficiente la conversión del negocio mediante una robusta gestión de carritos de compras, cálculo dinámico de costos de envío y procesamiento controlado de estados de pago.
-
-Asimismo, el sistema incluye módulos dedicados a la experiencia posventa, permitiendo el seguimiento histórico de las órdenes de compra y la administración simplificada de múltiples direcciones físicas de entrega asociadas a cada comprador.
+La aplicación cubre el ciclo de vida completo del comprador:
+- **Exploración y Decisión:** Catálogo completo de fragancias enriquecido con calificaciones dinámicas calculadas desde la base de datos y **resúmenes de opiniones generados por Inteligencia Artificial** para reducir la fatiga de decisión.
+- **Conversión y Checkout:** Gestión reactiva del carrito de compras y favoritos con actualizaciones optimistas, cálculo logístico según el destino y pasarela de pago segura con Mercado Pago Checkout Bricks.
+- **Experiencia Posventa y Comunidad:** Trazabilidad de estados de envío y un sistema de **reseñas verificadas**, donde los compradores califican la autenticidad y características del perfume y el servicio del vendedor únicamente tras la entrega de su orden.
 
 ---
 
 ## 5. Notas y Comentarios para la Corrección
 
-- **Datos Precargados:** La base de datos cuenta con un set completo de datos iniciales que incluye múltiples marcas (`Dior`, `Chanel`, `Versace`, etc.), variedad de tamaños de envases y precios realistas.
-- **Sincronización de Usuarios:** Para sincronizar las cuentas de Clerk con nuestra base de datos, optamos por implementar un observador optimizado del lado del cliente. Esto simplifica la arquitectura local evitando la necesidad de configurar túneles (como Ngrok) para Webhooks tradicionales durante la etapa de desarrollo.
-- **Alcance de la Interfaz Visual (UI):** Para esta instancia de entrega (Etapa 2), el foco del desarrollo estuvo direccionado rigurosamente hacia la solidez de la arquitectura, el modelado de la base de datos, la sincronización de estados y la lógica del negocio (checkout y roles). Los componentes visuales se estructuraron de manera funcional utilizando los componentes base de Shadcn, priorizando la usabilidad y la correcta visualización de datos por sobre el refinamiento estético o animaciones complejas de UI.
+- **Arquitectura de Server Actions Seguras (`createSafeAction`):** Todas las mutaciones del servidor están protegidas por wrappers de orden superior (`createSafeAction`, `createAuthAction`, `createAdminAction`). Esta capa centraliza:
+  - Validación de entradas con esquemas Zod (`safeParse`).
+  - Inyección estricta del contexto de autenticación y autorización (`userId`, rol `ADMIN`).
+  - Normalización de errores de dominio tipados (`NotFoundError`, `ValidationError`, `ForbiddenError`, `ConflictError`).
+  - Sanitización de errores 500 para el cliente y registro estructurado en el servidor con Correlation ID.
+  - Propagación transparente de errores nativos de navegación de Next.js (`redirect()` y `notFound()`).
+- **Sistema de Reseñas Verificadas (C2C):**
+  - Las opiniones (`ResenaProducto` y `ResenaVendedor`) están estrictamente restringidas a órdenes en estado `ENTREGADO`.
+  - Integridad garantizada mediante restricciones compuestas `@@unique([usuarioId, ordenCompraId, productoId])` y `@@unique([usuarioId, ordenCompraId, vendedorId])` que previenen valoraciones duplicadas o fraudulentas.
+  - Las calificaciones mostradas en el catálogo y fichas de producto se calculan de manera agregada (`_avg`, `_count`) directamente en PostgreSQL, mostrando el estado vacío transparente ("Sin calificaciones") si un producto aún no fue valorado.
+- **Procesamiento de IA Desacoplado y Reactivo (Groq):**
+  - **Latencia cero en SSR:** La función `obtenerResumenYResenas` en la página de producto es de solo lectura contra la base de datos, eliminando por completo los bloqueos de 3 a 6 segundos causados por llamadas sincrónicas a LLMs.
+  - **Generación en segundo plano:** La inferencia con Groq (`openai/gpt-oss-120b`) se ejecuta de manera asíncrona ("fire-and-forget") únicamente cuando se acumulan **5 reseñas nuevas** desde el último resumen procesado.
+  - **Protección Thundering Herd:** El sistema incluye deduplicación en memoria para que múltiples visitas concurrentes a un mismo perfume no disparen llamadas redundantes a la API de IA.
+  - **Mantenimiento programado:** Cuenta con un endpoint Route Handler protegido (`/api/cron/resumenes`) para procesar resúmenes pendientes mediante tareas programadas (Cron).
+- **Sembrado de Datos Realista y Corpus Rioplatense:**
+  - Se incorporó un dataset validado (`resenas-textos.json`) con comentarios contextualizados para los 32 perfumes del catálogo (mencionando sus notas reales, duración y proyección), opiniones genéricas y feedback de vendedores en español rioplatense.
+  - Aplica una curva de distribución de estrellas auténtica de e-commerce (65% 5★, 20% 4★, 8% 3★, etc.), 20% de calificaciones sin texto escrito y fechas coherentes posteriores a la entrega de la orden.
+  - Precomputa los resúmenes de IA para los 32 perfumes, permitiendo evaluar la funcionalidad inmediatamente tras el clonado sin requerir una API Key activa de Groq.
 - **Implementación de Componentes Optimistas (Optimistic Updates):** Con el objetivo de maximizar la fluidez de la experiencia de usuario (UX), se implementó el hook `useOptimistic` de React en interacciones clave de la interfaz, como la gestión del carrito y la selección de favoritos. El sistema asume que la operación en el servidor será exitosa para actualizar la interfaz en microsegundos, revirtiendo el estado de forma automática únicamente si la Server Action llega a fallar.
 - **Seguridad en Server Components:** El panel de administración y las Server Actions críticas comprueban la identidad y rol del usuario de forma directa en el servidor usando Clerk `auth()`. Si un usuario común intenta acceder a las vistas administrativas, el flujo intercepta la petición y lo redirige de inmediato.
-- **Integración de IA:** Se implementó un resumen inteligente de opiniones para reducir la fatiga de decisión en el entorno C2C. A nivel arquitectura, se diseñó un sistema de Procesamiento por Lotes con Umbral (Cron Job): el resumen no se genera en tiempo real, sino que un proceso en background evalúa diariamente si el producto recibió suficientes reseñas nuevas (ej. >5) para justificar un recálculo. La IA procesa este set cerrado de datos (minimizando "alucinaciones") y guarda el resultado estático en la base de datos. Esto garantiza latencia cero en la interfaz del usuario y optimiza drásticamente el consumo de la API.
+- **Sincronización de Usuarios:** Para sincronizar las cuentas de Clerk con nuestra base de datos, optamos por implementar un observador optimizado del lado del cliente. Esto simplifica la arquitectura local evitando la necesidad de configurar túneles (como Ngrok) para Webhooks tradicionales durante la etapa de desarrollo.
 
 ---
 

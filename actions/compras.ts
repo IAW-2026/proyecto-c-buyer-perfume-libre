@@ -1,103 +1,130 @@
 "use server";
 
+import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { obtenerDetallePerfume } from "@/lib/api";
-import { EstadosOrden } from "@/schema/perfume.schema";
 import { EstadoOrden } from "@/lib/generated/prisma/enums";
+import { requireUser } from "@/lib/auth/guards";
+import { createAdminAction } from "@/lib/errors/safe-action";
+import { NotFoundError } from "@/lib/errors/domain-errors";
+import { Perfume } from "@/schema/perfume.schema";
 
+/**
+ * Consulta del historial de órdenes del usuario autenticado en la base de datos.
+ */
 export async function obtenerComprasDelUsuario() {
-  try {
-    const { userId } = await auth();
+  const userId = await requireUser();
 
-    if (!userId) {
-      throw new Error("Usuario no autenticado");
-    }
-
-    const ordenes = await prisma.ordenCompra.findMany({
-      where: {
-        usuarioId: userId,
-      },
-      select: {
-        id: true,
-        estado: true,
-        total: true,
-        items: {
-          select: {
-            id: true,
-            productoId: true,
-            precio: true,
-            cantidad: true,
-          },
+  return await prisma.ordenCompra.findMany({
+    where: {
+      usuarioId: userId,
+    },
+    select: {
+      id: true,
+      estado: true,
+      total: true,
+      items: {
+        select: {
+          id: true,
+          productoId: true,
+          nombre: true,
+          marca: true,
+          imagenUrl: true,
+          vendedor: true,
+          precio: true,
+          cantidad: true,
         },
-        createdAt: true,
       },
-      orderBy: { createdAt: "desc" },
-    });
-
-    return ordenes;
-  } catch (error) {
-    console.error("Error en obtenerHistorialDeOrdenes:", error);
-    throw new Error("No se pudo cargar el historial de compras");
-  }
+      createdAt: true,
+    },
+    orderBy: { createdAt: "desc" },
+  });
 }
 
+/**
+ * Obtiene los detalles de una compra específica con soporte para snapshots históricos
+ * y fallback resiliente para órdenes legacy.
+ */
 export async function verDetallesCompra(ordenId: string) {
-  try {
-    const { userId } = await auth();
+  const userId = await requireUser();
 
-    if (!userId) {
-      throw new Error("Usuario no autenticado");
-    }
-
-    const orden = await prisma.ordenCompra.findFirst({
-      where: { id: ordenId, usuarioId: userId },
-      select: {
-        id: true,
-        estado: true,
-        total: true,
-        items: {
-          select: {
-            id: true,
-            productoId: true,
-            precio: true,
-            cantidad: true,
-          },
+  const orden = await prisma.ordenCompra.findFirst({
+    where: { id: ordenId, usuarioId: userId },
+    select: {
+      id: true,
+      estado: true,
+      total: true,
+      items: {
+        select: {
+          id: true,
+          productoId: true,
+          nombre: true,
+          marca: true,
+          imagenUrl: true,
+          vendedor: true,
+          precio: true,
+          cantidad: true,
         },
-        createdAt: true,
-        updatedAt: true,
       },
-    });
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
 
-    if (!orden) {
-      throw new Error("Orden no encontrada");
-    }
+  if (!orden) {
+    throw new NotFoundError("Orden", ordenId);
+  }
 
-    // Enriquecer cada item con los detalles del producto desde la API externa
-    const itemsEnriquecidos = await Promise.all(
-      orden.items.map(async (item) => {
+  // Identificar si existen ítems legacy sin snapshot descriptivo
+  const itemsSinSnapshot = orden.items.filter(
+    (item) => !item.nombre || !item.imagenUrl,
+  );
+
+  let legacyMap = new Map<string, Perfume | null>();
+  if (itemsSinSnapshot.length > 0) {
+    const uniqueLegacyIds = Array.from(
+      new Set(itemsSinSnapshot.map((i) => i.productoId)),
+    );
+    const resultadosFallback = await Promise.all(
+      uniqueLegacyIds.map(async (id) => {
         try {
-          const producto = await obtenerDetallePerfume(item.productoId);
-          return { ...item, producto };
-        } catch (e) {
-          // Si no se encuentra el producto, devolvemos el item sin detalles
-          return { ...item, producto: null };
+          const producto = await obtenerDetallePerfume(id);
+          return { id, producto };
+        } catch {
+          return { id, producto: null };
         }
       }),
     );
-
-    return { ...orden, items: itemsEnriquecidos };
-  } catch (error) {
-    console.error("Error en verDetallesCompra:", error);
-    throw new Error("No se pudo cargar los detalles de la compra");
+    legacyMap = new Map(resultadosFallback.map((r) => [r.id, r.producto]));
   }
+
+  const itemsEnriquecidos = orden.items.map((item) => {
+    // Si el ítem ya posee snapshot histórico, se utiliza directamente sin golpear la red
+    if (item.nombre && item.imagenUrl) {
+      return {
+        ...item,
+        producto: {
+          id: item.productoId,
+          nombre: item.nombre,
+          marca: item.marca || "Desconocida",
+          vendedor: item.vendedor || "Vendedor Oficial",
+          imagenesUrl: [item.imagenUrl],
+          precio: item.precio,
+        },
+      };
+    }
+
+    // Fallback para ítems legacy
+    const productoFallback = legacyMap.get(item.productoId);
+    return { ...item, producto: productoFallback || null };
+  });
+
+  return { ...orden, items: itemsEnriquecidos };
 }
 
 export async function obtenerDetalleCompra(ordenId: string) {
-  const { userId } = await auth();
-
-  if (!userId) return null;
+  const userId = await requireUser();
 
   const orden = await prisma.ordenCompra.findFirst({
     where: { id: ordenId, usuarioId: userId },
@@ -110,14 +137,15 @@ export async function obtenerDetalleCompra(ordenId: string) {
     },
   });
 
-  if (!orden) return null;
+  if (!orden) {
+    throw new NotFoundError("Orden", ordenId);
+  }
 
   return orden;
 }
 
 export async function obtenerItemDeOrden(ordenId: string, itemId: string) {
-  const { userId } = await auth();
-  if (!userId) return null;
+  const userId = await requireUser();
 
   const itemOrden = await prisma.itemOrdenCompra.findFirst({
     where: {
@@ -147,8 +175,7 @@ export async function obtenerItemDeOrden(ordenId: string, itemId: string) {
 }
 
 export async function obtenerCantidadDeProductosComprados(ordenId: string) {
-  const { userId } = await auth();
-  if (!userId) return null;
+  const userId = await requireUser();
 
   const cantidadComprados = await prisma.itemOrdenCompra.aggregate({
     where: {
@@ -165,15 +192,32 @@ export async function obtenerCantidadDeProductosComprados(ordenId: string) {
   return cantidadComprados._sum.cantidad;
 }
 
-export async function simularCambioEstado(
-  ordenId: string,
-  itemId: string,
-  nuevoEstado: EstadoOrden,
-) {
-  await prisma.ordenCompra.update({
-    where: { id: ordenId },
-    data: { estado: nuevoEstado },
-  });
+/**
+ * Server Action protegida con rol ADMIN para simulación y pruebas controladas de envíos.
+ * Valida los parámetros con Zod y asegura que no pueda ser invocada por compradores ordinarios.
+ */
+export const simularCambioEstado = createAdminAction({
+  schema: z.object({
+    ordenId: z.string().min(1, "ID de orden requerido"),
+    itemId: z.string().min(1, "ID de ítem requerido"),
+    nuevoEstado: z.nativeEnum(EstadoOrden),
+  }),
+  handler: async ({ ordenId, itemId, nuevoEstado }) => {
+    const orden = await prisma.ordenCompra.findUnique({
+      where: { id: ordenId },
+    });
 
-  revalidatePath(`/compras/${ordenId}?itemId=${itemId}`);
-}
+    if (!orden) {
+      throw new NotFoundError("Orden de compra", ordenId);
+    }
+
+    await prisma.ordenCompra.update({
+      where: { id: ordenId },
+      data: { estado: nuevoEstado },
+    });
+
+    revalidatePath(`/compras/${ordenId}?itemId=${itemId}`);
+    revalidatePath(`/admin/ordenes/${ordenId}`);
+    return { success: true, nuevoEstado };
+  },
+});

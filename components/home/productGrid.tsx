@@ -46,9 +46,14 @@ export default async function ProductGrid({
 
   return (
     <div className="w-full min-w-0 space-y-10">
+      <h2 className="sr-only">Catálogo de Fragancias</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-4 gap-y-8 lg:gap-x-6">
-        {items.map((perfume) => (
-          <ProductCard key={perfume.id} {...perfume} />
+        {items.map((perfume, index) => (
+          <ProductCard
+            key={perfume.id}
+            {...perfume}
+            prioridad={index === 0}
+          />
         ))}
       </div>
 

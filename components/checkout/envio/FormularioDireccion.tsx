@@ -7,6 +7,7 @@ import { DireccionDb, DireccionSchema } from "@/schema/direccion.schema";
 import { agregarDireccion, editarDireccion } from "@/actions/direcciones";
 import { Button } from "@/components/ui/button";
 import CampoFormulario from "./CampoFormulario";
+import { toast } from "sonner";
 import z from "zod";
 
 type FormValues = z.infer<typeof DireccionSchema>;
@@ -53,7 +54,9 @@ export default function FormularioDireccion({
       }
       onSuccess(idGuardado);
       form.reset();
-    } catch (error) {}
+    } catch {
+      toast.error("Ocurrió un error al guardar la dirección.");
+    }
   };
 
   return (

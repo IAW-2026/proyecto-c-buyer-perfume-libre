@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { iniciarProcesamientoCompra } from "@/actions/checkout";
 import { OpcionEnvio } from "@/lib/mockEnvios";
 import { formatearPrecio } from "@/lib/utils";
+import { toast } from "sonner";
 
 const obtenerIdVirtual = (opcion: OpcionEnvio) => {
   return `${opcion.operador}-${opcion.tipo_servicio}`;
@@ -32,12 +33,20 @@ export default function PanelMetodosEnvio({
     if (!opcionSeleccionada) return;
 
     startTransition(async () => {
-      await iniciarProcesamientoCompra(
-        direccionId,
-        opcionSeleccionada,
-        productosIds,
-        esCompraDirecta,
-      );
+      try {
+        const res = await iniciarProcesamientoCompra({
+          direccionId,
+          datosEnvio: opcionSeleccionada,
+          productosIds,
+          esCompraDirecta,
+        });
+
+        if (res && !res.success) {
+          toast.error(res.error.message);
+        }
+      } catch {
+        // En Next.js, redirect() arroja NEXT_REDIRECT que en el cliente es manejado por el router
+      }
     });
   };
 

@@ -1,5 +1,4 @@
 import { obtenerAdminPageData } from "@/actions/admin";
-import { HerramientasDesarrollo } from "@/components/admin/dashboard/HerramientasDesarollo";
 import { VentasChart } from "@/components/admin/dashboard/VentasChart";
 import {
   Card,
@@ -12,6 +11,8 @@ import { formatearPrecio } from "@/lib/utils";
 import { Package, TrendingUp, Users } from "lucide-react";
 import { redirect } from "next/navigation";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Panel de Control - Admin",
   description:
@@ -21,8 +22,6 @@ export const metadata = {
 export default async function AdminDashboardPage() {
   const datos = await obtenerAdminPageData();
 
-  const produccion = process.env.USE_REAL_API === "true";
-
   if (!datos) {
     redirect("/");
   }
@@ -31,16 +30,13 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="space-y-10">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <h1 className="font-serif text-[clamp(28px,4vw,36px)] font-normal text-foreground leading-[1.1] tracking-tight">
-            Panel de Control
-          </h1>
-          <p className="text-[14px] font-light text-muted-foreground mt-2">
-            Monitoreo global de transacciones, estados de envío e integraciones.
-          </p>
-        </div>
-        {!produccion && <HerramientasDesarrollo />}
+      <div>
+        <h1 className="font-serif text-[clamp(28px,4vw,36px)] font-normal text-foreground leading-[1.1] tracking-tight">
+          Panel de Control
+        </h1>
+        <p className="text-[14px] font-light text-muted-foreground mt-2">
+          Monitoreo global de transacciones, estados de envío e integraciones.
+        </p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">

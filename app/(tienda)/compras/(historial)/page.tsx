@@ -3,7 +3,7 @@ import { OrdenAgrupada } from "@/schema/perfume.schema";
 import HeaderCompra from "@/components/compras/HeaderCompra";
 import ProductoCompra from "@/components/compras/ProductoCompra";
 import EstadoVacioCompras from "@/components/compras/EstadoVacioCompras";
-import { obtenerHistorialDelUsuario } from "@/lib/utils";
+import { obtenerHistorialDelUsuario } from "@/lib/services/historial";
 
 export const dynamic = "force-dynamic";
 

@@ -25,13 +25,15 @@ enum EstadoOrden {
 /// * Tanto el id de los productos, direcciones, pagos y envíos se obtienen de las APIs 
 /// * correspondientes por lo que no es necesario crear modelos adicionales para ellos.
 model Usuario {
-  id          String        @id
-  rol         RolUsuario @default(USER)
-  createdAt   DateTime      @default(now())
-  carrito     Carrito[]
-  direcciones Direccion[]
-  favoritos   Favorito[]
-  compras     OrdenCompra[]
+  id              String           @id
+  rol             RolUsuario       @default(USER)
+  createdAt       DateTime         @default(now())
+  carrito         Carrito[]
+  direcciones     Direccion[]
+  favoritos       Favorito[]
+  compras         OrdenCompra[]
+  resenasProducto ResenaProducto[]
+  resenasVendedor ResenaVendedor[]
 }
 
 model Favorito {
@@ -71,35 +73,48 @@ model Direccion {
   updatedAt DateTime @updatedAt
 
   usuario Usuario @relation(fields: [usuarioId], references: [id])
+
+  @@index([usuarioId])
 }
 
 model OrdenCompra {
-  id         String            @id @default(cuid())
-  usuarioId  String
-  vendedorId String           
-  pagoId     String?            @unique
-  envioId    String?           @unique
-  estado     EstadoOrden
-  total      Int
-  createdAt  DateTime          @default(now())
-  updatedAt  DateTime          @updatedAt
-  items      ItemOrdenCompra[]
-  direccionId   String            
+  id              String            @id @default(cuid())
+  usuarioId       String
+  vendedorId      String           
+  pagoId          String?           @unique
+  envioId         String?           @unique
+  estado          EstadoOrden
+  total           Int
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  items           ItemOrdenCompra[]
+  direccionId     String            
   // Datos del envio que usa shipping app. 
-  costoEnvio Int              
-  operadorEnvio String           
-  servicioEnvio String
-  demoraDias Int
-  usuario    Usuario           @relation(fields: [usuarioId], references: [id])
+  costoEnvio      Int              
+  operadorEnvio   String           
+  servicioEnvio   String
+  demoraDias      Int
+  usuario         Usuario           @relation(fields: [usuarioId], references: [id])
+  resenasProducto ResenaProducto[]
+  resenasVendedor ResenaVendedor[]
+
+  @@index([usuarioId, createdAt])
+  @@index([estado, createdAt])
 }
 
 model ItemOrdenCompra {
   id            String      @id @default(cuid())
   ordenCompraId String
   productoId    String
+  nombre        String?
+  marca         String?
+  imagenUrl     String?
+  vendedor      String?
   precio        Int
   cantidad      Int
   ordenCompra   OrdenCompra @relation(fields: [ordenCompraId], references: [id])
+
+  @@index([ordenCompraId])
 }
 /*
 * Feedback app es dueña de la información de las reseñas pero
@@ -114,4 +129,38 @@ model ResumenProductoIA {
   resumenVendedor   String?  @db.Text
   resenasProcesadas Int      @default(0)
   actualizadoEn     DateTime @updatedAt
+}
+
+model ResenaProducto {
+  id            String      @id @default(cuid())
+  usuarioId     String
+  ordenCompraId String
+  productoId    String
+  puntuacion    Int
+  comentario    String?     @db.Text
+  createdAt     DateTime    @default(now())
+
+  usuario       Usuario     @relation(fields: [usuarioId], references: [id])
+  ordenCompra   OrdenCompra @relation(fields: [ordenCompraId], references: [id])
+
+  @@unique([usuarioId, ordenCompraId, productoId])
+  @@index([productoId])
+  @@index([usuarioId])
+}
+
+model ResenaVendedor {
+  id            String      @id @default(cuid())
+  usuarioId     String
+  ordenCompraId String
+  vendedorId    String
+  puntuacion    Int
+  comentario    String?     @db.Text
+  createdAt     DateTime    @default(now())
+
+  usuario       Usuario     @relation(fields: [usuarioId], references: [id])
+  ordenCompra   OrdenCompra @relation(fields: [ordenCompraId], references: [id])
+
+  @@unique([usuarioId, ordenCompraId, vendedorId])
+  @@index([vendedorId])
+  @@index([usuarioId])
 }

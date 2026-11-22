@@ -21,7 +21,7 @@ export default function StatusScreenPayment({
         // console.log("Status Screen cargado");
       }}
       onError={(error) => {
-        // console.error("Error en Status Screen:", error);
+        console.error("Error en Status Screen:", error);
       }}
     />
   );

@@ -11,7 +11,8 @@ export const metadata = {
 };
 
 export default async function FavoritosPage() {
-  const obtenerIdsFavoritos = await obtenerFavoritosDelUsuario();
+  const res = await obtenerFavoritosDelUsuario();
+  const obtenerIdsFavoritos = res.success ? res.data : [];
   const perfumesFavoritos =
     await obtenerProductosFavoritos(obtenerIdsFavoritos);
 

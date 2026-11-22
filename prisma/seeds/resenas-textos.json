@@ -1,0 +1,913 @@
+{
+  "meta": {
+    "idioma": "es-AR",
+    "descripcion": "Textos para sembrar reseñas. 'productos' tiene comentarios específicos por id de perfume (clave = id de mockPerfumes). 'productoGenerico' sirve de complemento o fallback para cualquier perfume. 'vendedor' son comentarios sobre el servicio (envío, embalaje, atención) y valen para cualquier vendedor.",
+    "estrellas": ["5", "4", "3", "2", "1"]
+  },
+
+  "productos": {
+    "1": {
+      "nombre": "Chanel No. 5 Eau de Parfum",
+      "5": [
+        "Un clásico que nunca falla. Elegante, floral y con una presencia inconfundible. Dura todo el día.",
+        "Es el perfume más sofisticado que tuve. Los aldehídos al principio son únicos y después queda un fondo empolvado hermoso.",
+        "Se lo regalé a mi mamá y se emocionó, dice que huele a mujer de verdad. Impecable.",
+        "Con dos pulverizaciones me acompaña de la mañana a la noche. Vale cada peso."
+      ],
+      "4": [
+        "Hermoso y muy elegante, aunque la salida aldehídica es fuerte y hay que acostumbrarse.",
+        "Un perfume de otra época, en el buen sentido. Lo siento más para ocasiones especiales que para todos los días.",
+        "Muy buena fijación y mucha clase. Le saco una estrella porque no es para cualquier momento."
+      ],
+      "3": [
+        "Es lindo pero muy empolvado para mi gusto, me parece un perfume más maduro.",
+        "Buena calidad, pero no me enamoró. Prefiero algo más fresco."
+      ],
+      "2": [
+        "Me resultó demasiado clásico y jabonoso, me recordó a un perfume de mi abuela."
+      ],
+      "1": [
+        "No me gustó nada, el aroma aldehídico me cayó pesado y me dio dolor de cabeza."
+      ]
+    },
+
+    "2": {
+      "nombre": "Dior Sauvage Eau de Toilette",
+      "5": [
+        "Una bomba. Fresco, especiado y con una proyección tremenda. Recibí cumplidos desde el primer día.",
+        "La bergamota con la pimienta queda increíble. Lo uso para trabajar y para salir, siempre acierta.",
+        "Duración excelente y una estela que se nota sin ser pesada. Mi favorito de lejos.",
+        "Se lo regalé a mi novio y no para de usarlo. Llegó impecable y con todo sellado."
+      ],
+      "4": [
+        "Muy rico y versátil. En verano a la tarde se evapora un poco rápido, pero en general muy bien.",
+        "Aroma espectacular, la fijación en mi piel es de unas 6 horas. Buen perfume.",
+        "Me encanta, aunque lo siento muy usado, lo huelo en mucha gente."
+      ],
+      "3": [
+        "Lindo, pero con tanta fama esperaba algo más especial. Dura unas 4 horas.",
+        "Un poco sintético para mi gusto, aunque entiendo por qué gusta tanto."
+      ],
+      "2": [
+        "La pimienta me resultó muy invasiva y me cansó rápido. No es para mí."
+      ],
+      "1": [
+        "No se parece a lo que huelo en otros lados, duró menos de una hora. Decepcionado."
+      ]
+    },
+
+    "3": {
+      "nombre": "Carolina Herrera Good Girl",
+      "5": [
+        "Divino. El jazmín con el cacao y la almendra es adictivo, y el frasco con forma de tacón es una joya.",
+        "Perfecto para salir de noche, se siente seductor y dulce sin empalagar. Me preguntan qué uso todo el tiempo.",
+        "Lo amo. Dura muchísimo y la estela queda por horas.",
+        "Un regalo que acerté de pleno: mi hermana lo usa todos los fines de semana."
+      ],
+      "4": [
+        "Muy rico y con mucha personalidad. Es bastante dulce, ideal para la noche o el invierno.",
+        "El frasco es hermoso y el aroma, muy femenino. Para el calor lo siento un poco pesado.",
+        "Excelente fijación. Le resto una estrella porque la salida es algo intensa."
+      ],
+      "3": [
+        "Lindo aroma pero demasiado dulce para mi gusto, lo uso poco.",
+        "Está bien, aunque esperaba más proyección para el precio."
+      ],
+      "2": [
+        "Me resultó muy empalagoso, a la hora ya me molestaba."
+      ],
+      "1": [
+        "El aroma es demasiado fuerte y me provocó dolor de cabeza. No lo volvería a comprar."
+      ]
+    },
+
+    "4": {
+      "nombre": "Paco Rabanne 1 Million",
+      "5": [
+        "Un clásico para salir de noche. Dulce, especiado y con mucha presencia. El frasco dorado es muy llamativo.",
+        "Dura todo el día y la estela es enorme. Cada vez que me lo pongo me dicen algo.",
+        "Excelente perfume, la canela y el cuero se sienten muy bien. Muy conforme.",
+        "Me lo regalaron y lo volví a comprar. Para mí es insuperable en su estilo."
+      ],
+      "4": [
+        "Muy buen perfume, aunque es bastante dulce y no lo uso en pleno verano.",
+        "Gran proyección y fijación. Para el trabajo me parece un poco fuerte, para salir es ideal.",
+        "Me gusta mucho, pero siento que lo usa todo el mundo."
+      ],
+      "3": [
+        "Es correcto pero muy dulce, se vuelve algo cansador después de unas horas.",
+        "Bueno, pero esperaba algo más sofisticado."
+      ],
+      "2": [
+        "Demasiado empalagoso para mi gusto. Lo uso muy poco."
+      ],
+      "1": [
+        "No me gustó, me pareció un aroma barato y muy dulce. Me arrepentí."
+      ]
+    },
+
+    "5": {
+      "nombre": "Versace Bright Crystal",
+      "5": [
+        "Fresquísimo y floral, perfecto para el día a día. La peonía y la magnolia se sienten divinas.",
+        "Lo uso para ir a la oficina y siempre alguien me pregunta qué perfume es. Súper recomendable.",
+        "Ideal para primavera y verano, es luminoso y muy femenino.",
+        "El frasco es hermoso y el aroma fresco sin ser aburrido. Muy conforme."
+      ],
+      "4": [
+        "Muy lindo y delicado. En mi piel dura unas 5 horas, lo repaso a la tarde.",
+        "Aroma muy fresco, aunque la proyección es moderada. Aun así, lo recomiendo.",
+        "Hermoso para el verano. Para el invierno lo siento muy liviano."
+      ],
+      "3": [
+        "Es agradable pero muy suave, a las 3 horas casi no lo sentía.",
+        "Lindo para el día, aunque nada que me sorprenda."
+      ],
+      "2": [
+        "Se evapora muy rápido, no justifica lo que cuesta."
+      ],
+      "1": [
+        "Casi no tiene duración, a la hora ya no se sentía nada."
+      ]
+    },
+
+    "6": {
+      "nombre": "Hugo Boss Bottled",
+      "5": [
+        "Un clásico atemporal. La manzana con la canela y el sándalo queda muy elegante. Perfecto para la oficina.",
+        "Lo uso hace años y siempre lo vuelvo a comprar. Aroma limpio, masculino y con muy buena duración.",
+        "Se lo regalé a mi papá y le encantó. Llegó perfecto.",
+        "Elegante y discreto, ideal para entrevistas y reuniones. Cumple de sobra."
+      ],
+      "4": [
+        "Muy buen perfume para el día a día, aunque la proyección es moderada.",
+        "Me gusta mucho el aroma, dura unas 6 horas. Un poco clásico, pero eso es parte de su encanto.",
+        "Lindo y versátil. En verano se siente un poco pesado."
+      ],
+      "3": [
+        "Es correcto, pero me resultó algo anticuado.",
+        "Buen aroma, pero la fijación me pareció regular."
+      ],
+      "2": [
+        "No me convenció, la manzana se siente muy artificial."
+      ],
+      "1": [
+        "Muy flojo, casi no se siente a la hora de aplicarlo."
+      ]
+    },
+
+    "7": {
+      "nombre": "Lancôme La Vie Est Belle",
+      "5": [
+        "Dulce, floral y adictivo. El praliné con el iris queda hermoso y dura todo el día.",
+        "Es mi perfume insignia. Cada vez que lo uso recibo piropos. Una maravilla.",
+        "Un aroma que enamora, cálido y elegante. La fijación es excelente.",
+        "Se lo regalé a mi mamá y no se lo saca. Llegó muy bien embalado."
+      ],
+      "4": [
+        "Muy rico y con mucha duración. Es bastante dulce, ideal para otoño e invierno.",
+        "Hermoso aroma, aunque para el calor lo siento intenso.",
+        "Me encanta el estilo gourmand. Le saco una estrella porque en mí es un poco empalagoso a la noche."
+      ],
+      "3": [
+        "Está bien, pero me resultó demasiado dulce para uso diario.",
+        "Lindo, aunque pensé que iba a ser más floral y menos dulce."
+      ],
+      "2": [
+        "Muy azucarado, me cansó a las pocas horas."
+      ],
+      "1": [
+        "No me gustó, el dulzor me resultó insoportable."
+      ]
+    },
+
+    "8": {
+      "nombre": "Calvin Klein CK One",
+      "5": [
+        "Un clásico fresco y limpio que sirve para todos los días. Lo comparto con mi pareja y los dos lo amamos.",
+        "Los 200 ml rinden un montón y el aroma cítrico es ideal para el verano. Súper conforme.",
+        "Fresco, simple y muy agradable. Cumplió todo lo que esperaba.",
+        "Excelente relación precio-cantidad. Me encanta para después de la ducha."
+      ],
+      "4": [
+        "Muy fresco y rico, pero la duración es corta, hay que repasarlo.",
+        "Un clásico noventero que sigue funcionando. Ideal para el calor.",
+        "Aroma limpio y agradable. Lo uso mucho, aunque no es muy duradero."
+      ],
+      "3": [
+        "Es lindo para el verano, pero se va muy rápido.",
+        "Correcto, aunque lo siento demasiado básico."
+      ],
+      "2": [
+        "A los 30 minutos ya casi no se sentía. Esperaba más duración."
+      ],
+      "1": [
+        "No dura nada, es agua con olor. No lo recomiendo."
+      ]
+    },
+
+    "9": {
+      "nombre": "Tom Ford Black Orchid",
+      "5": [
+        "Intenso, oscuro y misterioso. La trufa con la orquídea es única y la proyección es brutal. Lujo puro.",
+        "Una joya para las noches de invierno. Dura más de 10 horas y deja una estela inolvidable.",
+        "Nunca olí algo igual. Con un par de pulverizaciones alcanza, es potentísimo.",
+        "Vale cada peso. Es un perfume con carácter, muy elegante y envolvente."
+      ],
+      "4": [
+        "Espectacular, pero es muy pesado para el calor. Lo reservo para la noche.",
+        "Gran perfume, aunque es una fragancia polarizante: hay que probarla antes.",
+        "Muy sofisticado y duradero. Le resto una estrella porque no es para todos los días."
+      ],
+      "3": [
+        "Es muy particular, me costó acostumbrarme. Se nota la calidad, pero no es lo mío.",
+        "Bueno, aunque para ese precio esperaba enamorarme."
+      ],
+      "2": [
+        "Demasiado denso y oscuro para mi gusto, me resultó agobiante."
+      ],
+      "1": [
+        "El olor me pareció muy fuerte y me cayó mal. Una decepción para lo que cuesta."
+      ]
+    },
+
+    "10": {
+      "nombre": "Dolce & Gabbana Light Blue",
+      "5": [
+        "El perfume del verano por excelencia. Cítrico, fresco y con manzana verde. Lo amo.",
+        "Me hace sentir de vacaciones. Ideal para los días de calor y la oficina.",
+        "Fresco, limpio y muy lindo. Recibí muchos cumplidos.",
+        "Una fragancia ligera que nunca cansa. Llegó perfecto."
+      ],
+      "4": [
+        "Muy rico y refrescante, aunque la duración es de unas 4 horas.",
+        "Hermoso para el verano, pero lo siento algo liviano para el invierno.",
+        "Gran aroma cítrico, tengo que repasarlo a la tarde."
+      ],
+      "3": [
+        "Es agradable pero muy básico y se va rápido.",
+        "Lindo para el calor, nada del otro mundo."
+      ],
+      "2": [
+        "Muy poca duración, a las dos horas ya no se sentía."
+      ],
+      "1": [
+        "Casi no tiene fijación, me pareció aguado."
+      ]
+    },
+
+    "11": {
+      "nombre": "Yves Saint Laurent Libre",
+      "5": [
+        "Una mezcla preciosa de lavanda y flor de azahar con fondo de vainilla. Es elegante y muy distinto.",
+        "Me encanta, es fresco y cálido a la vez. Tiene muchísima personalidad y dura todo el día.",
+        "Un perfume que se siente libre y atrevido, como dice el nombre. Muy conforme.",
+        "Recibí muchos elogios. La lavanda con la vainilla es una combinación ganadora."
+      ],
+      "4": [
+        "Muy lindo y moderno. La lavanda se siente bastante, ojo si no te gusta.",
+        "Excelente fijación y proyección. A veces lo siento un poco intenso.",
+        "Me gusta mucho, aunque me costó los primeros minutos acostumbrarme."
+      ],
+      "3": [
+        "Interesante pero la lavanda me resultó muy marcada, parece colonia de hombre.",
+        "Correcto, esperaba algo más floral."
+      ],
+      "2": [
+        "No me gustó la mezcla, me resultó confusa."
+      ],
+      "1": [
+        "No es lo que esperaba, el aroma me pareció muy fuerte y mareante."
+      ]
+    },
+
+    "12": {
+      "nombre": "Armani Code",
+      "5": [
+        "Seductor, elegante y muy masculino. Es mi perfume de salida y siempre funciona.",
+        "Dura muchísimo y deja una estela cálida y sofisticada. Excelente compra.",
+        "La bergamota y el limón al principio son frescos y después queda un fondo amaderado precioso.",
+        "Un clásico que nunca desilusiona. Llegó impecable."
+      ],
+      "4": [
+        "Muy buen perfume para la noche. Para el día lo siento algo formal.",
+        "Aroma hermoso, con buena fijación. La proyección es moderada.",
+        "Me gusta mucho, aunque me parece un poco clásico."
+      ],
+      "3": [
+        "Es lindo pero no me llamó especialmente la atención.",
+        "Buen aroma, pero la duración fue regular en mi piel."
+      ],
+      "2": [
+        "Me resultó demasiado serio y apagado, no me identifiqué."
+      ],
+      "1": [
+        "A las dos horas ya no se sentía. No lo recomiendo."
+      ]
+    },
+
+    "13": {
+      "nombre": "Carolina Herrera 212 VIP Men",
+      "5": [
+        "Un perfume de fiesta total. El maracuyá con la menta es divertido y adictivo. Me encanta.",
+        "Dulce, fresco y con una estela que se nota. Ideal para salir con amigos.",
+        "Lo uso para el boliche y funciona de maravilla, dura muchísimo.",
+        "Muy distinto a lo que hay. Recibo cumplidos cada vez que me lo pongo."
+      ],
+      "4": [
+        "Muy rico y juvenil. Lo siento más para noche que para el día.",
+        "Excelente aroma, aunque es algo dulce. La duración es buena.",
+        "Me gusta, pero es bastante particular, hay que probarlo."
+      ],
+      "3": [
+        "Es entretenido pero se vuelve cansador después de un rato.",
+        "Lindo, aunque no lo usaría todos los días."
+      ],
+      "2": [
+        "Muy dulce y artificial para mi gusto."
+      ],
+      "1": [
+        "No me gustó para nada, me pareció un perfume de adolescente."
+      ]
+    },
+
+    "14": {
+      "nombre": "Dior J'adore",
+      "5": [
+        "Un bouquet floral magnífico. La rosa y el ylang-ylang son puro lujo. Elegante y muy femenino.",
+        "Un perfume para sentirse especial. Dura todo el día y la estela es hermosa.",
+        "Lo uso en ocasiones importantes y siempre me hacen cumplidos. Una joya.",
+        "Es delicado y sofisticado a la vez. Me encantó y llegó perfecto."
+      ],
+      "4": [
+        "Muy lindo y elegante, aunque lo siento más maduro.",
+        "Aroma precioso. La duración es muy buena, la proyección moderada.",
+        "Me gusta mucho, aunque lo reservo para salidas especiales."
+      ],
+      "3": [
+        "Es bonito pero muy clásico, esperaba algo más moderno.",
+        "Correcto, aunque la fragancia floral me resultó algo común."
+      ],
+      "2": [
+        "Muy floral y pesado para mi gusto, me cansó pronto."
+      ],
+      "1": [
+        "No me gustó, me pareció un aroma envejecido."
+      ]
+    },
+
+    "15": {
+      "nombre": "Calvin Klein CK Everyone",
+      "5": [
+        "Limpio, verde y cítrico. Lo compartimos entre mi pareja y yo y nos encanta. Ideal para el día a día.",
+        "Muy fresco y relajante. Para el trabajo y el verano es perfecto.",
+        "Súper agradable, sutil y fácil de usar. Muy buena compra.",
+        "Un aroma ligero que no cansa. Muy conforme."
+      ],
+      "4": [
+        "Muy rico y fresco, pero la fijación es de unas 4 horas.",
+        "Lindo aroma para el verano. Lo repaso a la tarde.",
+        "Agradable y versátil. Es suave, no esperes una gran proyección."
+      ],
+      "3": [
+        "Está bien pero es muy simple, no deja huella.",
+        "Correcto, aunque no me sorprendió."
+      ],
+      "2": [
+        "Casi no se siente, se va en una hora."
+      ],
+      "1": [
+        "No tiene duración ni proyección. Una decepción."
+      ]
+    },
+
+    "16": {
+      "nombre": "Paco Rabanne Invictus",
+      "5": [
+        "Fresco, marino y potente. El frasco con forma de trofeo es genial. Lo uso en verano y rinde.",
+        "Excelente proyección y duración. Recibí cumplidos desde el primer día.",
+        "El pomelo con la madera queda perfecto. Ideal para el gimnasio y para salir.",
+        "Muy conforme. Un aroma que combina energía y elegancia."
+      ],
+      "4": [
+        "Muy buen perfume para el calor, aunque es algo común.",
+        "Aroma muy agradable. Dura unas 6 horas en mi piel.",
+        "Me gusta mucho, aunque la salida es fuerte al principio."
+      ],
+      "3": [
+        "Es correcto, pero lo siento similar a otros perfumes frescos.",
+        "Lindo, pero esperaba mejor duración."
+      ],
+      "2": [
+        "El aroma marino me resultó artificial y se fue rápido."
+      ],
+      "1": [
+        "No me gustó, huele a producto de limpieza."
+      ]
+    },
+
+    "17": {
+      "nombre": "Chanel Bleu de Chanel",
+      "5": [
+        "Elegante, amaderado y versátil. Sirve para la oficina, una cena o una salida. Perfecto.",
+        "La mezcla de cítricos y maderas es sofisticada. Dura todo el día y la proyección es ideal.",
+        "Mi perfume de cabecera. Cada vez que lo uso recibo elogios.",
+        "Un lujo. Llegó perfectamente sellado y con su caja impecable."
+      ],
+      "4": [
+        "Muy elegante y fino. Lo siento algo formal, pero hermoso.",
+        "Excelente aroma. La duración es muy buena, aunque la proyección es moderada.",
+        "Gran perfume, aunque por el precio esperaba un poco más de potencia."
+      ],
+      "3": [
+        "Es lindo pero me resultó demasiado correcto, sin carácter.",
+        "Buena calidad, pero no me deslumbró."
+      ],
+      "2": [
+        "No me pareció para tanto, se perdió rápido en mi piel."
+      ],
+      "1": [
+        "Esperaba mucho más. Casi no se siente a las pocas horas."
+      ]
+    },
+
+    "18": {
+      "nombre": "Versace Eros",
+      "5": [
+        "Menta, manzana verde y vainilla: una combinación brutal. Dura mucho y deja una estela increíble.",
+        "Perfecto para salir de noche. Recibí muchísimos cumplidos.",
+        "Es potente y seductor. Me encantó el color del frasco y el aroma.",
+        "Un perfume con mucha personalidad. Súper conforme con la compra."
+      ],
+      "4": [
+        "Muy rico, aunque es dulce. Lo uso más en otoño e invierno.",
+        "Gran proyección y fijación. A veces me resulta intenso.",
+        "Me gusta mucho, aunque lo siento medio juvenil."
+      ],
+      "3": [
+        "Está bien, pero es muy dulce y me cansó.",
+        "Lindo, aunque lo vi demasiado común."
+      ],
+      "2": [
+        "Muy azucarado y fuerte. No me terminó de convencer."
+      ],
+      "1": [
+        "Me mareó el aroma, es demasiado intenso para mí."
+      ]
+    },
+
+    "19": {
+      "nombre": "Dior Fahrenheit",
+      "5": [
+        "Una firma única. El cuero con la violeta es inconfundible, y esa nota casi metálica es lo que lo hace especial.",
+        "Un clásico de culto. Es elegante, masculino y distinto a todo lo moderno.",
+        "Lo uso en invierno y es perfecto. Dura muchísimo.",
+        "Aroma con carácter. Me sorprendió gratamente."
+      ],
+      "4": [
+        "Muy particular y elegante. No es para cualquiera, pero a mí me encanta.",
+        "Gran perfume, aunque la salida es intensa y se siente un poco anticuado.",
+        "Excelente duración. Lo siento más para ocasiones frescas."
+      ],
+      "3": [
+        "Es distinto, pero la nota de cuero es muy marcada y no me terminó de gustar.",
+        "Interesante, aunque no lo volvería a comprar."
+      ],
+      "2": [
+        "El olor me recordó a combustible, no me gustó."
+      ],
+      "1": [
+        "No me gustó para nada, demasiado fuerte y raro."
+      ]
+    },
+
+    "20": {
+      "nombre": "Carolina Herrera 212 NYC",
+      "5": [
+        "Fresco, juvenil y muy lindo. Capta perfecto la energía de una ciudad dinámica. Lo amo para el día a día.",
+        "Floral y cítrico, ideal para ir a trabajar o a la facultad. Me encantó.",
+        "Muy agradable y fácil de llevar. Recibí varios cumplidos.",
+        "Mi perfume de todos los días. Excelente relación precio-calidad."
+      ],
+      "4": [
+        "Muy rico y fresco, aunque la duración es de unas 5 horas.",
+        "Hermoso aroma, aunque la proyección es suave.",
+        "Lindo y juvenil, pero lo siento algo simple."
+      ],
+      "3": [
+        "Está bien, pero se pierde enseguida.",
+        "Correcto, aunque esperaba algo más especial."
+      ],
+      "2": [
+        "No dura casi nada, lo tengo que repasar cada dos horas."
+      ],
+      "1": [
+        "Aroma muy débil, no vale lo que cuesta."
+      ]
+    },
+
+    "21": {
+      "nombre": "Paco Rabanne Olympéa",
+      "5": [
+        "Vainilla salada y mandarina verde: una mezcla única. Es dulce, adictivo y super femenino.",
+        "Dura todo el día y la estela es hermosa. Me encantó.",
+        "Un perfume diferente a todo. Recibo cumplidos cada vez que lo uso.",
+        "El frasco es precioso y el aroma enamora. Excelente."
+      ],
+      "4": [
+        "Muy rico, aunque es dulce. Perfecto para la noche.",
+        "Gran aroma y muy buena duración. Para el verano lo siento intenso.",
+        "Me gusta mucho, aunque tarda en asentarse."
+      ],
+      "3": [
+        "Es lindo pero muy dulce, no lo uso a menudo.",
+        "Agradable, pero lo vi demasiado parecido a otros."
+      ],
+      "2": [
+        "Me resultó empalagoso y pesado."
+      ],
+      "1": [
+        "No me gustó el olor, es demasiado dulce y me dio náuseas."
+      ]
+    },
+
+    "22": {
+      "nombre": "Calvin Klein Euphoria",
+      "5": [
+        "Misteriosa, sensual y provocativa. La granada con la orquídea es preciosa. Me fascinó.",
+        "Un perfume nocturno por excelencia. Dura mucho y deja una estela elegante.",
+        "Me encanta el aroma oriental, es cálido y envolvente. Muy conforme.",
+        "Una joya a muy buen precio. Llegó perfecto."
+      ],
+      "4": [
+        "Muy lindo y sensual, aunque lo siento denso para el calor.",
+        "Gran aroma, buena duración. Para mí es más de invierno.",
+        "Me gusta mucho, aunque la salida es algo fuerte."
+      ],
+      "3": [
+        "Lindo, pero lo siento medio anticuado.",
+        "Es correcto, aunque no me enamoró."
+      ],
+      "2": [
+        "Muy pesado y almizclado para mi gusto."
+      ],
+      "1": [
+        "No me gustó, me dio dolor de cabeza a los minutos."
+      ]
+    },
+
+    "23": {
+      "nombre": "Yves Saint Laurent Black Opium",
+      "5": [
+        "Adictivo. El café con las flores blancas y la vainilla es una combinación irresistible. Dura todo el día.",
+        "Perfecto para salir de noche. Es intenso, dulce y muy seductor.",
+        "Recibí cumplidos desde el primer día. El frasco también es hermoso.",
+        "Me encanta, es mi perfume de cabecera. Muy conforme."
+      ],
+      "4": [
+        "Muy rico y envolvente, pero demasiado dulce para el verano.",
+        "Gran aroma y duración excelente. Lo siento intenso para el día.",
+        "Hermoso, aunque lo reservo para la noche."
+      ],
+      "3": [
+        "Es lindo pero muy dulce, me cansa rápido.",
+        "Está bien, aunque esperaba algo más distinto."
+      ],
+      "2": [
+        "Empalagoso y muy fuerte. No fue para mí."
+      ],
+      "1": [
+        "No pude usarlo, el dulzor me resultó insoportable."
+      ]
+    },
+
+    "24": {
+      "nombre": "Tom Ford Oud Wood",
+      "5": [
+        "Exótico, ahumado y sumamente lujoso. El oud con el sándalo es una obra de arte. Dura todo el día.",
+        "Un perfume sofisticado y elegante, de los que dejan huella. Muy conforme con la compra.",
+        "Cálido y envolvente, ideal para otoño e invierno. Recibí muchísimos elogios.",
+        "Nunca había olido algo así. Vale la inversión."
+      ],
+      "4": [
+        "Hermoso y refinado, aunque es más sutil de lo que esperaba.",
+        "Gran calidad y duración. Es una fragancia para ocasiones especiales.",
+        "Muy elegante, aunque el aroma ahumado no es para todos."
+      ],
+      "3": [
+        "Se nota la calidad, pero no me enamoró. Es muy particular.",
+        "Lindo, aunque para ese precio esperaba más proyección."
+      ],
+      "2": [
+        "El oud no es lo mío, me resultó muy pesado."
+      ],
+      "1": [
+        "Esperaba mucho más por lo que cuesta. Casi no tiene proyección."
+      ]
+    },
+
+    "25": {
+      "nombre": "Lancôme Idôle",
+      "5": [
+        "Limpio, luminoso y muy femenino. Los pétalos de rosa con el jazmín quedan hermosos. Lo uso todos los días.",
+        "Un perfume fresco y moderno. Dura todo el día y es muy agradable.",
+        "Me encantó, es delicado y elegante. Muy buena compra.",
+        "Perfecto para la oficina, nada invasivo. Recibí varios cumplidos."
+      ],
+      "4": [
+        "Muy lindo y fresco, aunque la proyección es suave.",
+        "Gran aroma limpio. Lo siento más de día que de noche.",
+        "Agradable y versátil. Le resto una estrella por la duración."
+      ],
+      "3": [
+        "Está bien, pero me pareció demasiado simple.",
+        "Correcto, aunque esperaba más personalidad."
+      ],
+      "2": [
+        "Muy suave, casi no se siente a las dos horas."
+      ],
+      "1": [
+        "No me gustó, no dura nada. Decepcionada."
+      ]
+    },
+
+    "26": {
+      "nombre": "Armani My Way",
+      "5": [
+        "Un ramo de flores blancas radiante y fresco. Los 30 ml son ideales para llevar en la cartera.",
+        "Hermoso y elegante, con un toque cítrico encantador. Muy conforme.",
+        "Dura todo el día y es muy femenino. Lo recomiendo.",
+        "Me encantó el aroma y el frasco. Llegó perfecto."
+      ],
+      "4": [
+        "Muy lindo, aunque en 30 ml se acaba rápido.",
+        "Aroma precioso y con buena fijación. Un poco pequeño el envase.",
+        "Hermoso para el día. Me gustaría que tuviera más proyección."
+      ],
+      "3": [
+        "Es lindo pero la tuberosa me resultó fuerte.",
+        "Correcto, aunque lo vi algo común."
+      ],
+      "2": [
+        "No me gustó el aroma floral tan marcado."
+      ],
+      "1": [
+        "Se evapora enseguida, no vale lo que pagué."
+      ]
+    },
+
+    "27": {
+      "nombre": "Chanel Coco Mademoiselle",
+      "5": [
+        "Fresca y sensual. La naranja con el pachulí y la rosa es perfecta. Me siento elegante cada vez que lo uso.",
+        "Un perfume que sirve para todo: trabajo, salidas, eventos. Siempre acierta.",
+        "Dura todo el día y la estela es inconfundible. Excelente.",
+        "Lo amo. Mi perfume favorito desde hace años."
+      ],
+      "4": [
+        "Muy elegante y versátil, aunque la salida cítrica es intensa.",
+        "Hermoso aroma. La duración es muy buena. Sale un poco caro.",
+        "Gran perfume, aunque es bastante popular."
+      ],
+      "3": [
+        "Lindo, pero para ese precio esperaba más.",
+        "Es elegante pero el pachulí me resulta fuerte."
+      ],
+      "2": [
+        "No me terminó de convencer, la mezcla se siente pesada."
+      ],
+      "1": [
+        "Esperaba mucho más, no me gustó el olor en mi piel."
+      ]
+    },
+
+    "28": {
+      "nombre": "Dior Miss Dior",
+      "5": [
+        "Romántico y precioso. Las rosas de Grasse con las peonías son una delicia. Me encantó.",
+        "Fresco, floral y delicado. Ideal para el día a día y para ocasiones especiales.",
+        "Dura muy bien y la estela es hermosa. Lo recomiendo.",
+        "Mi favorito de la primavera. Siempre recibo elogios."
+      ],
+      "4": [
+        "Muy lindo y femenino, aunque lo siento algo clásico.",
+        "Hermoso aroma. La proyección es moderada.",
+        "Gran perfume floral, lo uso sobre todo en primavera."
+      ],
+      "3": [
+        "Es bonito pero muy floral, lo vi demasiado dulce.",
+        "Correcto, aunque esperaba algo diferente."
+      ],
+      "2": [
+        "Demasiado rosado y pesado para mi gusto."
+      ],
+      "1": [
+        "No me gustó, me resultó muy empalagoso."
+      ]
+    },
+
+    "29": {
+      "nombre": "Versace Crystal Noir",
+      "5": [
+        "Mágico y sensual. El cardamomo con el coco y la gardenia es una mezcla preciosa. Perfecto para la noche.",
+        "Un aroma oriental muy elegante. Dura muchísimo y la estela es increíble.",
+        "Me encantó, es misterioso y envolvente. Muy conforme.",
+        "Hermoso y distinto, recibí muchos cumplidos."
+      ],
+      "4": [
+        "Muy lindo y sensual, aunque lo siento pesado para el verano.",
+        "Gran aroma y buena duración. Para la noche es ideal.",
+        "Hermoso, aunque la salida es algo intensa."
+      ],
+      "3": [
+        "Lindo, pero me resultó demasiado denso.",
+        "Está bien, aunque no lo sentí tan especial."
+      ],
+      "2": [
+        "El coco con la gardenia me pareció muy fuerte."
+      ],
+      "1": [
+        "No me gustó, me mareó el aroma."
+      ]
+    },
+
+    "30": {
+      "nombre": "Calvin Klein Be",
+      "5": [
+        "Íntimo, suave y muy agradable. La lavanda con el almizcle queda hermosa. Los 200 ml rinden muchísimo.",
+        "Un aroma limpio que sirve para cualquiera. Lo comparto con mi pareja y nos encanta.",
+        "Súper cómodo para el uso diario. Excelente relación precio-cantidad.",
+        "Me gusta mucho la sutileza, ideal para la oficina."
+      ],
+      "4": [
+        "Muy lindo y suave, aunque la duración es corta.",
+        "Aroma limpio y agradable. Es discreto, no esperes mucha proyección.",
+        "Rico y muy versátil. Lo repaso un par de veces al día."
+      ],
+      "3": [
+        "Está bien, pero es muy básico.",
+        "Correcto, aunque se va muy rápido."
+      ],
+      "2": [
+        "Casi no se siente, desaparece a la hora."
+      ],
+      "1": [
+        "No dura nada, me pareció aguado."
+      ]
+    },
+
+    "31": {
+      "nombre": "Yves Saint Laurent Y",
+      "5": [
+        "Atrevido, fresco y muy elegante. La salvia con la manzana y el jengibre queda genial. Lo uso para todo.",
+        "Gran proyección y duración. Para la oficina y para salir funciona perfecto.",
+        "Recibo cumplidos todo el tiempo. Excelente compra.",
+        "Un aroma moderno y versátil. Muy conforme."
+      ],
+      "4": [
+        "Muy rico y fresco. En mi piel dura unas 6 horas.",
+        "Gran perfume, aunque lo vi algo parecido a otros del estilo.",
+        "Me gusta mucho, aunque la salida es fuerte."
+      ],
+      "3": [
+        "Es lindo pero no me sorprendió.",
+        "Correcto, aunque esperaba más personalidad."
+      ],
+      "2": [
+        "El aroma me resultó muy sintético."
+      ],
+      "1": [
+        "No me gustó, se evaporó en una hora."
+      ]
+    },
+
+    "32": {
+      "nombre": "Carolina Herrera Bad Boy",
+      "5": [
+        "Complejo y cautivador. La pimienta con el cedro y el cacao queda espectacular. El frasco con el rayo es genial.",
+        "Perfecto para salir de noche. Dura todo el día y deja una estela increíble.",
+        "Muy distinto a lo que suelo usar, me encantó. Recibí cumplidos.",
+        "Un perfume con muchísima personalidad. Súper conforme."
+      ],
+      "4": [
+        "Muy rico, aunque es dulce y especiado. Ideal para otoño e invierno.",
+        "Gran aroma y proyección. Para el día lo siento intenso.",
+        "Me gusta mucho, aunque tarda en asentarse."
+      ],
+      "3": [
+        "Es lindo pero muy dulce, me cansó.",
+        "Correcto, aunque lo vi algo parecido a otros."
+      ],
+      "2": [
+        "Demasiado fuerte y especiado para mi gusto."
+      ],
+      "1": [
+        "No me gustó, me dio dolor de cabeza."
+      ]
+    }
+  },
+
+  "productoGenerico": {
+    "5": [
+      "Excelente perfume, original y con una duración increíble. Muy conforme con la compra.",
+      "Llegó perfectamente sellado y el aroma es tal cual lo esperaba. Lo recomiendo.",
+      "Me encantó. Recibí cumplidos desde el primer día.",
+      "Una fragancia hermosa, con muy buena fijación y proyección. Súper recomendable.",
+      "Superó mis expectativas. El aroma dura todo el día.",
+      "Muy buena relación precio-calidad. Volvería a comprarlo sin dudar.",
+      "El frasco es precioso y el perfume es todavía mejor. Impecable.",
+      "Lo compré de regalo y fue un éxito total.",
+      "Es mi nuevo perfume favorito. Lo uso todos los días.",
+      "Una joya. Mejor de lo que imaginaba."
+    ],
+    "4": [
+      "Muy rico y con buena duración, aunque en mi piel se va a las 5 horas.",
+      "Hermoso aroma. Le resto una estrella porque la proyección es moderada.",
+      "Muy conforme, aunque esperaba un poco más de intensidad.",
+      "Buen perfume, lindo aroma y buena presentación. Recomendable.",
+      "Me gusta mucho, aunque lo siento más apropiado para ciertas ocasiones.",
+      "Excelente calidad. Un poquito más de fijación y sería perfecto.",
+      "Muy lindo, pero la salida es fuerte al principio.",
+      "Cumple muy bien. Solo me hubiera gustado que durara un poco más."
+    ],
+    "3": [
+      "Es lindo pero esperaba más proyección por el precio.",
+      "Está bien, aunque no me sorprendió.",
+      "Aroma correcto, la duración es regular.",
+      "Buen perfume pero no es lo que esperaba por la descripción.",
+      "Cumple, pero hay opciones mejores en esta gama de precio.",
+      "Lindo aroma, aunque la caja llegó algo golpeada."
+    ],
+    "2": [
+      "La fijación es muy pobre, a las dos horas ya no se sentía.",
+      "No me gustó el aroma en mi piel, es muy distinto a lo que olí en el local.",
+      "Esperaba mucho más por lo que cuesta.",
+      "Se parece poco a la descripción de las notas.",
+      "Demasiado fuerte y me cansó rápido."
+    ],
+    "1": [
+      "No me gustó nada, no lo volvería a comprar.",
+      "Casi no tiene duración. Una decepción total.",
+      "El aroma me resultó desagradable y me provocó dolor de cabeza.",
+      "No coincide con lo que esperaba, me arrepiento de la compra.",
+      "Dudo de su autenticidad, el aroma es muy distinto al original."
+    ]
+  },
+
+  "vendedor": {
+    "5": [
+      "Excelente atención, respondieron mis consultas rápido y el pedido llegó antes de lo previsto.",
+      "Todo perfecto: embalaje impecable, producto sellado y envío rápido.",
+      "Muy buen vendedor, despachó el mismo día. Lo recomiendo.",
+      "Atención de primera, resolvieron todas mis dudas antes de comprar.",
+      "Llegó muy bien protegido, con caja y frasco sin un solo detalle. Súper recomendable.",
+      "Compra sin problemas. Todo tal cual la publicación.",
+      "Comunicación excelente y envío rapidísimo. Volveré a comprarle.",
+      "Muy profesionales. El perfume llegó en perfectas condiciones.",
+      "Rápido, confiable y muy amable. Cinco estrellas.",
+      "Embalaje cuidado, con protección extra. Se nota que les importa.",
+      "Me mantuvieron informada del envío en todo momento. Excelente servicio.",
+      "Cumplieron con todo lo prometido. Recomendadísimo.",
+      "Llegó en 48 horas y perfectamente sellado. Muy conforme.",
+      "Gran vendedor, tuve una consulta posterior y me respondieron enseguida."
+    ],
+    "4": [
+      "Muy buen vendedor, el único detalle es que el correo demoró un día más.",
+      "Todo bien, aunque tardaron un poco en despachar.",
+      "Buena atención y embalaje correcto. Recomendable.",
+      "Cumplieron con lo pactado, solo le sumaría más protección a la caja.",
+      "Compra satisfactoria. La comunicación podría ser más rápida.",
+      "Buen servicio en general. El envío tardó un poco más de lo estimado.",
+      "Atención muy amable. Me hubiera gustado recibir el código de seguimiento antes.",
+      "Todo en orden, aunque la caja llegó con una pequeña marca por el transporte.",
+      "Buen vendedor. Responden, aunque no de inmediato.",
+      "Muy conforme. Solo mejoraría los tiempos de despacho."
+    ],
+    "3": [
+      "El producto llegó bien pero tardaron más de lo indicado en despachar.",
+      "Atención regular, tuve que insistir para tener respuesta.",
+      "Cumplió, pero el embalaje era muy básico.",
+      "El envío demoró varios días más de lo prometido.",
+      "Está bien, pero la comunicación fue escasa.",
+      "La caja llegó algo abollada por el correo. El perfume en sí estaba bien.",
+      "Compra normal, ni mala ni buena. Esperaba más atención.",
+      "Tardaron en responderme y el seguimiento no se actualizaba."
+    ],
+    "2": [
+      "Demoraron mucho en despachar y casi no respondían los mensajes.",
+      "El embalaje era muy pobre y la caja llegó dañada.",
+      "Mala comunicación, tuve que reclamar varias veces.",
+      "El envío llegó con una semana de retraso y sin avisos.",
+      "No coincidía exactamente con lo publicado, y tardaron en responder.",
+      "Atención deficiente. Terminó llegando, pero con muchos inconvenientes."
+    ],
+    "1": [
+      "Pésima experiencia, nunca respondieron mis mensajes y el pedido llegó tarde.",
+      "Demoraron más de dos semanas y el paquete llegó golpeado.",
+      "No lo recomiendo, atención nula y mal embalaje.",
+      "Tuve que reclamar para que despacharan el pedido. Muy mala experiencia.",
+      "El producto llegó sin protección y con la caja rota. No vuelvo a comprar.",
+      "Mala gestión, no resolvieron mi reclamo y me dejaron sin respuestas."
+    ]
+  }
+}

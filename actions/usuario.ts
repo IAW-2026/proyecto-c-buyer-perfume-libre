@@ -3,6 +3,7 @@
 import { RolUsuario } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { auth, clerkClient } from "@clerk/nextjs/server";
+import { requireAdmin, requireUser } from "@/lib/auth/guards";
 
 export async function asegurarUsuario(userId: string) {
   try {
@@ -24,12 +25,7 @@ export async function asegurarUsuario(userId: string) {
 
 export async function sincronizarUsuario() {
   try {
-    const { userId } = await auth();
-
-    if (!userId) {
-      throw new Error("Usuario no autenticado");
-    }
-
+    const userId = await requireUser();
     await asegurarUsuario(userId);
   } catch (error) {
     console.error("Error al sincronizar el usuario:", error);
@@ -38,6 +34,7 @@ export async function sincronizarUsuario() {
 }
 
 export async function actualizarRol(usuarioId: string, nuevoRol: RolUsuario) {
+  await requireAdmin();
   try {
     await prisma.usuario.upsert({
       where: { id: usuarioId },
@@ -79,7 +76,7 @@ export async function obtenerRolUsuario() {
     });
 
     return rolUsuario;
-  } catch (error) {
+  } catch {
     return null;
   }
 }

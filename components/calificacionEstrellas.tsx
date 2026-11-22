@@ -11,7 +11,14 @@ export default function CalificacionEstrellas({ rating }: EstrellasProps) {
   const estrellasVacias = 5 - estrellaPiso - (hayMediaEstrella ? 1 : 0);
 
   return (
-    <div className="flex items-center gap-0.5">
+    <div
+      className="flex items-center gap-0.5"
+      role="img"
+      aria-label={`Calificación: ${rating.toFixed(1)} de 5 estrellas`}
+    >
+      <span className="sr-only">
+        Calificación: {rating.toFixed(1)} de 5 estrellas
+      </span>
       {[...Array(estrellaPiso)].map((_, i) => (
         <Star key={`full-${i}`} className="h-3 w-3 fill-accent text-accent" />
       ))}

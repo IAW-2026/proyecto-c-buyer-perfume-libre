@@ -11,52 +11,88 @@ import {
 import { Star } from "lucide-react";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
+import { toast } from "sonner";
+import { ActionResult } from "@/lib/errors";
+
+interface CardResenaProps {
+  titulo: string;
+  descripcion: string;
+  id: string;
+  ordenId: string;
+  yaEnviado?: boolean;
+  calificacionExistente?: {
+    puntuacion: number;
+    comentario?: string | null;
+  } | null;
+  onEnviar: (
+    id: string,
+    ordenId: string,
+    rating: number,
+    comentario: string,
+  ) => Promise<ActionResult<{ mensaje: string; id: string }>>;
+}
 
 export default function CardResena({
   titulo,
   descripcion,
   id,
   ordenId,
+  yaEnviado = false,
+  calificacionExistente,
   onEnviar,
-}: {
-  titulo: string;
-  descripcion: string;
-  id: string;
-  ordenId: string;
-  onEnviar: (
-    id: string,
-    ordenId: string,
-    rating: number,
-    comentario: string,
-  ) => Promise<any>;
-}) {
-  const [rating, setRating] = useState(0);
-  const [comentario, setComentario] = useState("");
+}: CardResenaProps) {
+  const [rating, setRating] = useState(calificacionExistente?.puntuacion || 0);
+  const [comentario, setComentario] = useState(
+    calificacionExistente?.comentario || "",
+  );
   const [estado, setEstado] = useState<
     "idle" | "enviando" | "enviado" | "error"
-  >("idle");
+  >(yaEnviado ? "enviado" : "idle");
 
   const manejarEnvio = async () => {
-    if (rating === 0) return;
+    if (rating === 0) {
+      toast.warning("Por favor seleccioná una calificación de 1 a 5 estrellas.");
+      return;
+    }
     setEstado("enviando");
     try {
-      const response = await onEnviar(id, ordenId, rating, comentario);
-      setEstado("enviado");
-    } catch (e) {
+      const res = await onEnviar(id, ordenId, rating, comentario);
+      if (res.success) {
+        setEstado("enviado");
+        toast.success(res.data.mensaje || "¡Reseña guardada con éxito!");
+      } else {
+        setEstado("error");
+        toast.error(res.error.message || "No se pudo guardar la reseña.");
+      }
+    } catch {
       setEstado("error");
+      toast.error("Ocurrió un error inesperado al enviar la reseña.");
     }
   };
 
   if (estado === "enviado") {
     return (
       <Card className="rounded-sm border-accent/30 bg-accent/5 shadow-none flex items-center justify-center h-full min-h-55">
-        <CardContent className="pt-6 text-center">
-          <Star className="w-8 h-8 mx-auto mb-3 text-accent fill-accent" />
+        <CardContent className="pt-6 text-center space-y-2">
+          <Star className="w-8 h-8 mx-auto mb-2 text-accent fill-accent" />
           <p className="text-[14px] font-semibold text-foreground">
-            ¡Gracias por tu reseña!
+            ¡Gracias por tu opinión!
           </p>
-          <p className="text-[12px] mt-1.5 text-muted-foreground">
-            Tu opinión fue publicada con éxito.
+          <div className="flex justify-center text-accent py-1">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Star
+                key={i}
+                className={`h-4 w-4 ${i < rating ? "fill-current" : "text-border/40"}`}
+              />
+            ))}
+          </div>
+          {comentario && (
+            <p className="text-[12px] italic text-muted-foreground line-clamp-2 max-w-xs mx-auto">
+              &ldquo;{comentario}&rdquo;
+            </p>
+          )}
+          <p className="text-[11px] text-muted-foreground pt-1">
+            Tu reseña ya fue registrada para esta compra.
           </p>
         </CardContent>
       </Card>

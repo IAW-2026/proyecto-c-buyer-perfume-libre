@@ -1,5 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { Metadata } from "next";
 import StatusScreenPayment from "@/components/checkout/StatusScreenPayment";
 import { obtenerEstadoOrden } from "@/actions/checkout";
@@ -50,21 +51,21 @@ export default async function CheckoutResultadoPage({ searchParams }: Props) {
         <div className="mt-6 flex flex-col gap-3">
           {/* Botón de reintento */}
           {ordenCancelada && (
-            <a
+            <Link
               href={`/checkout/pago?ordenId=${ordenId}`}
               className="w-full h-12 flex items-center justify-center text-[11px] uppercase font-bold rounded-sm bg-foreground text-background hover:bg-foreground/90 transition-all"
             >
               Volver a intentar el pago
-            </a>
+            </Link>
           )}
 
           {/* Tu botón original de ver pedidos */}
-          <a
+          <Link
             href="/compras"
             className="w-full h-12 flex items-center justify-center text-[11px] uppercase tracking-[0.08em] font-bold rounded-sm border border-border/60 text-foreground hover:bg-secondary transition-all"
           >
             Ver mis pedidos
-          </a>
+          </Link>
         </div>
       </div>
     </div>

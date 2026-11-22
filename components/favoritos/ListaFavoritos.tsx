@@ -5,6 +5,7 @@ import { eliminarFavorito } from "@/actions/favoritos";
 import { PerfumeFavorito } from "@/schema/perfume.schema";
 import FavoritosVacio from "./FavoritosVacio";
 import ProductoCardFavoritos from "./ProductCardFavoritos";
+import { toast } from "sonner";
 
 export default function ListaFavoritos({
   favoritosIniciales,
@@ -26,8 +27,13 @@ export default function ListaFavoritos({
       optimisticallyRemove(id);
 
       try {
-        await eliminarFavorito(id);
-      } catch (error) {}
+        const res = await eliminarFavorito({ productoId: id });
+        if (!res.success) {
+          toast.error(res.error.message);
+        }
+      } catch {
+        toast.error("No se pudo eliminar el favorito");
+      }
     });
   };
 

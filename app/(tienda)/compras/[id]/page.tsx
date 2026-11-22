@@ -9,7 +9,6 @@ import { cn, formatearPrecio, obtenerLabelEstado } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import {
-  EstadoOrdenType,
   EstadosOrden,
   ItemDeOrdenDetallado,
 } from "@/schema/perfume.schema";
@@ -20,6 +19,7 @@ import { notFound } from "next/navigation";
 import { obtenerDetallePerfume, obtenerHistorialEnvio } from "@/lib/api";
 import { SeccionResenas } from "@/components/compras/SeccionResenas";
 import { SimuladorEnvio } from "@/components/compras/SelectorEnvio";
+import { obtenerEstadoResenasOrden } from "@/actions/resenas";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -46,16 +46,31 @@ export default async function DetalleCompraPage({
     notFound();
   }
 
+  const estadoResenas =
+    orden.ordenCompra.estado === "ENTREGADO"
+      ? await obtenerEstadoResenasOrden(
+          orden.ordenCompraId,
+          orden.productoId,
+          orden.ordenCompra.vendedorId,
+        )
+      : null;
+
   return (
     <div className="min-h-screen bg-background">
       <main className="container mx-auto px-4 py-8 md:py-12 max-w-5xl">
-        <DetalleCompra orden={orden} />
+        <DetalleCompra orden={orden} estadoResenas={estadoResenas} />
       </main>
     </div>
   );
 }
 
-function DetalleCompra({ orden }: { orden: ItemDeOrdenDetallado }) {
+function DetalleCompra({
+  orden,
+  estadoResenas,
+}: {
+  orden: ItemDeOrdenDetallado;
+  estadoResenas: Awaited<ReturnType<typeof obtenerEstadoResenasOrden>> | null;
+}) {
   return (
     <div className="space-y-8">
       <div className="flex justify-between items-center">
@@ -97,12 +112,18 @@ function DetalleCompra({ orden }: { orden: ItemDeOrdenDetallado }) {
         </div>
       </div>
 
-      <PanelPrincipal orden={orden} />
+      <PanelPrincipal orden={orden} estadoResenas={estadoResenas} />
     </div>
   );
 }
 
-function PanelPrincipal({ orden }: { orden: ItemDeOrdenDetallado }) {
+function PanelPrincipal({
+  orden,
+  estadoResenas,
+}: {
+  orden: ItemDeOrdenDetallado;
+  estadoResenas: Awaited<ReturnType<typeof obtenerEstadoResenasOrden>> | null;
+}) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <div className="lg:col-span-2 space-y-8">
@@ -117,6 +138,10 @@ function PanelPrincipal({ orden }: { orden: ItemDeOrdenDetallado }) {
             vendedorId={orden.ordenCompra.vendedorId}
             vendedor={orden.vendedor}
             ordenId={orden.ordenCompraId}
+            yaResenadoProducto={estadoResenas?.yaResenadoProducto}
+            yaResenadoVendedor={estadoResenas?.yaResenadoVendedor}
+            calificacionProducto={estadoResenas?.calificacionProducto}
+            calificacionVendedor={estadoResenas?.calificacionVendedor}
           />
         )}
       </div>
@@ -320,18 +345,34 @@ async function obtenerItemOrden(
     return null;
   }
 
+  let nombreProducto = ordenDb.nombre;
+  let imagenUrl = ordenDb.imagenUrl;
+  let marca = ordenDb.marca;
+  let vendedor = ordenDb.vendedor;
+
+  // Fallback a Seller API SOLO si faltan datos descriptivos (órdenes legacy)
+  const necesitaFallback = !nombreProducto || !imagenUrl;
+
   const [productoDetalle, datosEnvio] = await Promise.all([
-    obtenerDetallePerfume(ordenDb.productoId),
+    necesitaFallback
+      ? obtenerDetallePerfume(ordenDb.productoId).catch(() => null)
+      : Promise.resolve(null),
     obtenerHistorialEnvio(
       ordenDb.ordenCompra.envioId?.toString() || "",
       ordenDb.ordenCompra.estado,
     ),
   ]);
 
-  if (!productoDetalle) {
-    return null;
+  if (productoDetalle) {
+    nombreProducto = nombreProducto || productoDetalle.nombre;
+    imagenUrl = imagenUrl || productoDetalle.imagenesUrl[0];
+    marca = marca || productoDetalle.marca;
+    vendedor = vendedor || productoDetalle.vendedor;
   }
-  const estadoValidado = EstadosOrden.parse(datosEnvio.estadoActual);
+
+  const estadoValidado = datosEnvio?.estadoActual
+    ? EstadosOrden.parse(datosEnvio.estadoActual)
+    : ordenDb.ordenCompra.estado;
   const { id: idItem, ...restoDeOrdenDb } = ordenDb;
 
   return {
@@ -342,11 +383,11 @@ async function obtenerItemOrden(
       estado: estadoValidado,
       itemsComprados: itemsComprados || 1,
     },
-    historialEnvio: datosEnvio.historial,
-    nombreProducto: productoDetalle.nombre,
-    vendedor: productoDetalle.vendedor,
-    imagenUrl: productoDetalle.imagenesUrl[0],
-    marca: productoDetalle.marca,
-    tamaño: productoDetalle.tamaño,
+    historialEnvio: datosEnvio?.historial || [],
+    nombreProducto: nombreProducto || "Perfume Adquirido",
+    vendedor: vendedor || "Vendedor Oficial",
+    imagenUrl: imagenUrl || "/placeholder-perfume.jpg",
+    marca: marca || "Marca Desconocida",
+    tamaño: 100,
   };
 }

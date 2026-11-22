@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { initMercadoPago, Payment } from "@mercadopago/sdk-react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 export default function CheckoutPayment({
   total,
@@ -75,7 +76,7 @@ export default function CheckoutPayment({
             onReady={() => {
               setIsBrickReady(true);
             }}
-            onSubmit={async ({ selectedPaymentMethod, formData }) => {
+            onSubmit={async ({ formData }) => {
               try {
                 const payload = { ...formData, ordenId };
                 const response = await fetch(
@@ -95,7 +96,8 @@ export default function CheckoutPayment({
                   );
                 }
               } catch (error) {
-                // console.error("Error enviando el pago:", error);
+                console.error("Error enviando el pago:", error);
+                toast.error("Hubo un problema al procesar el pago. Por favor, reintenta.");
               }
             }}
             onError={async (error) => {

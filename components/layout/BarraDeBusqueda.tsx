@@ -34,6 +34,7 @@ export function BarraDeBusqueda() {
         <Input
           type="search"
           placeholder="Buscar marcas, notas olfativas..."
+          aria-label="Buscar perfumes por marca o notas olfativas"
           className="w-full pl-11 pr-4 h-11 text-[13px] bg-secondary/30 border-border/40 focus-visible:ring-accent focus-visible:border-accent rounded-sm shadow-none transition-all placeholder:text-muted-foreground/60"
           value={termino}
           onChange={(e) => setTermino(e.target.value)}

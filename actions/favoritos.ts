@@ -1,18 +1,17 @@
 "use server";
 
+import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
+import { createAuthAction } from "@/lib/errors/safe-action";
+import { NotFoundError, ForbiddenError } from "@/lib/errors/domain-errors";
 import { asegurarUsuario } from "./usuario";
 
-export async function toggleFavorito(productoId: string) {
-  try {
-    const { userId } = await auth();
-
-    if (!userId) {
-      throw new Error("Usuario no autenticado");
-    }
-
+export const toggleFavorito = createAuthAction({
+  schema: z.object({
+    productoId: z.string().min(1, "El ID del producto es requerido"),
+  }),
+  handler: async ({ productoId }, { userId }) => {
     await asegurarUsuario(userId);
 
     const favoritoExistente = await prisma.favorito.findUnique({
@@ -30,6 +29,10 @@ export async function toggleFavorito(productoId: string) {
           id: favoritoExistente.id,
         },
       });
+
+      revalidatePath(`/producto/${productoId}`, "page");
+      revalidatePath("/");
+      return { enFavoritos: false };
     } else {
       await prisma.favorito.create({
         data: {
@@ -40,21 +43,13 @@ export async function toggleFavorito(productoId: string) {
 
       revalidatePath(`/producto/${productoId}`, "page");
       revalidatePath("/");
+      return { enFavoritos: true };
     }
-  } catch (error) {
-    console.error("Error en toggleFavorito:", error);
-    throw new Error("No se pudo actualizar el estado de favoritos");
-  }
-}
+  },
+});
 
-export async function obtenerFavoritosDelUsuario() {
-  try {
-    const { userId } = await auth();
-
-    if (!userId) {
-      throw new Error("Usuario no autenticado");
-    }
-
+export const obtenerFavoritosDelUsuario = createAuthAction({
+  handler: async (_input, { userId }) => {
     const favoritos = await prisma.favorito.findMany({
       where: {
         usuarioId: userId,
@@ -65,20 +60,14 @@ export async function obtenerFavoritosDelUsuario() {
     });
 
     return favoritos.map((fav) => fav.productoId);
-  } catch (error) {
-    console.error("Error en obtenerFavoritosDelUsuario:", error);
-    throw new Error("No se pudieron obtener los favoritos del usuario");
-  }
-}
+  },
+});
 
-export async function productoEstaEnFavoritos(productoId: string) {
-  try {
-    const { userId } = await auth();
-
-    if (!userId) {
-      throw new Error("Usuario no autenticado");
-    }
-
+export const productoEstaEnFavoritos = createAuthAction({
+  schema: z.object({
+    productoId: z.string().min(1, "El ID del producto es requerido"),
+  }),
+  handler: async ({ productoId }, { userId }) => {
     const favoritoExistente = await prisma.favorito.findUnique({
       where: {
         usuarioId_productoId: {
@@ -88,26 +77,16 @@ export async function productoEstaEnFavoritos(productoId: string) {
       },
     });
 
-    if (favoritoExistente) {
-      return true;
-    } else {
-      return false;
-    }
-  } catch (error) {
-    console.error("Error en productoEstaEnFavoritos:", error);
-    throw new Error("No se pudo verificar si el producto está en favoritos");
-  }
-}
+    return Boolean(favoritoExistente);
+  },
+});
 
-export async function eliminarFavorito(productoId: string) {
-  try {
-    const { userId } = await auth();
-
-    if (!userId) {
-      throw new Error("Usuario no autenticado");
-    }
-
-    await prisma.favorito.delete({
+export const eliminarFavorito = createAuthAction({
+  schema: z.object({
+    productoId: z.string().min(1, "El ID del producto es requerido"),
+  }),
+  handler: async ({ productoId }, { userId }) => {
+    const favoritoExistente = await prisma.favorito.findUnique({
       where: {
         usuarioId_productoId: {
           usuarioId: userId,
@@ -115,9 +94,22 @@ export async function eliminarFavorito(productoId: string) {
         },
       },
     });
-  } catch (error) {
-    console.error("Error en eliminarFavorito:", error);
-  }
 
-  revalidatePath(`/favoritos`);
-}
+    if (!favoritoExistente) {
+      throw new NotFoundError("Favorito", productoId);
+    }
+
+    if (favoritoExistente.usuarioId !== userId) {
+      throw new ForbiddenError("No puedes eliminar un favorito que no te pertenece");
+    }
+
+    await prisma.favorito.delete({
+      where: {
+        id: favoritoExistente.id,
+      },
+    });
+
+    revalidatePath("/favoritos");
+    return { eliminado: true };
+  },
+});

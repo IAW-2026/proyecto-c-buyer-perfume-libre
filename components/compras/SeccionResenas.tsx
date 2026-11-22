@@ -1,7 +1,25 @@
 "use client";
 
-import { enviarResenaProducto, enviarResenaVendedor } from "@/lib/api";
+import { crearResenaProducto, crearResenaVendedor } from "@/actions/resenas";
 import CardResena from "./CardResena";
+
+export interface SeccionResenasProps {
+  productoId: string;
+  nombreProducto: string;
+  vendedor: string;
+  vendedorId: string;
+  ordenId: string;
+  yaResenadoProducto?: boolean;
+  yaResenadoVendedor?: boolean;
+  calificacionProducto?: {
+    puntuacion: number;
+    comentario?: string | null;
+  } | null;
+  calificacionVendedor?: {
+    puntuacion: number;
+    comentario?: string | null;
+  } | null;
+}
 
 export function SeccionResenas({
   productoId,
@@ -9,13 +27,11 @@ export function SeccionResenas({
   vendedor,
   vendedorId,
   ordenId,
-}: {
-  productoId: string;
-  nombreProducto: string;
-  vendedor: string;
-  vendedorId: string;
-  ordenId: string;
-}) {
+  yaResenadoProducto = false,
+  yaResenadoVendedor = false,
+  calificacionProducto,
+  calificacionVendedor,
+}: SeccionResenasProps) {
   return (
     <div className="mt-12 pt-8 border-t border-border/60">
       <h3 className="font-serif text-[26px] text-foreground mb-6">
@@ -27,7 +43,16 @@ export function SeccionResenas({
           descripcion={`¿Qué te pareció ${nombreProducto}?`}
           id={productoId}
           ordenId={ordenId}
-          onEnviar={enviarResenaProducto}
+          yaEnviado={yaResenadoProducto}
+          calificacionExistente={calificacionProducto}
+          onEnviar={async (prodId, ordId, rating, comentario) => {
+            return await crearResenaProducto({
+              productoId: prodId,
+              ordenId: ordId,
+              rating,
+              comentario,
+            });
+          }}
         />
 
         <CardResena
@@ -35,7 +60,16 @@ export function SeccionResenas({
           descripcion={`¿Cómo fue tu experiencia con ${vendedor}?`}
           id={vendedorId}
           ordenId={ordenId}
-          onEnviar={enviarResenaVendedor}
+          yaEnviado={yaResenadoVendedor}
+          calificacionExistente={calificacionVendedor}
+          onEnviar={async (vendId, ordId, rating, comentario) => {
+            return await crearResenaVendedor({
+              vendedorId: vendId,
+              ordenId: ordId,
+              rating,
+              comentario,
+            });
+          }}
         />
       </div>
     </div>

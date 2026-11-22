@@ -1,36 +1,108 @@
 "use server";
-import { auth } from "@clerk/nextjs/server";
 
-export async function obtenerHistorialEnvioReal(trackingId: string) {
+import { auth } from "@clerk/nextjs/server";
+import { EstadoOrdenType, EstadosOrden } from "@/schema/perfume.schema";
+import { obtenerHistorialSimulado } from "@/lib/mockEnvios";
+import { shippingClient } from "@/lib/integrations/shipping-client";
+
+export interface ItemHistorialEnvio {
+  fecha: string;
+  ubicacion: string;
+}
+
+export interface RespuestaHistorialEnvio {
+  estadoActual: EstadoOrdenType;
+  historial: ItemHistorialEnvio[];
+}
+
+function normalizarEstadoEnvio(estado: unknown): EstadoOrdenType {
+  if (typeof estado !== "string") return EstadosOrden.enum.PENDIENTE;
+  const upper = estado.toUpperCase().trim().replace(/[\s-]+/g, "_");
+
+  if (upper in EstadosOrden.enum) {
+    return upper as EstadoOrdenType;
+  }
+  if (upper.includes("TRANSIT") || upper.includes("VIAJE")) return EstadosOrden.enum.EN_TRANSITO;
+  if (upper.includes("ENTREG") || upper.includes("DELIVER")) return EstadosOrden.enum.ENTREGADO;
+  if (upper.includes("PREPAR") || upper.includes("EMPAQ")) return EstadosOrden.enum.PREPARANDO;
+  if (upper.includes("CANCEL")) return EstadosOrden.enum.CANCELADO;
+  if (upper.includes("PAG")) return EstadosOrden.enum.PAGADO;
+
+  return EstadosOrden.enum.PENDIENTE;
+}
+
+function formatearFechaEvento(fecha: unknown): string {
+  if (!fecha) {
+    return new Date().toLocaleString("es-AR", {
+      dateStyle: "short",
+      timeStyle: "short",
+    });
+  }
+
+  const d = new Date(String(fecha));
+  if (isNaN(d.getTime())) {
+    return String(fecha);
+  }
+
+  return d.toLocaleString("es-AR", {
+    dateStyle: "short",
+    timeStyle: "short",
+  });
+}
+
+export async function obtenerHistorialEnvioReal(
+  trackingId: string,
+  estadoFallback?: string,
+): Promise<RespuestaHistorialEnvio> {
   const { getToken } = await auth();
   const token = await getToken();
 
   try {
-    const shippingBaseUrl =
-      process.env.SHIPPING_API_URL ||
-      "https://proyecto-c-shipping2-perfume-libre.vercel.app/api";
+    const data = await shippingClient.obtenerHistorial(trackingId, token);
 
-    const response = await fetch(`${shippingBaseUrl}/shipping/${trackingId}`, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      method: "GET",
-      cache: "no-store",
-    });
-    if (!response.ok) {
-      throw new Error(`Error API Shipping: ${response.status}`);
-    }
+    const estadoActual = normalizarEstadoEnvio(
+      data.estado_actual || data.estado || estadoFallback,
+    );
 
-    const data = await response.json();
+    const historial: ItemHistorialEnvio[] =
+      Array.isArray(data.historial) && data.historial.length > 0
+        ? data.historial.map(
+            (evento: {
+              fecha?: string;
+              timestamp?: string;
+              ubicacion?: string;
+              descripcion?: string;
+            }) => ({
+              fecha: formatearFechaEvento(evento.fecha || evento.timestamp),
+              ubicacion:
+                evento.ubicacion ||
+                evento.descripcion ||
+                "Actualización de envío",
+            }),
+          )
+        : [
+            {
+              fecha: formatearFechaEvento(data.updatedAt || data.fecha),
+              ubicacion:
+                data.ubicacion_actual ||
+                data.ubicacion ||
+                "El paquete se encuentra en el centro logístico de distribución",
+            },
+          ];
 
-    const estadoReal = data.estado_actual;
-
-    return estadoReal;
+    return {
+      estadoActual,
+      historial,
+    };
   } catch (error) {
     console.error(
-      `⚠️ Error al consultar Shipping App para ${trackingId}, usando fallback:`,
+      `⚠️ Error al consultar Shipping App para ${trackingId}, usando fallback simulado:`,
       error,
     );
+    const mock = await obtenerHistorialSimulado(estadoFallback || "PENDIENTE");
+    return {
+      estadoActual: mock.estadoActual as EstadoOrdenType,
+      historial: mock.historial,
+    };
   }
 }

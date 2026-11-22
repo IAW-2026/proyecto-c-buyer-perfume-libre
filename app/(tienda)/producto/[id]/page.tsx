@@ -20,7 +20,6 @@ import { BotonAgregarCarrito } from "@/components/carrito/botonAgregarCarrito";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
-import { obtenerResumenYResenas } from "@/actions/resumen-ia";
 import SeccionResenas from "@/components/producto/SeccionResenas";
 import { SeccionResenasSkeleton } from "@/components/producto/SeccionResenasSkeleton";
 
@@ -67,7 +66,7 @@ export default async function ProductoDetalle({
   let producto: Perfume;
   try {
     producto = await obtenerDetallePerfume(idReal);
-  } catch (error) {
+  } catch {
     return notFound();
   }
 
@@ -82,7 +81,8 @@ export default async function ProductoDetalle({
   let estaEnFavoritos = false;
 
   if (userId && idReal) {
-    estaEnFavoritos = await productoEstaEnFavoritos(idReal);
+    const favRes = await productoEstaEnFavoritos({ productoId: idReal });
+    estaEnFavoritos = favRes.success ? favRes.data : false;
   }
 
   return (
@@ -220,19 +220,24 @@ function ProductEncabezado({
   );
 }
 
-async function ProductCalificacion({ calificacion }: { calificacion: number }) {
-  try {
+function ProductCalificacion({ calificacion }: { calificacion: number }) {
+  if (!calificacion || calificacion === 0) {
     return (
-      <div className="flex items-center gap-2 mt-4">
-        <CalificacionEstrellas rating={calificacion} />
-        <span className="text-[13px] font-medium text-foreground ml-1">
-          {calificacion.toFixed(1)}
-        </span>
+      <div className="flex items-center gap-2 mt-4 text-muted-foreground text-[13px]">
+        <CalificacionEstrellas rating={0} />
+        <span className="italic ml-1">Sin calificaciones</span>
       </div>
     );
-  } catch (error) {
-    return null;
   }
+
+  return (
+    <div className="flex items-center gap-2 mt-4">
+      <CalificacionEstrellas rating={calificacion} />
+      <span className="text-[13px] font-medium text-foreground ml-1">
+        {calificacion.toFixed(1)}
+      </span>
+    </div>
+  );
 }
 
 function ProductPrecio({ precio }: { precio: number }) {
@@ -245,40 +250,36 @@ function ProductPrecio({ precio }: { precio: number }) {
   );
 }
 
-async function InfoVendedor({
+function InfoVendedor({
   vendedor,
   calificacion,
 }: {
   vendedor: string;
   calificacion: number;
 }) {
-  try {
-    return (
-      <div className="flex flex-wrap items-center gap-2 mt-4">
-        <p className="text-[13px] text-muted-foreground">
-          Vendido por{" "}
-          <span className="text-foreground font-medium cursor-pointer hover:text-accent transition-colors underline underline-offset-4">
-            {vendedor}
-          </span>
-        </p>
-        <div className="flex items-center gap-1 opacity-80">
-          <span className="text-muted-foreground">|</span>
-          <CalificacionEstrellas rating={calificacion} />
-        </div>
+  return (
+    <div className="flex flex-wrap items-center gap-2 mt-4">
+      <p className="text-[13px] text-muted-foreground">
+        Vendido por{" "}
+        <span className="text-foreground font-medium cursor-pointer hover:text-accent transition-colors underline underline-offset-4">
+          {vendedor}
+        </span>
+      </p>
+      <div className="flex items-center gap-1.5 opacity-80 text-[12px] text-muted-foreground">
+        <span>|</span>
+        {calificacion > 0 ? (
+          <>
+            <CalificacionEstrellas rating={calificacion} />
+            <span className="font-medium text-foreground ml-0.5">
+              {calificacion.toFixed(1)}
+            </span>
+          </>
+        ) : (
+          <span className="italic">Sin calificar</span>
+        )}
       </div>
-    );
-  } catch (error) {
-    return (
-      <div className="mt-4">
-        <p className="text-[13px] text-muted-foreground">
-          Vendido por{" "}
-          <span className="text-foreground font-medium cursor-pointer hover:text-accent transition-colors">
-            {vendedor}
-          </span>
-        </p>
-      </div>
-    );
-  }
+    </div>
+  );
 }
 
 function ProductDetalles({

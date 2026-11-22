@@ -18,39 +18,44 @@ Aplicación **Buyer** del [Proyecto IAW 2026](https://iaw-2026.github.io/proyect
 
 correr `npm install` para instalar las dependencias
 
-## Comando para ejecutar la aplicación
+## Scripts Principales
 
-En la terminal ejecutar`npm run dev`
-
-En http://localhost:3000 se vera la app
+- `npm run dev`: Inicia el servidor de desarrollo en `http://localhost:3000`.
+- `npm run build`: Compila la aplicación para producción.
+- `npm test`: Ejecuta la suite de pruebas unitarias de manejo de errores y Safe Actions.
+- `npm run seed`: Ejecuta el pipeline completo de sembrado (usuarios, direcciones, órdenes, carritos, favoritos, reseñas y resúmenes IA).
+- `npm run seed:resenas`: Ejecuta únicamente el sembrado de reseñas de productos y vendedores y genera los resúmenes de IA.
+- `npm run seed:reset`: Limpia de forma segura los datos de prueba en la base de datos respetando las restricciones referenciales.
 
 ## Estructura del Proyecto
 
-Se utiliza una arquitectura basada en **Next.js App Router** con una organización de archivos orientada a la mantenibilidad y el testing:
+Se utiliza una arquitectura limpia basada en **Next.js App Router** con separación estricta de responsabilidades:
 
 ```text
 /proyecto-c-buyer-perfume-libre
-  /app          --> Rutas y páginas (App Router)
-  	/api 		    --> Endpoints de las APIs REST
-  /components   --> Componentes de React
+  /actions      --> Server Actions protegidas con wrappers seguros (safe-action.ts)
+  /app          --> Rutas, páginas y API Route Handlers (App Router)
+    /api        --> Endpoints REST (cron de resúmenes, roles, webhooks)
+  /components   --> Componentes de React modulares (UI, home, producto, compras, etc.)
     /ui         --> Componentes base de shadcn/ui
-  /lib          --> Lógica compartida y utilidades
-  /actions      --> Server actions
-  /prisma  	    --> Capa de datos
-  /schema		    --> Validaciones con Zod
-  /e2e          --> Pruebas de extremo a extremo (Playwright)
-
-Nota: Se utiliza el patrón de colocation para tests unitarios (los archivos .test.ts residen junto a la lógica que prueban).
+  /lib          --> Lógica de dominio, utilidades y clientes singleton (Prisma, API)
+    /errors     --> Manejador centralizado de errores tipados, Correlation ID y tests
+  /prisma       --> Esquema relacional de PostgreSQL, migraciones y seeds
+    /seeds      --> Pipeline secuencial de datos de prueba y corpus rioplatense
+  /schema       --> Esquemas y contratos de validación de datos con Zod
+  /doc          --> Documentación técnica y especificaciones arquitectónicas
 ```
 
 ## Stack Tecnológico
 
-- **Framework:** Next.js 16.2.4 (App Router)
-- **Base de Datos:** PostgreSQL + **Prisma ORM**
-- **UI & Estilos:** Tailwind CSS + **shadcn/ui**
-- **Autenticación:** Clerk
-- **Validación:** Zod
-- **Validación:** Vercel
+- **Framework:** Next.js 16.2.4 (App Router, Turbopack, React 19)
+- **Base de Datos:** PostgreSQL en la nube (Neon Serverless) con **Prisma ORM** y adaptador `@prisma/adapter-neon`
+- **Inteligencia Artificial:** **Groq** (`openai/gpt-oss-120b`) a través de **Vercel AI SDK**
+- **Autenticación & Roles:** **Clerk**
+- **Pasarela de Pagos:** **Mercado Pago Checkout Bricks** (Modo Sandbox)
+- **UI & Estilos:** Tailwind CSS + **shadcn/ui** + Lucide React
+- **Validación de Esquemas:** Zod
+- **Testing:** Node Test Runner nativo con ejecución mediante Jiti
 
 ## Flujo de Desarrollo (Git Flow)
 
