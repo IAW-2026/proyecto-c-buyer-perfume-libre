@@ -138,29 +138,6 @@ async function obtenerGraficoVentas(x: number = 6) {
   }
 }
 
-export async function limpiarDatosPrueba() {
-  await requireAdmin();
-  try {
-    await prisma.$transaction([
-      prisma.ordenCompra.deleteMany({
-        where: {
-          usuarioId: { startsWith: "mock_user_" },
-        },
-      }),
-
-      prisma.usuario.deleteMany({
-        where: {
-          id: { startsWith: "mock_user_" },
-        },
-      }),
-    ]);
-
-    revalidatePath("/admin/dashboard");
-  } catch {
-    throw new Error("Hubo un problema limpiando los datos de prueba.");
-  }
-}
-
 interface FiltrosOrdenes {
   q?: string;
   estado?: string;

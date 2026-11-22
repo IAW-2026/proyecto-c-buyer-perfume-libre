@@ -38,6 +38,7 @@ export function BotonFavorito({
             })
             .catch(() => {
               setEsFav(false);
+              toast.error("No se pudo actualizar el estado de favoritos");
             });
         }
       }
