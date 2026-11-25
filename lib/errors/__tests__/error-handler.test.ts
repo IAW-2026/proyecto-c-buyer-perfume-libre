@@ -1,4 +1,4 @@
-import { test, expect } from "vitest";
+import { test, expect, vi } from "vitest";
 import { z } from "zod";
 import {
   AppError,
@@ -86,16 +86,27 @@ test("formatActionError: maneja errores conocidos de Prisma como fallback", () =
 });
 
 test("formatActionError: sanitiza errores 500 inesperados", () => {
-  const secretError = new Error("Connection failed postgres://user:secretpass@db:5432");
+  const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+  const secretError = new Error(
+    "Connection failed postgres://user:secretpass@db:5432",
+  );
   const res = formatActionError(secretError, "test-cid-123");
 
   expect(res.code).toBe("INTERNAL_SERVER_ERROR");
   expect(res.statusCode).toBe(500);
-  expect(res.message).toBe("Ocurrió un error inesperado al procesar la solicitud");
+  expect(res.message).toBe(
+    "Ocurrió un error inesperado al procesar la solicitud",
+  );
   expect("secretpass" in res).toBe(false);
+  expect(errorSpy).toHaveBeenCalledOnce();
+
+  errorSpy.mockRestore();
 });
 
 test("rethrowIfNavigationError: relanza errores con digest NEXT_REDIRECT o NEXT_NOT_FOUND", () => {
+  const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
   const redirectErr = { digest: "NEXT_REDIRECT;replace;/login;307;" };
   expect(() => rethrowIfNavigationError(redirectErr)).toThrow();
 
@@ -105,9 +116,13 @@ test("rethrowIfNavigationError: relanza errores con digest NEXT_REDIRECT o NEXT_
   // Un error común no debe ser relanzado
   const standardErr = new Error("Normal business error");
   expect(() => rethrowIfNavigationError(standardErr)).not.toThrow();
+
+  errorSpy.mockRestore();
 });
 
 test("withApiHandler: maneja éxito y errores tipados en Route Handlers", async () => {
+  const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
   // 1. Éxito
   const handlerExito = withApiHandler(async () => {
     return new Response(JSON.stringify({ ok: true }), { status: 200 });
@@ -139,5 +154,10 @@ test("withApiHandler: maneja éxito y errores tipados en Route Handlers", async 
   expect(res3.headers.get("x-correlation-id")).toBe("cid-custom-999");
   const data3 = await res3.json();
   expect(data3.code).toBe("INTERNAL_SERVER_ERROR");
-  expect(data3.error).toBe("Ocurrió un error inesperado al procesar la solicitud");
+  expect(data3.error).toBe(
+    "Ocurrió un error inesperado al procesar la solicitud",
+  );
+
+  expect(errorSpy).toHaveBeenCalledOnce();
+  errorSpy.mockRestore();
 });
