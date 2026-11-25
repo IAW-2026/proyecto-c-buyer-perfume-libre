@@ -1,5 +1,4 @@
-import test from "node:test";
-import assert from "node:assert/strict";
+import { test, expect } from "vitest";
 import { z } from "zod";
 import {
   AppError,
@@ -17,42 +16,42 @@ import { withApiHandler } from "../api-handler";
 test("formatActionError: maneja AppError y sus subtipos", () => {
   const errApp = new AppError("Error personalizado", "CUSTOM_CODE", 418);
   const resApp = formatActionError(errApp);
-  assert.equal(resApp.code, "CUSTOM_CODE");
-  assert.equal(resApp.statusCode, 418);
+  expect(resApp.code).toBe("CUSTOM_CODE");
+  expect(resApp.statusCode).toBe(418);
 
   const errUnauth = new UnauthorizedError();
   const resUnauth = formatActionError(errUnauth);
-  assert.equal(resUnauth.code, "UNAUTHORIZED");
-  assert.equal(resUnauth.statusCode, 401);
+  expect(resUnauth.code).toBe("UNAUTHORIZED");
+  expect(resUnauth.statusCode).toBe(401);
 
   const errForbid = new ForbiddenError();
   const resForbid = formatActionError(errForbid);
-  assert.equal(resForbid.code, "FORBIDDEN");
-  assert.equal(resForbid.statusCode, 403);
+  expect(resForbid.code).toBe("FORBIDDEN");
+  expect(resForbid.statusCode).toBe(403);
 
   const errNotFound = new NotFoundError("Perfume", "123");
   const resNotFound = formatActionError(errNotFound);
-  assert.equal(resNotFound.code, "NOT_FOUND");
-  assert.equal(resNotFound.statusCode, 404);
-  assert.match(resNotFound.message, /Perfume con ID '123' no encontrado/);
+  expect(resNotFound.code).toBe("NOT_FOUND");
+  expect(resNotFound.statusCode).toBe(404);
+  expect(resNotFound.message).toMatch(/Perfume con ID '123' no encontrado/);
 
   const errConflict = new ConflictError("Ya está en favoritos");
   const resConflict = formatActionError(errConflict);
-  assert.equal(resConflict.code, "CONFLICT");
-  assert.equal(resConflict.statusCode, 409);
+  expect(resConflict.code).toBe("CONFLICT");
+  expect(resConflict.statusCode).toBe(409);
 
   const errValidation = new ValidationError("Campos inválidos", {
     email: ["Email requerido"],
   });
   const resValidation = formatActionError(errValidation);
-  assert.equal(resValidation.code, "VALIDATION_ERROR");
-  assert.equal(resValidation.statusCode, 400);
-  assert.deepEqual(resValidation.fields, { email: ["Email requerido"] });
+  expect(resValidation.code).toBe("VALIDATION_ERROR");
+  expect(resValidation.statusCode).toBe(400);
+  expect(resValidation.fields).toEqual({ email: ["Email requerido"] });
 
   const errExternal = new ExternalServiceError("Seller API");
   const resExternal = formatActionError(errExternal);
-  assert.equal(resExternal.code, "EXTERNAL_SERVICE_ERROR");
-  assert.equal(resExternal.statusCode, 503);
+  expect(resExternal.code).toBe("EXTERNAL_SERVICE_ERROR");
+  expect(resExternal.statusCode).toBe(503);
 });
 
 test("formatActionError: maneja ZodError extrayendo fields", () => {
@@ -62,56 +61,50 @@ test("formatActionError: maneja ZodError extrayendo fields", () => {
   });
 
   const parsed = schema.safeParse({ nombre: "a", edad: -5 });
-  assert.equal(parsed.success, false);
+  expect(parsed.success).toBe(false);
 
   if (!parsed.success) {
     const res = formatActionError(parsed.error);
-    assert.equal(res.code, "VALIDATION_ERROR");
-    assert.equal(res.statusCode, 400);
-    assert.ok(res.fields);
-    assert.ok(res.fields.nombre);
-    assert.ok(res.fields.edad);
+    expect(res.code).toBe("VALIDATION_ERROR");
+    expect(res.statusCode).toBe(400);
+    expect(res.fields).toBeDefined();
+    expect(res.fields?.nombre).toBeDefined();
+    expect(res.fields?.edad).toBeDefined();
   }
 });
 
 test("formatActionError: maneja errores conocidos de Prisma como fallback", () => {
   const prismaP2002 = { code: "P2002", clientVersion: "5.0.0" };
   const resP2002 = formatActionError(prismaP2002);
-  assert.equal(resP2002.code, "CONFLICT");
-  assert.equal(resP2002.statusCode, 409);
+  expect(resP2002.code).toBe("CONFLICT");
+  expect(resP2002.statusCode).toBe(409);
 
   const prismaP2025 = { code: "P2025", clientVersion: "5.0.0" };
   const resP2025 = formatActionError(prismaP2025);
-  assert.equal(resP2025.code, "NOT_FOUND");
-  assert.equal(resP2025.statusCode, 404);
+  expect(resP2025.code).toBe("NOT_FOUND");
+  expect(resP2025.statusCode).toBe(404);
 });
 
 test("formatActionError: sanitiza errores 500 inesperados", () => {
   const secretError = new Error("Connection failed postgres://user:secretpass@db:5432");
   const res = formatActionError(secretError, "test-cid-123");
 
-  assert.equal(res.code, "INTERNAL_SERVER_ERROR");
-  assert.equal(res.statusCode, 500);
-  assert.equal(res.message, "Ocurrió un error inesperado al procesar la solicitud");
-  assert.equal("secretpass" in res, false);
+  expect(res.code).toBe("INTERNAL_SERVER_ERROR");
+  expect(res.statusCode).toBe(500);
+  expect(res.message).toBe("Ocurrió un error inesperado al procesar la solicitud");
+  expect("secretpass" in res).toBe(false);
 });
 
 test("rethrowIfNavigationError: relanza errores con digest NEXT_REDIRECT o NEXT_NOT_FOUND", () => {
   const redirectErr = { digest: "NEXT_REDIRECT;replace;/login;307;" };
-  assert.throws(
-    () => rethrowIfNavigationError(redirectErr),
-    (err: unknown) => (err as { digest: string }).digest === redirectErr.digest,
-  );
+  expect(() => rethrowIfNavigationError(redirectErr)).toThrow();
 
   const notFoundErr = { digest: "NEXT_NOT_FOUND" };
-  assert.throws(
-    () => rethrowIfNavigationError(notFoundErr),
-    (err: unknown) => (err as { digest: string }).digest === notFoundErr.digest,
-  );
+  expect(() => rethrowIfNavigationError(notFoundErr)).toThrow();
 
   // Un error común no debe ser relanzado
   const standardErr = new Error("Normal business error");
-  assert.doesNotThrow(() => rethrowIfNavigationError(standardErr));
+  expect(() => rethrowIfNavigationError(standardErr)).not.toThrow();
 });
 
 test("withApiHandler: maneja éxito y errores tipados en Route Handlers", async () => {
@@ -121,7 +114,7 @@ test("withApiHandler: maneja éxito y errores tipados en Route Handlers", async 
   });
   const req1 = new Request("http://localhost/api/test");
   const res1 = await handlerExito(req1);
-  assert.equal(res1.status, 200);
+  expect(res1.status).toBe(200);
 
   // 2. Error tipado UnauthorizedError (401)
   const handlerUnauth = withApiHandler(async () => {
@@ -129,10 +122,10 @@ test("withApiHandler: maneja éxito y errores tipados en Route Handlers", async 
   });
   const req2 = new Request("http://localhost/api/test");
   const res2 = await handlerUnauth(req2);
-  assert.equal(res2.status, 401);
+  expect(res2.status).toBe(401);
   const data2 = await res2.json();
-  assert.equal(data2.code, "UNAUTHORIZED");
-  assert.equal(data2.error, "Acceso no autorizado al recurso");
+  expect(data2.code).toBe("UNAUTHORIZED");
+  expect(data2.error).toBe("Acceso no autorizado al recurso");
 
   // 3. Error 500 inesperado con correlation ID preservado
   const handlerError = withApiHandler(async () => {
@@ -142,9 +135,9 @@ test("withApiHandler: maneja éxito y errores tipados en Route Handlers", async 
     headers: { "x-correlation-id": "cid-custom-999" },
   });
   const res3 = await handlerError(req3);
-  assert.equal(res3.status, 500);
-  assert.equal(res3.headers.get("x-correlation-id"), "cid-custom-999");
+  expect(res3.status).toBe(500);
+  expect(res3.headers.get("x-correlation-id")).toBe("cid-custom-999");
   const data3 = await res3.json();
-  assert.equal(data3.code, "INTERNAL_SERVER_ERROR");
-  assert.equal(data3.error, "Ocurrió un error inesperado al procesar la solicitud");
+  expect(data3.code).toBe("INTERNAL_SERVER_ERROR");
+  expect(data3.error).toBe("Ocurrió un error inesperado al procesar la solicitud");
 });
